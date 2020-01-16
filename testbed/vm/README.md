@@ -8,7 +8,7 @@ Install [Vagrant](https://www.vagrantup.com/downloads.html) and [VirtualBox 6.0.
 
 ## Usage
 
-Open a terminal and `cd` into the vagrant folder. To boot up the VM environment, run:
+Open a terminal and `cd` into this folder where the `Vagrantfile` is. To boot up the VM environment, run:
 
 ```
 vagrant up
