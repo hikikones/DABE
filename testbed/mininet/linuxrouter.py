@@ -72,11 +72,11 @@ def test(net):
     router = net.get('r0')
 
     # Setup router bottleneck
-    router.cmd('tc qdisc add dev r0-eth1 root tbf rate 1mbit limit 0.1mb burst 32kB peakrate 1.01mbit mtu 1600')
-    router.cmd('tc qdisc add dev r0-eth2 root tbf rate 1mbit limit 0.1mb burst 32kB peakrate 1.01mbit mtu 1600')
+    router.cmd('tc qdisc add dev r0-eth2 root tbf rate 100Mbit latency 10ms burst 2048')
+    #router.cmd('tc qdisc add dev r0-eth2 root tbf rate 10Mbit latency 100ms')
 
     # Start traffic generator and tcp logging
-    duration = 120
+    duration = 5
     print '\n\nStarting iperf traffic generator... Duration: %s (s)' % duration
     receiver.cmd('iperf -s &')
     start_tcpprobe("/vagrant/cwnd.log")
@@ -89,8 +89,8 @@ def test(net):
     stop_tcpprobe()
 
 def start_tcpprobe(outfile="cwnd.txt"):
-    os.system("modprobe tcp_probe")
-    os.system("rmmod tcp_probe; modprobe tcp_probe full=1;")
+    os.system("modprobe tcp_probe port=5001")
+    os.system("rmmod tcp_probe; modprobe tcp_probe port=5001 full=1;")
     Popen("cat /proc/net/tcpprobe > %s" % outfile, shell=True)
 
 def stop_tcpprobe():

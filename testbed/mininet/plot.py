@@ -10,12 +10,14 @@ with open("cwnd.log") as f:
     first_line = f.readline().rstrip().split(" ")
     first_timestamp = float(first_line[0])
 
-    for line in f:
+    for index, line in enumerate(f):
         fields = line.rstrip().split(" ")
+
+        if fields[1] == "172.16.0.100:5001":
+            continue
 
         time = float(fields[0]) - first_timestamp
         timeList.append(time)
-
         cwnd = int(fields[6])
         cwndList.append(cwnd)
 
