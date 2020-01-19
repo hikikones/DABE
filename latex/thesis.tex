@@ -1,0 +1,40 @@
+%------------------------------------------------
+%	Preamble
+%------------------------------------------------
+
+\input{document/preamble.tex}
+
+%------------------------------------------------
+%	Contents
+%------------------------------------------------
+
+\begin{document}
+
+% Title
+\include{document/title}
+
+% Abstract
+\pagenumbering{roman}
+\include{content/abstract}
+
+% Table of contents
+\tableofcontents
+\newpage
+
+% Chapters
+\pagenumbering{arabic}
+\include{content/introduction}
+\include{content/theory}
+\include{content/methods}
+\include{content/analysis}
+\include{content/conclusion}
+
+% Appendix
+\appendix
+\include{content/appendix}
+
+% Bibliography
+\bibliographystyle{alpha}
+\bibliography{refs}
+
+\end{document}

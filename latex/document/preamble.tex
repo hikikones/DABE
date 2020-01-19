@@ -1,0 +1,51 @@
+%----------------------------------------------------------------------------------------
+%	PACKAGES AND OTHER DOCUMENT CONFIGURATIONS
+%----------------------------------------------------------------------------------------
+
+\documentclass[11pt]{report}
+
+\usepackage[parfill]{parskip} % New lines, no indent
+
+\usepackage[utf8]{inputenc} % Required for inputting international characters
+\usepackage[T1]{fontenc} % Output font encoding for international characters
+\usepackage[english]{babel}
+
+\usepackage{hyperref} % Hyperlinks
+\usepackage[dvipsnames]{xcolor}
+\hypersetup{
+    colorlinks=true,
+    linkcolor={NavyBlue},
+	urlcolor={NavyBlue},
+	citecolor={Maroon}
+}
+
+\usepackage{mathpazo} % Palatino font
+
+\usepackage{graphicx, float} % Image support
+\usepackage[font=small,labelfont=bf]{caption}
+\graphicspath{{images/}}
+
+\usepackage{listings} % Syntax highlighting
+\definecolor{LightGray}{gray}{0.95}
+\lstset{
+	backgroundcolor=\color{LightGray},
+	commentstyle=\color{OliveGreen},
+	rulecolor=\color{Black},
+	stringstyle=\color{BrickRed},
+	basicstyle=\footnotesize,
+	language=C,
+	columns=fullflexible,
+	frame=tlbr,
+	framesep=5pt,
+	framerule=0pt,
+	captionpos=b,
+	breakatwhitespace=false,
+	mathescape=true,
+	showspaces=false,
+	showstringspaces=false,
+	numbers=left,
+	numbersep=10pt,
+	showtabs=false,
+	tabsize=2,
+	breaklines=true
+}
