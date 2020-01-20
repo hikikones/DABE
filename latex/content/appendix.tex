@@ -22,7 +22,7 @@ Next, install FreeBSD. When asked for partitioning the disk, choose \lstinline{a
     \label{fig:freebsd_partition}
 \end{figure}
 
-After installing both systems, only Ubuntu is presented in the GRUB bootloader. To add FreeBSD as an option, run \lstinline{sudo nano /etc/grub.d/40_custom} in Ubuntu, and add the following entry:
+After installing both systems, only Ubuntu is presented in the \gls{grub}. To add FreeBSD as an option, run \lstinline{sudo nano /etc/grub.d/40_custom} in Ubuntu, and add the following entry:
 
 \begin{lstlisting}
 menuentry "FreeBSD" {
@@ -32,6 +32,6 @@ menuentry "FreeBSD" {
 }
 \end{lstlisting}
 
-Then update the GRUB bootloader with \lstinline{sudo update-grub}. The FreeBSD option should now be available when rebooting. If the bootloader won't display, hold the \lstinline{RIGHT SHIFT} key upon booting.
+Then update \gls{grub} with \lstinline{sudo update-grub}. The FreeBSD option should now be available when rebooting. If the bootloader won't display, hold the \lstinline{RIGHT SHIFT} key upon booting.
 
 To enable a one-time reboot into FreeBSD from Ubuntu, run the command \lstinline{grub-editenv /boot/grub/grubenv set next_entry="FreeBSD"} and reboot with \lstinline{sudo reboot}.

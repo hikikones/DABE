@@ -4,13 +4,15 @@
 
 \documentclass[11pt]{report}
 
-\usepackage[parfill]{parskip} % New lines, no indent
+% New lines, no indent
+\usepackage[parfill]{parskip}
 
-\usepackage[utf8]{inputenc} % Required for inputting international characters
-\usepackage[T1]{fontenc} % Output font encoding for international characters
+% Encoding of international characters
+\usepackage[utf8]{inputenc}
 \usepackage[english]{babel}
 
-\usepackage{hyperref} % Hyperlinks
+% Hyperlinks
+\usepackage{hyperref}
 \usepackage[dvipsnames]{xcolor}
 \hypersetup{
     colorlinks=true,
@@ -19,13 +21,16 @@
 	citecolor={Maroon}
 }
 
-\usepackage{mathpazo} % Palatino font
+% Palatino font
+\usepackage{mathpazo}
 
-\usepackage{graphicx, float} % Image support
+% Image support
+\usepackage{graphicx, float}
 \usepackage[font=small,labelfont=bf]{caption}
 \graphicspath{{images/}}
 
-\usepackage{listings} % Syntax highlighting
+% Syntax highlighting
+\usepackage{listings}
 \definecolor{LightGray}{gray}{0.95}
 \lstset{
 	backgroundcolor=\color{LightGray},
@@ -49,3 +54,13 @@
 	tabsize=2,
 	breaklines=true
 }
+
+% Glossaries, acronyms etc
+\usepackage[nopostdot,toc,acronym,nomain,nonumberlist]{glossaries}
+\makeglossaries
+\loadglsentries{metadata/terms}
+\renewcommand*{\glstextformat}[1]{\textcolor{Brown}{#1}}
+
+% Bibliography
+\usepackage[backend=biber,style=alphabetic]{biblatex}
+\addbibresource{metadata/refs.bib}
