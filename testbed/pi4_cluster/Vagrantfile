@@ -1,0 +1,27 @@
+Vagrant.configure("2") do |config|
+
+    config.vm.define "ubuntu" do |ubuntu|
+       ubuntu.vm.box = "ubuntu/bionic64"
+        ubuntu.vm.hostname = "ubuntu"
+        ubuntu.vm.provision "shell", inline: $ubuntu_setup
+        ubuntu.vm.synced_folder ".", "/vagrant", create: true
+    end
+
+    config.vm.define "freebsd" do |freebsd|
+        freebsd.vm.box = "freebsd/FreeBSD-12.1-RELEASE"
+        freebsd.vm.hostname = "freebsd"
+        freebsd.vm.provision "shell", inline: $freebsd_setup
+    end
+
+end
+
+
+
+$ubuntu_setup = <<SCRIPT
+    # Run ubuntu_setup.sh
+    #/vagrant/ubuntu_setup.sh
+SCRIPT
+
+$freebsd_setup = <<SCRIPT
+    # TODO
+SCRIPT
