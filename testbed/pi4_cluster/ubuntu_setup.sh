@@ -1,3 +1,5 @@
+sudo apt update && sudo apt -y upgrade
+
 ##########
 # SSH
 ##########
@@ -26,7 +28,7 @@ cd ..
 
 # Fabric
 sudo apt install -y fabric python-pip python-dev libffi-dev libssl-dev
-pip install fabric
+pip install fabric3
 pip install -Iv pexpect==3.2
 
 # TEACUP
