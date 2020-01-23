@@ -10,19 +10,14 @@ sudo ufw allow ssh
 ##########
 
 # R
-sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E298A3A825C0D65DFD57CBB651716619E084DAB9
-sudo add-apt-repository 'deb https://cloud.r-project.org/bin/linux/ubuntu bionic-cran35/'
-sudo apt update
 sudo apt install -y r-base
 
 # PDFJAM
 sudo apt install -y texlive-extra-utils
 
 # SPP
-sudo apt install -y mercurial
+sudo apt install -y mercurial libpcap-dev build-essential
 hg clone https://bitbucket.org/caia-swin/spp
-sudo apt install -y libpcap-dev
-sudo apt install -y build-essential
 cd spp
 sudo make
 sudo mkdir /usr/local/man/man1
@@ -30,8 +25,7 @@ sudo make install
 cd ..
 
 # Fabric
-sudo apt install -y fabric
-sudo apt install -y python-pip
+sudo apt install -y fabric python-pip python-dev libffi-dev libssl-dev
 pip install fabric
 pip install -Iv pexpect==3.2
 
