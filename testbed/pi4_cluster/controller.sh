@@ -3,6 +3,8 @@ sudo dpkg-reconfigure keyboard-configuration
 
 # SSH
 sudo systemctl enable ssh
+ssh-keygen -t rsa #no passfrase, default location  
+ssh-copy-id -i $HOME/.ssh/id_rsa.pub pi@10.0.0.x #login with ssh 10.0.0.x should now be without password
 
 # Hostname
 sudo nano /etc/hostname
