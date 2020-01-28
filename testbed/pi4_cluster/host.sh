@@ -37,7 +37,7 @@ sudo nano /etc/resolve.conf
 #nameserver 152.94.1.11
 
 # Add route on interface up
-sudo touch /etc/network/if-up.d/route
-sudo echo '#!/bin/sh' >> /etc/network/if-up.d/route
-sudo echo 'ip route add 192.168.xx.0/24 via 192.168.xx.1' >> /etc/network/if-up.d/route
+sudo nano /etc/network/if-up.d/route
+##!/bin/sh
+#ip route add 192.168.xx.0/24 via 192.168.xx.1
 sudo chmod +x /etc/network/if-up.d/route
