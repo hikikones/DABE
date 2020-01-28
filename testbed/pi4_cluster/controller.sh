@@ -10,9 +10,14 @@ ssh-copy-id -i $HOME/.ssh/id_rsa.pub pi@10.0.0.x #login with ssh 10.0.0.x should
 sudo nano /etc/hostname
 sudo nano /etc/hosts
 
+#password
+sudo su #password raspberry
+passwd pi #enter password twice: youcantbakewithoutpies
+
 # IP forwarding
 #sudo sysctl -w net.ipv4.ip_forward=1
 sudo /etc/sysctl.conf # Enable ipv4 forwarding
+
 
 # VLAN subinterface
 # sudo apt install -y vlan
@@ -33,5 +38,5 @@ sudo nano /etc/network/interfaces
 # netmask 255.255.255.0
 
 # NAT
-#sudo update-alternatives --set iptables /usr/sbin/iptables-legacy
-#sudo iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+sudo update-alternatives --set iptables /usr/sbin/iptables-legacy
+sudo iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
