@@ -4,13 +4,44 @@
 
 \documentclass[11pt]{report}
 
+% Redefine margins
+\usepackage[
+	left=2cm,
+	right=2cm,
+	top=2.54cm,
+	bottom=2.54cm]
+	{geometry}
+
 % New lines, no indent
 \usepackage[parfill]{parskip}
 
 % Encoding of international characters
 \usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
 \usepackage[english]{babel}
 \usepackage{csquotes}
+
+% Palatino font
+\usepackage{mathpazo}
+%\usepackage{ebgaramond}
+%\usepackage{kpfonts}
+%\usepackage{librecaslon}
+
+% Custom chapter title
+\usepackage{titlesec}
+\titleformat{\chapter}[display]
+{\centering} % Common format
+{\chaptertitlename \, \Large \thechapter} % Label
+{0.5ex} % Vertical separation
+{\bfseries\Huge} % Title
+[] % After
+\titlespacing*{\chapter}{0pt}{-20pt}{40pt} % Margins
+
+% Two-column table of contents
+\usepackage[toc]{multitoc}
+\renewcommand*{\multicolumntoc}{2}
+\setlength{\columnseprule}{0.5pt}
+\setlength{\columnsep}{1cm}
 
 % Hyperlinks
 \usepackage{hyperref}
@@ -21,9 +52,6 @@
 	urlcolor={NavyBlue},
 	citecolor={Maroon}
 }
-
-% Palatino font
-\usepackage{mathpazo}
 
 % Image support
 \usepackage{graphicx, float}
