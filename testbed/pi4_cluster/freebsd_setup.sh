@@ -18,11 +18,10 @@ cd ..
 
 # Fabric
 sudo pkg install -y portmaster py27-pip
-sudo portsnap fetch
-sudo portsnap extract
+sudo portsnap fetch && sudo portsnap extract
 sudo portmaster -D -G --no-confirm lang/python2
 #sudo portmaster -D -G --no-confirm devel/py-pip
-sudo python2 -m pip install fabric
+sudo python2 -m pip install fabric3
 sudo python2 -m pip install -Iv pexpect==3.2
 
 # TEACUP
@@ -33,3 +32,6 @@ mkdir experiment
 cp teacup-1.1/example_configs/config-scenario1.py experiment/config.py
 cp teacup-1.1/run.sh experiment/
 cp teacup-1.1/fabfile.py experiment/
+cd experiment
+nano config.py # TPCONF_script_path = '~/teacup-1.1'
+fab check_config
