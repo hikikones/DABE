@@ -13,6 +13,7 @@ The method that currently shows most promise follows.
 The most promising method so far is done as follows. First, find which files web10g changes:
 
 ```
+sudo apt install wget patchutils
 wget https://www.web10g.org/images/Software/Web10G_Kernel_Patches/web10g-0.11-patch-3.17.diff.gz
 gunzip web10g-0.11-patch-3.17.diff.gz
 lsdiff web10g-0.11-patch-3.17.diff
@@ -47,7 +48,7 @@ diff -u linux/net/ipv4/tcp.c web10g/net/ipv4/tcp.c >> web10g.patch
 diff -u linux/net/ipv6/tcp_ipv6.c web10g/net/ipv6/tcp_ipv6.c >> web10g.patch
 ```
 
-The resulting `patch` file from these commands can be found in the `web10g_raw.patch`. Then the big job of manual inspection comes where every section in the `diff` has been checked. For example, since the web10g kernel is behind the official release, it wants to "undo" a lot of the new changes, and so those sections have been removed. Also, a lot of sections require som slight modifications where a relevant web10g change is wanted, but another "undo" change to kernel 5.5 is unwanted. The final cleaned up result can found in the file `web10g.patch`.
+The resulting `patch` file from these commands can be found in the `web10g_raw.patch`. Then the big job of manual inspection comes where every section in the `diff` has been checked. For example, since the web10g kernel is behind the official release, it wants to "undo" a lot of the new changes, and so those sections have been removed. Also, a lot of sections require som slight modifications where a relevant web10g change is wanted, but another "undo" change to kernel 5.5 is unwanted. At last a new section was manually added due to build error `net/ipv4/tcp_ipv4.c:2805:12: error: ‘struct netns_ipv4’ has no member named ‘sysctl_estats_delay’`, which was fixed by adding the missing members to file `include/net/netns/ipv4.h`. The final cleaned up result can found in the file `web10g.patch`.
 
 To patch the changes into kernel 5.5 and building it for RPI4, you first need to download [BCM2711_defconfig](https://raw.githubusercontent.com/raspberrypi/linux/rpi-5.5.y/arch/arm/configs/bcm2711_defconfig) for kernel 5.5 and copy it to `linux/arch/arm/configs`. Then you can start building with:
 
@@ -59,21 +60,4 @@ make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- bcm2711_defconfig
 make -s ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- -j6 zImage modules dtbs
 ```
 
-The only error so far that has appeared when building is the following:
-
-```
-net/ipv4/tcp_ipv4.c: In function ‘tcp_sk_init’:
-net/ipv4/tcp_ipv4.c:2805:12: error: ‘struct netns_ipv4’ has no member named ‘sysctl_estats_delay’; did you mean ‘sysctl_tcp_ecn’?         net->ipv4.sysctl_estats_delay = TCP_ESTATS_PERSIST_DELAY_MSECS;
-            ^~~~~~~~~~~~~~~~~~~
-            sysctl_tcp_ecn
-scripts/Makefile.build:265: recipe for target 'net/ipv4/tcp_ipv4.o' failed
-make[2]: *** [net/ipv4/tcp_ipv4.o] Error 1
-scripts/Makefile.build:503: recipe for target 'net/ipv4' failed
-make[1]: *** [net/ipv4] Error 2
-make[1]: *** Waiting for unfinished jobs....
-Makefile:1693: recipe for target 'net' failed
-make: *** [net] Error 2
-make: *** Waiting for unfinished jobs....
-```
-
-A seemingly simple error to fix. TODO for now.
+The build should complete with no errors. The question remains however, _does it actually work_?

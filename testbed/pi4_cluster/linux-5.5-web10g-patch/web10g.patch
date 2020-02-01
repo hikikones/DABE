@@ -2028,3 +2028,13 @@
  obj-$(CONFIG_NETFILTER)	+= netfilter.o netfilter/
  obj-$(CONFIG_INET_DIAG) += inet_diag.o
  obj-$(CONFIG_INET_TCP_DIAG) += tcp_diag.o
+--- linux/include/net/netns/ipv4.h	2020-02-01 20:15:11.502082700 +0100
++++ web10g/include/net/netns/ipv4.h	2020-02-01 01:06:57.784702000 +0100
+@@ -223,4 +223,7 @@
+	atomic_t	rt_genid;
+ 	siphash_key_t	ip_id_key;
++
++	int sysctl_tcp_estats;
++	int sysctl_estats_delay;
+ };
+ #endif
