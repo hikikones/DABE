@@ -1,12 +1,31 @@
-\chapter{Theory}
+\chapter{Literature Review}
 
 
 \section{Network Delay and Bufferbloat}
-
-
+A common cause of latency in packet switched networks is bufferbloat. It occurs when a router, with a 
+large buffer gets congested. the tcp congestion controll will fill up the entire buffer, before 
+it starts backing off. Packets become queued for a long period of time, untill the buffer is drained,
+congestion controll resets and TCP connection ramps back up to speed to fill the buffer again.
+This causes high and variable latency, in addition to "blocking" the bottleneck for other flows
+when the buffer is full and packets are droped. 
+Several technical solutions exists, that try to solve the problem of bufferbloat and we will outline 
+some of them  in this section.
 \section{Transmission Control Protocol}
+Transmission Controll Protocol (TCP) is the one of the main protocols for transmitting data on the internet.
+It is a connection based, reliable protocoll and is used by for instance World Wide Web(WWW), email, 
+File Transfer Protocoll (FTP) and streaming media. TCP requires that the sender and reciever establishes a connection 
+through a three-way handshake before transmission starts. All segments sent have a sequence number, and the reciver sends 
+an acknowledgment(ACK) for every segment it recieves. This, in addition to retransmission and error-checking ensures
+reliable transfer, but also lengthens latency.
 
 \subsection{Congestion Control}
+To help reduce congestion on the links TCP maintains a congestion window(CWIN), which limits the total number of 
+unacknowledged packets that it can send at a time. This is  done in multiple fases.
+In the slow start fase,  right after a connection is established. the congestion window starts as a small multiple 
+of MSS(Maximum Segment Size) and is effectivley doubled for every RTT. When it reaches the slow-start threshold(ssthresh),
+CWIN is reduced by half and a new fase starts, congestion avoidance. In this fase CWIN is increased linearly by one MSS 
+every RTT. If loss occurs, it could mean there is congestion, and steps will be taken to reduce load on the
+network. The steps depend on what exact congestion avoidance algorithm is used.
 
 
 
@@ -16,4 +35,4 @@
 
 
 
-\section{Alternative Backoff with ECN}
+\section{ECN}
