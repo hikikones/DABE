@@ -1,5 +1,13 @@
 --- linux/include/linux/tcp.h	2020-02-01 01:08:33.677529600 +0100
 +++ web10g/include/linux/tcp.h	2020-02-01 01:06:57.417149200 +0100
+@@ -116,4 +116,7 @@
+ 	u8	num_sacks;	/* Number of SACK blocks		*/
+ 	u16	user_mss;	/* mss requested by user in ioctl	*/
++#ifdef CONFIG_TCP_ESTATS
++   u16 rec_mss;    /* MSS option received */
++#endif
+	u16	mss_clamp;	/* Maximal mss, negotiated at connection setup */
+ #if IS_ENABLED(CONFIG_MPTCP)
 @@ -165,6 +138,10 @@
  	return (struct tcp_request_sock *)req;
  }
@@ -2030,11 +2038,12 @@
  obj-$(CONFIG_INET_TCP_DIAG) += tcp_diag.o
 --- linux/include/net/netns/ipv4.h	2020-02-01 20:15:11.502082700 +0100
 +++ web10g/include/net/netns/ipv4.h	2020-02-01 01:06:57.784702000 +0100
-@@ -223,4 +223,7 @@
+@@ -223,4 +223,8 @@
 	atomic_t	rt_genid;
  	siphash_key_t	ip_id_key;
-+
++#ifdef CONFIG_TCP_ESTATS
 +	int sysctl_tcp_estats;
 +	int sysctl_estats_delay;
++#endif
  };
  #endif

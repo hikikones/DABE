@@ -50,7 +50,16 @@ diff -u linux/net/ipv6/tcp_ipv6.c web10g/net/ipv6/tcp_ipv6.c >> web10g.patch
 
 The resulting `patch` file from these commands can be found in the `web10g_raw.patch`. Then the big job of manual inspection comes where every section in the `diff` has been checked. For example, since the web10g kernel is behind the official release, it wants to "undo" a lot of the new changes, and so those sections have been removed. Also, a lot of sections require som slight modifications where a relevant web10g change is wanted, but another "undo" change to kernel 5.5 is unwanted. At last a new section was manually added due to build error `net/ipv4/tcp_ipv4.c:2805:12: error: ‘struct netns_ipv4’ has no member named ‘sysctl_estats_delay’`, which was fixed by adding the missing members to file `include/net/netns/ipv4.h`. The final cleaned up result can found in the file `web10g.patch`.
 
-To patch the changes into kernel 5.5 and building it for RPI4, you first need to download [BCM2711_defconfig](https://raw.githubusercontent.com/raspberrypi/linux/rpi-5.5.y/arch/arm/configs/bcm2711_defconfig) for kernel 5.5 and copy it to `linux/arch/arm/configs`. Then you can start building with:
+To patch the changes into kernel 5.5 and building it for RPI4, you first need to download [BCM2711_defconfig](https://raw.githubusercontent.com/raspberrypi/linux/rpi-5.5.y/arch/arm/configs/bcm2711_defconfig) for kernel 5.5, copy it to `linux/arch/arm/configs` and add the following two new lines to it:
+
+```
+wget https://raw.githubusercontent.com/raspberrypi/linux/rpi-5.5.y/arch/arm/configs/bcm2711_defconfig
+echo 'CONFIG_TCP_ESTATS=y' >> bcm2711_defconfig
+echo '# CONFIG_TCP_ESTATS_STRICT_ELAPSEDTIME is not set' >> bcm2711_defconfig
+mv bcm2711_defconfig linux/arch/arm/configs/
+```
+
+Then you can start building with:
 
 ```
 sudo apt install gcc-arm-linux-gnueabihf bc make flex bison libssl-dev build-essential
@@ -60,4 +69,12 @@ make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- bcm2711_defconfig
 make -s ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- -j6 zImage modules dtbs
 ```
 
-The build should complete with no errors. The question remains however, _does it actually work_?
+TODO: Fix the following build error:
+
+```
+ERROR: "tcp_estats_update_finish_segrecv" [net/ipv6/ipv6.ko] undefined!
+ERROR: "tcp_estats_create" [net/ipv6/ipv6.ko] undefined!
+ERROR: "tcp_estats_update_segrecv" [net/ipv6/ipv6.ko] undefined! scripts/Makefile.modpost:93: recipe for target '__modpost' failedmake[1]: *** [__modpost] Error 1
+Makefile:1281: recipe for target 'modules' failed
+make: *** [modules] Error 2
+```
