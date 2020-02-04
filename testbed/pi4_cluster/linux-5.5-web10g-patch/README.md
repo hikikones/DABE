@@ -1,5 +1,28 @@
 # Linux 5.5 web10g patch
 
+## Working solution so far
+
+A working web10g patch for mainline kernel 5.5.1 has been created by manually porting over the necessary changes. This has been done by looking through the old web10g patch made for kernel 3.17 in combination with more recent changes from the official GitHub repository.
+
+To patch web10g features onto mainline kernel 5.5.1 do the following:
+
+```
+wget https://cdn.kernel.org/pub/linux/kernel/v5.x/linux-5.5.1.tar.xz
+tar -xvf linux-5.5.1.tar.xz
+cd linux-5.5.1
+patch -p1 < ~/web10g-5.5.1.patch
+```
+
+Before you can start building it for RPI4, you need the proper SoC `bcm2711_defconfig` configuration. Download it from this repo, and copy it to `arch/arm/configs/`. Then:
+
+```
+sudo apt install gcc-arm-linux-gnueabihf bc make flex bison libssl-dev build-essential
+make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- bcm2711_defconfig
+make -s ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- -j6 zImage modules dtbs
+```
+
+## Other methods
+
 Methods so far that hasn't showed much promise:
 
 * Diff between entire mainline 5.5 source tree and web10g resulting in over a million lines of code.
@@ -78,3 +101,5 @@ ERROR: "tcp_estats_update_segrecv" [net/ipv6/ipv6.ko] undefined! scripts/Makefil
 Makefile:1281: recipe for target 'modules' failed
 make: *** [modules] Error 2
 ```
+
+__UPDATE: Fixed by simply removing the undefined function calls in `net/ipv6/tcp_ipv6.c`.__
