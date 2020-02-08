@@ -1,0 +1,13 @@
+--- web10g-dlkm/tcp_estats_mib_var.c	2020-02-07 21:58:14.375500600 +0100
++++ web10g-dlkm-arm/tcp_estats_mib_var.c	2020-02-07 21:55:32.546665500 +0100
+@@ -99,8 +99,8 @@
+ static void read_StartTimeStamp(void *buf, struct tcp_estats *stats,
+ 				struct tcp_estats_var *vp)
+ {
+-	u64 msecs = (u64)stats->start_tv.tv_sec * 1000000; /* convert to msecs */
+-	msecs = msecs + (u64)stats->start_tv.tv_nsec/1000; /* convert nsec to msec */
++	u64 msecs = stats->start_tv.tv_sec * 1000000; /* convert to msecs */
++	msecs = msecs + stats->start_tv.tv_nsec/1000; /* convert nsec to msec */
+ 	memcpy(buf, &msecs, 8);
+ }
+ 
