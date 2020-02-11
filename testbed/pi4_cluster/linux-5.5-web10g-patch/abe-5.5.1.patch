@@ -1,0 +1,89 @@
+diff -Naur linux-5.5.1/include/linux/tcp.h linux-5.5.1-abe/include/linux/tcp.h
+--- linux-5.5.1/include/linux/tcp.h	2020-02-01 10:33:01.000000000 +0100
++++ linux-5.5.1-abe/include/linux/tcp.h	2020-02-04 11:14:21.727335900 +0100
+@@ -395,6 +395,8 @@
+ 	 */
+ 	struct request_sock __rcu *fastopen_rsk;
+ 	u32	*saved_syn;
++	/* flag to inform congestion control whether there was an ECN flag or not */
++	bool abe_doit; 
+ };
+ 
+ enum tsq_enum {
+diff -Naur linux-5.5.1/net/ipv4/tcp_cong.c linux-5.5.1-abe/net/ipv4/tcp_cong.c
+--- linux-5.5.1/net/ipv4/tcp_cong.c	2020-02-01 10:33:01.000000000 +0100
++++ linux-5.5.1-abe/net/ipv4/tcp_cong.c	2020-02-04 11:19:10.155168900 +0100
+@@ -17,6 +17,28 @@
+ #include <linux/jhash.h>
+ #include <net/tcp.h>
+ 
++#define RENOTCP_BETA_SCALE 1024 /* Scale factor beta calculation
++                                 * max_cwnd = snd_cwnd * beta
++                                 */
++/* beta with loss during CA */ 
++static int beta __read_mostly = 512;
++/* beta with loss during SS */
++static int ss_beta __read_mostly = 512;
++/* beta with ECN during CA */ 
++static int abe_beta __read_mostly = 819;
++/* beta with ECN during SS */ 
++static int abe_ss_beta __read_mostly = 819;
++
++/* Note parameters that are used for precomputing scale factors are read-only */
++module_param(beta, int, 0644);
++MODULE_PARM_DESC(beta, "beta for multiplicative decrease in CA without ECN");
++module_param(ss_beta, int, 0644);
++MODULE_PARM_DESC(ss_beta, "beta for multiplicative decrease in SS without ECN");
++module_param(abe_beta, int, 0644);
++MODULE_PARM_DESC(abe_beta, "beta for multiplicative decrease in CA with ECN");
++module_param(abe_ss_beta, int, 0644);
++MODULE_PARM_DESC(abe_ss_beta, "beta for multiplicative decrease in SS with ECN");
++
+ static DEFINE_SPINLOCK(tcp_cong_list_lock);
+ static LIST_HEAD(tcp_cong_list);
+ 
+@@ -459,8 +481,30 @@
+ u32 tcp_reno_ssthresh(struct sock *sk)
+ {
+ 	const struct tcp_sock *tp = tcp_sk(sk);
++	/*return max(tp->snd_cwnd >> 1U, 2U);*/
++
++	/* Below code applies Alternative Backoff with ECN (ABE) from   
++		* Naeem Khademi et al., "Alternative Backoff: Achieving Low Latency 
++		* and High Throughput with ECN and AQM", IFIP NETWORKING 2017 and also in 
++	* https://tools.ietf.org/html/draft-ietf-tcpm-alternativebackoff-ecn
++	*/
++   int used_beta;
++
++	if (sock_net(sk)->ipv4.sysctl_tcp_ecn > 0 && tp->abe_doit) { 
++			/* if ECN enabled and we see ECE */
++		if (tp->snd_cwnd < tp->snd_ssthresh)
++			used_beta = abe_ss_beta;
++		else
++			used_beta = abe_beta;
++	} else {
++		/* if we see packet loss */
++		if (tp->snd_cwnd < tp->snd_ssthresh)
++			used_beta = ss_beta;
++		else
++			used_beta = beta;
++	}
+ 
+-	return max(tp->snd_cwnd >> 1U, 2U);
++	return max((tp->snd_cwnd * used_beta) / RENOTCP_BETA_SCALE, 2U);
+ }
+ EXPORT_SYMBOL_GPL(tcp_reno_ssthresh);
+ 
+diff -Naur linux-5.5.1/net/ipv4/tcp_input.c linux-5.5.1-abe/net/ipv4/tcp_input.c
+--- linux-5.5.1/net/ipv4/tcp_input.c	2020-02-01 10:33:01.000000000 +0100
++++ linux-5.5.1-abe/net/ipv4/tcp_input.c	2020-02-04 11:20:42.043875900 +0100
+@@ -2526,7 +2526,9 @@
+ 	tp->prior_ssthresh = 0;
+ 	if (inet_csk(sk)->icsk_ca_state < TCP_CA_CWR) {
+ 		tp->undo_marker = 0;
++		tp->abe_doit = 1;
+ 		tcp_init_cwnd_reduction(sk);
++		tp->abe_doit = 0;
+ 		tcp_set_ca_state(sk, TCP_CA_CWR);
+ 	}
+ }

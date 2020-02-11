@@ -29,12 +29,17 @@ CWIN is reduced by half and a new fase starts, congestion avoidance. In this fas
 every RTT. If loss occurs, it could mean there is congestion, and steps will be taken to reduce load on the
 network. The steps depend on what exact congestion avoidance algorithm is used.
 
-
-
 \section{Active Queue Management}
 
-\subsection{Explicit Congestion Notification}
+\section{Explicit Congestion Notification}
+Explicit Congestion Notification (ECN) is an extension to TCP that allows routers to notify end points on impending congestion
+without dropping packets.
 
+\subsection{Legacy ECN}
+In legacy ECN, the router notifies end hosts of congestion by setting a Congestion Encountered (CE) flag in the IP header on ECN enabled packets
+when experiencing congestion. The reciever of the packet then reflects this back to the sender by setting an ECN-Echo (ECE) in the TCP
+header. It keeps doing this until the sender responds back with a segment with Congestion Window Reduced (CWR) set,
+indicating that the sender has backed off.
 
 
 \section{Alternative Backoff with ECN}
