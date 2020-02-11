@@ -105,7 +105,7 @@ patch -p1 < web10g-dlkm-arm.patch
 All the patch does is to remove the explicit `u64-bit` division cast. Although RPI4 does support 64-bit, most of the userland tools for it are still on 32-bit (even the official OS). If we do not remove it, the build results in `WARNING: "__aeabi_ldivmod" undefined`. Now start the kernel module build and copy the resulting kernel object to the approriate kernel module folder as follows:
 
 ```
-make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf-
+make
 sudo cp tcp_estats_nl.ko /lib/modules/$(uname -r)/kernel/net/ipv4/
 ```
 
@@ -127,15 +127,17 @@ make
 sudo make install
 ```
 
-If any complaint about `autoconf` appears, try `make clean` and then build again.
+If any complaint about `autoconf` appears, run `autogen` and `configure` again, followed by `make clean`. Then build again.
 
 ### Verify web10g by using it
 
 After installing all of the components of web10g you will need to load the module and instantiate the collection process with the following commands:
 
 ```
+sudo depmod -a
 sudo modprobe tcp_estats_nl
 sudo sysctl -w net.ipv4.tcp_estats=127
+sudo ldconfig
 ```
 
 As long as no errors are shown, you are now good to go.
