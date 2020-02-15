@@ -40,3 +40,8 @@ sudo nano /etc/network/interfaces
 # NAT
 sudo update-alternatives --set iptables /usr/sbin/iptables-legacy
 sudo iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+
+# Sync clock
+sudo timedatectl set-timezone Europe/Oslo
+sudo timedatectl set-ntp true
+# reboot

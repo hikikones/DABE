@@ -41,3 +41,17 @@ sudo nano /etc/network/if-up.d/route
 ##!/bin/sh
 #ip route add 192.168.xx.0/24 via 192.168.xx.1
 sudo chmod +x /etc/network/if-up.d/route
+
+# Enable root login over SSH
+sudo nano /etc/ssh/sshd_config
+#PermitRootLogin yes
+sydo systemctl restart sshd
+
+# Sync clock
+# sudo timedatectl set-timezone Europe/Oslo
+# sudo timedatectl set-ntp true
+# reboot
+sudo apt install ntp
+sudo systemctl enable ntp
+sudo timedatectl set-ntp 1
+# reboot

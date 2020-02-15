@@ -37,3 +37,8 @@ sudo nano /etc/network/interfaces
 # address 192.168.20.1
 # netmask 255.255.255.0
 # gateway 10.0.0.254
+
+# Sync clock
+sudo timedatectl set-timezone Europe/Oslo
+sudo timedatectl set-ntp true
+# reboot
