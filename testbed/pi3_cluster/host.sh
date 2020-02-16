@@ -1,3 +1,6 @@
+# Keyboard layout
+echo 'keymap="no.kbd"' >> /etc/rc.conf
+
 ##################
 ## SSH Setup
 ##################
