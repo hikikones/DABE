@@ -1,5 +1,12 @@
+##################
+## General Setup
+##################
+
 # Keyboard layout
 echo 'keymap="no.kbd"' >> /etc/rc.conf
+
+# Remove freebsd user
+rmuser freebsd
 
 ##################
 ## SSH Setup
@@ -40,6 +47,7 @@ host pihost4 { hardware ethernet b8:27:eb:98:9e:e0; fixed-address 10.0.0.4; }
 host pihost5 { hardware ethernet b8:27:eb:9e:04:a3; fixed-address 10.0.0.5; }
 host pihost6 { hardware ethernet b8:27:eb:4a:37:d9; fixed-address 10.0.0.6; }
 host pihost7 { hardware ethernet b8:27:eb:86:d2:e0; fixed-address 10.0.0.7; }
+#host pigate { hardware ethernet b8:27:eb:a6:35:6b; fixed-address 10.0.0.254; }
 
 # Enable dhcp server at boot
 echo 'dhcpd_enable="YES"' >> /etc/rc.conf
@@ -52,11 +60,14 @@ service isc-dhcpd start
 ## Network Setup
 ##################
 
+# Change hostname
+nano /etc/rc.conf
+
 # Add an interface alias (subinterface)
 echo 'ifconfig_ue0_alias0="inet 10.0.0.254 netmask 255.255.255.0"' >> /etc/rc.conf
 
-# Change hostname
-nano /etc/rc.conf
+# Enable IP forwarding
+echo 'gateway_enable="YES"' >> /etc/rc.conf
 
 # NAT
 echo 'pf_enable="YES"' >> /etc/rc.conf
@@ -79,6 +90,10 @@ echo 'nat on ue0 inet from 10.0.0.0/24 to any -> ue0' >> /etc/pf.conf
 ##########
 # TEACUP
 ##########
+
+# FreeBSD kernel source
+wget ftp://ftp.freebsd.org/pub/FreeBSD/releases/arm64/12.1-RELEASE/src.txz
+tar -C / -xzvf src.txz
 
 # R
 pkg install -y R
