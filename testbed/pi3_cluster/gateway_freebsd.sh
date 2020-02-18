@@ -1,3 +1,5 @@
+# OS: FreeBSD 12.1 RELEASE ARM64 (PI3)
+
 ##################
 ## General Setup
 ##################

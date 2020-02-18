@@ -36,3 +36,43 @@ echo 'ifconfig_ue0_alias0="inet 192.168.xx.x netmask 255.255.255.0"' >> /etc/rc.
 # Add route
 static_routes="intnet"
 route_intnet="-net 192.168.xx.0/24 192.168.xx.1"
+
+##################
+## Time Sync
+##################
+
+echo 'ntpd_enable=YES' >> /etc/rc.conf
+echo 'ntpd_sync_on_start=YES' >> /etc/rc.conf
+echo 'server 0.no.pool.ntp.org' >> /etc/ntp.conf
+echo 'server 1.no.pool.ntp.org' >> /etc/ntp.conf
+echo 'server 2.no.pool.ntp.org' >> /etc/ntp.conf
+echo 'server 3.no.pool.ntp.org' >> /etc/ntp.conf
+
+##################
+## TEACUP Setup
+##################
+
+# FreeBSD kernel source
+wget ftp://ftp.freebsd.org/pub/FreeBSD/releases/arm64/12.1-RELEASE/src.txz
+tar -C / -xzvf src.txz
+
+# Lighttpd
+pkg install lighttpd
+
+# Iperf
+wget https://sourceforge.net/projects/iperf2/files/iperf-2.0.9.tar.gz
+#wget http://caia.swin.edu.au/urp/newtcp/tools/caia_iperf208_1.1.patch
+tar -xf iperf-2.0.8.tar.gz
+cd iperf-2.0.8
+patch -p1 < iperf-2.0.9.patch
+./configure
+make
+make install
+
+# Httperf
+pkg install httperf
+
+# Nttcp
+portsnap fetch && portsnap extract
+pkg install portmaster
+portmaster -D -G --no-confirm benchmark/nttcp

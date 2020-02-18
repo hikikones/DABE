@@ -1,0 +1,617 @@
+diff -Nur iperf-2.0.9/include/Locale.h iperf-2.0.9-arm/include/Locale.h
+--- iperf-2.0.9/include/Locale.h	2016-06-21 01:41:31.000000000 +0200
++++ iperf-2.0.9-arm/include/Locale.h	2020-02-18 14:49:50.121263600 +0100
+@@ -94,11 +94,15 @@
+ 
+ extern const char server_datagram_size[];
+ 
+-extern const char tcp_window_size[];
++extern const char tcp_sendspace_size[];
+ 
+-extern const char udp_buffer_size[];
++extern const char tcp_recvspace_size[];
+ 
+-extern const char window_default[];
++extern const char udp_sendspace_size[];
++
++extern const char udp_recvspace_size[];
++
++extern const char buf_default[];
+ 
+ extern const char wait_server_threads[];
+ 
+@@ -184,9 +188,9 @@
+  * warnings
+  * ------------------------------------------------------------------- */
+ 
+-extern const char warn_window_requested[];
++extern const char warn_buf_requested[];
+ 
+-extern const char warn_window_small[];
++extern const char warn_buf_small[];
+ 
+ extern const char warn_delay_large[];
+ 
+@@ -198,7 +202,7 @@
+ 
+ extern const char warn_fileopen_failed[];
+ 
+-extern const char unable_to_change_win[];
++extern const char unable_to_change_buf[];
+ 
+ extern const char opt_estimate[];
+ 
+diff -Nur iperf-2.0.9/include/Reporter.h iperf-2.0.9-arm/include/Reporter.h
+--- iperf-2.0.9/include/Reporter.h	2016-06-21 01:41:31.000000000 +0200
++++ iperf-2.0.9-arm/include/Reporter.h	2020-02-18 14:49:50.121263600 +0100
+@@ -193,7 +193,8 @@
+     int PacketID;
+     int mBufLen;                    // -l
+     int mMSS;                       // -M
+-    int mTCPWin;                    // -w
++    int mTCPSndBuf;                 // -j
++    int mTCPRcvBuf;                 // -k
+     max_size_t mUDPRate;            // -b or -u
+     RateUnits mUDPRateUnits;        // -b is either bw or pps
+     /*   flags is a BitMask of old bools
+diff -Nur iperf-2.0.9/include/Settings.hpp iperf-2.0.9-arm/include/Settings.hpp
+--- iperf-2.0.9/include/Settings.hpp	2016-06-21 01:41:31.000000000 +0200
++++ iperf-2.0.9-arm/include/Settings.hpp	2020-02-18 14:49:50.121263600 +0100
+@@ -133,7 +133,9 @@
+     int Extractor_size;
+     int mBufLen;                    // -l
+     int mMSS;                       // -M
+-    int mTCPWin;                    // -w
++    int mTCPSndBuf;                 // -j
++    int mTCPRcvBuf;                 // -k
++    int mTCPWizBuf;                 // -w
+     /*   flags is a BitMask of old bools
+         bool   mBufLenSet;              // -l
+         bool   mCompat;                 // -C
+@@ -358,7 +360,8 @@
+     int32_t numThreads;
+     int32_t mPort;
+     int32_t bufferlen;
+-    int32_t mWindowSize;
++    int32_t mRcvBand;
++    int32_t mSndBand;
+     int32_t mAmount;
+     int32_t mRate;
+     int32_t mUDPRateUnits;
+@@ -368,7 +371,8 @@
+     signed int numThreads : 32;
+     signed int mPort      : 32;
+     signed int bufferlen  : 32;
+-    signed int mWindowSize : 32;
++    signed int mSndBand   : 32;
++    signed int mRcvBand   : 32;
+     signed int mAmount    : 32;
+     signed int mRate      : 32;
+     signed int mUDPRateUnits : 32;
+diff -Nur iperf-2.0.9/include/iperf-int.h iperf-2.0.9-arm/include/iperf-int.h
+--- iperf-2.0.9/include/iperf-int.h	1970-01-01 01:00:00.000000000 +0100
++++ iperf-2.0.9-arm/include/iperf-int.h	2020-02-18 14:49:50.121263600 +0100
+@@ -0,0 +1,9 @@
++#ifndef _IPERF_INCLUDE_IPERF_INT_H
++#define _IPERF_INCLUDE_IPERF_INT_H 1
++#ifndef _GENERATED_STDINT_H
++#define _GENERATED_STDINT_H "iperf 2.0.8"
++/* generated using gnu compiler gcc (SUSE Linux) 4.8.5 */
++#define _STDINT_HAVE_STDINT_H 1
++#include <stdint.h>
++#endif
++#endif
+diff -Nur iperf-2.0.9/include/util.h iperf-2.0.9-arm/include/util.h
+--- iperf-2.0.9/include/util.h	2016-06-21 01:41:31.000000000 +0200
++++ iperf-2.0.9-arm/include/util.h	2020-02-18 14:49:50.121263600 +0100
+@@ -65,8 +65,8 @@
+  * set/getsockopt wrappers for SO_RCVBUF and SO_SNDBUF; TCP_MAXSEG
+  * socket.c
+  * ------------------------------------------------------------------- */
+-int setsock_tcp_windowsize( int inSock, int inTCPWin, int inSend );
+-int getsock_tcp_windowsize( int inSock, int inSend );
++int setsock_buffer_size( int inSock, int inBufSize, int inWhichBuf );
++int getsock_buffer_size( int inSock, int inWhichBuf );
+ 
+ void setsock_tcp_mss( int inSock, int inTCPWin );
+ int  getsock_tcp_mss( int inSock );
+diff -Nur iperf-2.0.9/src/Locale.c iperf-2.0.9-arm/src/Locale.c
+--- iperf-2.0.9/src/Locale.c	2016-06-21 01:41:31.000000000 +0200
++++ iperf-2.0.9-arm/src/Locale.c	2020-02-18 14:49:50.136887300 +0100
+@@ -79,12 +79,14 @@
+   -e, --enhancedreports    use enhanced reporting giving more tcp/udp and traffic information\n\
+   -f, --format    [kmKM]   format to report: Kbits, Mbits, KBytes, MBytes\n\
+   -i, --interval  #        seconds between periodic bandwidth reports\n\
++  -j, --sendbuf   #[KM]    socket send buffer size\n\
++  -k, --recvbuf   #[KM]    socket receive buffer size\n\
+   -l, --len       #[KM]    length of buffer to read or write (default 8 KB)\n\
+   -m, --print_mss          print TCP maximum segment size (MTU - TCP/IP header)\n\
+   -o, --output    <filename> output the report or error message to this specified file\n\
+   -p, --port      #        server port to listen on/connect to\n\
+   -u, --udp                use UDP rather than TCP\n\
+-  -w, --window    #[KM]    TCP window size (socket buffer size)\n"
++  -w, --wizard    #[KM]    socket buffer tuning wizard (useful for unidirectional client to server tests\n"
+ #ifdef HAVE_SCHED_SETSCHEDULER
+ "  -z, --realtime           request realtime scheduler\n"
+ #endif
+@@ -127,8 +129,7 @@
+ \n\
+ [KM] Indicates options that support a K or M suffix for kilo- or mega-\n\
+ \n\
+-The TCP window size option can be set by the environment variable\n\
+-TCP_WINDOW_SIZE. Most other options can be set by an environment variable\n\
++Most options can be set by an environment variable\n\
+ IPERF_<long option name>, such as IPERF_BANDWIDTH.\n\
+ \n\
+ Source at <http://sourceforge.net/projects/iperf2/>\n\
+@@ -183,13 +184,19 @@
+ const char server_datagram_size[] =
+ "Receiving %d byte datagrams\n";
+ 
+-const char tcp_window_size[] =
+-"TCP window size";
++const char tcp_sendspace_size[] =
++"TCP snd buf size";
+ 
+-const char udp_buffer_size[] =
+-"UDP buffer size";
++const char tcp_recvspace_size[] =
++"TCP rcv buf size (max advertised window)";
+ 
+-const char window_default[] =
++const char udp_sendspace_size[] =
++"UDP snd buffer size";
++
++const char udp_recvspace_size[] =
++"UDP rcv buffer size";
++
++const char buf_default[] =
+ "(default)";
+ 
+ const char wait_server_threads[] =
+@@ -341,11 +348,11 @@
+  * warnings
+  * ------------------------------------------------------------------- */
+ 
+-const char warn_window_requested[] =
++const char warn_buf_requested[] =
+ " (WARNING: requested %s)";
+ 
+-const char warn_window_small[] = "\
+-WARNING: TCP window size set to %d bytes. A small window size\n\
++const char warn_buf_small[] = "\
++WARNING: TCP buffer size set to %d bytes. A small buffer size\n\
+ will give poor performance. See the Iperf documentation.\n";
+ 
+ const char warn_delay_large[] =
+@@ -364,8 +371,8 @@
+ "WARNING: Unable to open file stream for transfer\n\
+ Using default data stream. \n";
+ 
+-const char unable_to_change_win[]=
+-"WARNING: Unable to change the window size\n";
++const char unable_to_change_buf[]=
++"WARNING: Unable to change the buffer size\n";
+ 
+ const char opt_estimate[]=
+ "Optimal Estimate\n";
+diff -Nur iperf-2.0.9/src/PerfSocket.cpp iperf-2.0.9-arm/src/PerfSocket.cpp
+--- iperf-2.0.9/src/PerfSocket.cpp	2016-06-21 01:41:31.000000000 +0200
++++ iperf-2.0.9-arm/src/PerfSocket.cpp	2020-02-18 14:49:50.136887300 +0100
+@@ -87,8 +87,18 @@
+     // set the TCP window size (socket buffer sizes)
+     // also the UDP buffer size
+     // must occur before call to accept() for large window sizes
+-    setsock_tcp_windowsize( inSettings->mSock, inSettings->mTCPWin,
+-                            (inSettings->mThreadMode == kMode_Client ? 1 : 0) );
++    if(inSettings->mTCPWizBuf > 0)
++    {
++      if(inSettings->mThreadMode == kMode_Client)
++        setsock_buffer_size( inSettings->mSock, inSettings->mTCPWizBuf, SO_SNDBUF);
++      else
++        setsock_buffer_size( inSettings->mSock, inSettings->mTCPWizBuf, SO_RCVBUF);
++    }
++    else
++    {
++      setsock_buffer_size( inSettings->mSock, inSettings->mTCPRcvBuf, SO_RCVBUF);
++      setsock_buffer_size( inSettings->mSock, inSettings->mTCPSndBuf, SO_SNDBUF);
++    }
+ 
+     if ( isCongestionControl( inSettings ) ) {
+ #ifdef TCP_CONGESTION
+diff -Nur iperf-2.0.9/src/ReportDefault.c iperf-2.0.9-arm/src/ReportDefault.c
+--- iperf-2.0.9/src/ReportDefault.c	2016-06-21 01:41:31.000000000 +0200
++++ iperf-2.0.9-arm/src/ReportDefault.c	2020-02-18 14:50:56.334507500 +0100
+@@ -275,12 +275,17 @@
+  * Report the client or listener Settings in default style
+  */
+ void reporter_reportsettings( ReporterData *data ) {
+-    int win, win_requested;
++    // int win, win_requested;
++	int sendspace, recvspace, rcvbuf_requested, sndbuf_requested;
+     int pid =  (int)  getpid();
+ 
+-    win = getsock_tcp_windowsize( data->info.transferID,
+-                  (data->mThreadMode == kMode_Listener ? 0 : 1) );
+-    win_requested = data->mTCPWin;
++    // win = getsock_tcp_windowsize( data->info.transferID,
++    //               (data->mThreadMode == kMode_Listener ? 0 : 1) );
++    // win_requested = data->mTCPWin;
++    sendspace = getsock_buffer_size( data->info.transferID, SO_SNDBUF);
++    recvspace = getsock_buffer_size( data->info.transferID, SO_RCVBUF);
++    rcvbuf_requested = data->mTCPRcvBuf;
++    sndbuf_requested = data->mTCPSndBuf;
+     printf( "%s", separator_line );
+     if ( data->mThreadMode == kMode_Listener ) {
+         printf(isEnhanced(data) ? server_pid_port : server_port,
+@@ -322,18 +327,33 @@
+             printf( multicast_ttl, data->info.mTTL);
+         }
+     }
+-    byte_snprintf( buffer, sizeof(buffer), win,
++    byte_snprintf( buffer, sizeof(buffer), sendspace,
+                    toupper( (int)data->info.mFormat));
+     printf( "%s: %s", (isUDP( data ) ? 
+-                                udp_buffer_size : tcp_window_size), buffer );
++                                udp_sendspace_size : tcp_sendspace_size), buffer );
+ 
+-    if ( win_requested == 0 ) {
+-        printf( " %s", window_default );
+-    } else if ( win != win_requested ) {
+-        byte_snprintf( buffer, sizeof(buffer), win_requested,
++    if ( sndbuf_requested == 0 ) {
++        printf( " %s", buf_default );
++    } else if ( sendspace != sndbuf_requested ) {
++        byte_snprintf( buffer, sizeof(buffer), sndbuf_requested,
+                        toupper( (int)data->info.mFormat));
+-        printf( warn_window_requested, buffer );
++        printf( warn_buf_requested, buffer );
+     }
++    printf( "\n" );
++
++    byte_snprintf( buffer, sizeof(buffer), recvspace,
++                   toupper( data->info.mFormat ));
++    printf( "%s: %s", (isUDP( data ) ?
++                                udp_recvspace_size : tcp_recvspace_size), buffer );
++
++    if ( rcvbuf_requested == 0) {
++        printf( " %s", buf_default );
++    } else if ( recvspace != rcvbuf_requested ) {
++        byte_snprintf( buffer, sizeof(buffer), rcvbuf_requested,
++                       toupper( data->info.mFormat));
++        printf( warn_buf_requested, buffer );
++    }
++
+     printf( "\n%s", separator_line );
+  }
+ 
+diff -Nur iperf-2.0.9/src/Reporter.c iperf-2.0.9-arm/src/Reporter.c
+--- iperf-2.0.9/src/Reporter.c	2016-09-08 18:27:20.000000000 +0200
++++ iperf-2.0.9-arm/src/Reporter.c	2020-02-18 14:49:50.136887300 +0100
+@@ -160,7 +160,20 @@
+                 data->mLocalhost = agent->mLocalhost;
+                 data->mBufLen = agent->mBufLen;
+                 data->mMSS = agent->mMSS;
+-                data->mTCPWin = agent->mTCPWin;
++                if ( agent->mTCPWizBuf > 0 ) {
++                    if ( agent->mThreadMode == kMode_Client ) {
++                        data->mTCPSndBuf = agent->mTCPWizBuf;
++                        data->mTCPRcvBuf = 0;
++                    }
++                    else {
++                        data->mTCPRcvBuf = agent->mTCPWizBuf;
++                        data->mTCPSndBuf;
++                    }
++                }
++                else {
++                    data->mTCPSndBuf = agent->mTCPSndBuf;
++                    data->mTCPRcvBuf = agent->mTCPRcvBuf;
++                }
+                 data->flags = agent->flags;
+                 data->mThreadMode = agent->mThreadMode;
+                 data->mode = agent->mReportMode;
+@@ -249,7 +262,20 @@
+             data->mLocalhost = agent->mLocalhost;
+             data->mBufLen = agent->mBufLen;
+             data->mMSS = agent->mMSS;
+-            data->mTCPWin = agent->mTCPWin;
++            if ( agent->mTCPWizBuf > 0 ) {
++                if ( agent->mThreadMode == kMode_Client ) {
++                    data->mTCPSndBuf = agent->mTCPWizBuf;
++                    data->mTCPRcvBuf = 0;
++                }
++                else {
++                    data->mTCPRcvBuf = agent->mTCPWizBuf;
++                    data->mTCPSndBuf;
++                }
++            }
++            else {
++                data->mTCPSndBuf = agent->mTCPSndBuf;
++                data->mTCPRcvBuf = agent->mTCPRcvBuf;
++            }
+             data->flags = agent->flags;
+             data->mThreadMode = agent->mThreadMode;
+             data->mode = agent->mReportMode;
+@@ -473,7 +499,20 @@
+             data->type = SETTINGS_REPORT;
+             data->mBufLen = agent->mBufLen;
+             data->mMSS = agent->mMSS;
+-            data->mTCPWin = agent->mTCPWin;
++            if ( agent->mTCPWizBuf > 0 ) {
++                if ( agent->mThreadMode == kMode_Client ) {
++                    data->mTCPSndBuf = agent->mTCPWizBuf;
++                    data->mTCPRcvBuf = 0;
++                }
++                else {
++                    data->mTCPRcvBuf = agent->mTCPWizBuf;
++                    data->mTCPSndBuf;
++                }
++            }
++            else {
++                data->mTCPSndBuf = agent->mTCPSndBuf;
++                data->mTCPRcvBuf = agent->mTCPRcvBuf;
++            }
+             data->flags = agent->flags;
+             data->mThreadMode = agent->mThreadMode;
+             data->mPort = agent->mPort;
+diff -Nur iperf-2.0.9/src/Settings.cpp iperf-2.0.9-arm/src/Settings.cpp
+--- iperf-2.0.9/src/Settings.cpp	2016-09-08 18:27:20.000000000 +0200
++++ iperf-2.0.9-arm/src/Settings.cpp	2020-02-18 14:49:50.152520700 +0100
+@@ -91,6 +91,8 @@
+ {"format",     required_argument, NULL, 'f'},
+ {"help",             no_argument, NULL, 'h'},
+ {"interval",   required_argument, NULL, 'i'},
++{"sendbuf",    required_argument, NULL, 'j'},
++{"recvbuf",    required_argument, NULL, 'k'},
+ {"len",        required_argument, NULL, 'l'},
+ {"print_mss",        no_argument, NULL, 'm'},
+ {"num",        required_argument, NULL, 'n'},
+@@ -101,7 +103,7 @@
+ {"time",       required_argument, NULL, 't'},
+ {"udp",              no_argument, NULL, 'u'},
+ {"version",          no_argument, NULL, 'v'},
+-{"window",     required_argument, NULL, 'w'},
++{"wizard",     required_argument, NULL, 'w'},
+ {"reportexclude", required_argument, NULL, 'x'},
+ {"reportstyle",required_argument, NULL, 'y'},
+ {"realtime",         no_argument, NULL, 'z'},
+@@ -138,6 +140,8 @@
+ {"IPERF_FORMAT",     required_argument, NULL, 'f'},
+ // skip help
+ {"IPERF_INTERVAL",   required_argument, NULL, 'i'},
++{"IPERF_SENDBUF",    required_argument, NULL, 'j'},
++{"IPERF_RECVBUF",    required_argument, NULL, 'k'},
+ {"IPERF_LEN",        required_argument, NULL, 'l'},
+ {"IPERF_PRINT_MSS",        no_argument, NULL, 'm'},
+ {"IPERF_NUM",        required_argument, NULL, 'n'},
+@@ -147,7 +151,7 @@
+ {"IPERF_TIME",       required_argument, NULL, 't'},
+ {"IPERF_UDP",              no_argument, NULL, 'u'},
+ // skip version
+-{"TCP_WINDOW_SIZE",  required_argument, NULL, 'w'},
++{"IPERF_WIZARD",     required_argument, NULL, 'w'},
+ {"IPERF_REPORTEXCLUDE", required_argument, NULL, 'x'},
+ {"IPERF_REPORTSTYLE",required_argument, NULL, 'y'},
+ 
+@@ -172,7 +176,7 @@
+ 
+ #define SHORT_OPTIONS()
+ 
+-const char short_options[] = "1b:c:def:hi:l:mn:o:p:rst:uvw:x:y:zB:CDF:IL:M:NP:RS:T:UVWZ:";
++const char short_options[] = "1b:c:def:hi:j:k:l:mn:o:p:rst:uvw:x:y:B:CDF:IL:M:NP:RS:T:UVWZ:";
+ 
+ /* -------------------------------------------------------------------
+  * defaults
+@@ -307,6 +311,16 @@
+     for ( int i = gnu_optind; i < argc; i++ ) {
+         fprintf( stderr, "%s: ignoring extra argument -- %s\n", argv[0], argv[i] );
+     }
++
++    if ( mSettings->mTCPWizBuf > 0 ) {
++        if ( mSettings->mTCPSndBuf > 0 ) {
++            fprintf( stderr, "-w mutually excludes the use of -j (ignoring -j argument)\n" );
++        }
++        if ( mSettings->mTCPRcvBuf > 0 ) {
++            fprintf( stderr, "-w mutually excludes the use of -k (ignoring -k argument)\n" );
++        }
++    }
++        
+ } // end ParseCommandLine
+ 
+ /* -------------------------------------------------------------------
+@@ -404,6 +418,24 @@
+ 	    }
+             break;
+ 
++        case 'j': // TCP sendbuf size (socket send buffer size)
++            Settings_GetUpperCaseArg(optarg,outarg);
++            mExtSettings->mTCPSndBuf = byte_atoi(outarg);
++
++            if ( mExtSettings->mTCPSndBuf < 2048 ) {
++                fprintf( stderr, warn_buf_small, mExtSettings->mTCPSndBuf );
++            }
++            break;
++
++        case 'k': // TCP recvbuf size (socket receive buffer size)
++            Settings_GetUpperCaseArg(optarg,outarg);
++            mExtSettings->mTCPRcvBuf = byte_atoi(outarg);
++
++            if ( mExtSettings->mTCPRcvBuf < 2048 ) {
++                fprintf( stderr, warn_buf_small, mExtSettings->mTCPRcvBuf );
++            }
++            break;
++
+         case 'l': // length of each buffer
+             Settings_GetUpperCaseArg(optarg,outarg);
+             mExtSettings->mBufLen = byte_atoi( outarg );
+@@ -504,12 +536,12 @@
+             exit(1);
+             break;
+ 
+-        case 'w': // TCP window size (socket buffer size)
++        case 'w': // TCP buffer tuning wizard
+             Settings_GetUpperCaseArg(optarg,outarg);
+-            mExtSettings->mTCPWin = byte_atoi(outarg);
++            mExtSettings->mTCPWizBuf = byte_atoi(outarg);
+ 
+-            if ( mExtSettings->mTCPWin < 2048 ) {
+-                fprintf( stderr, warn_window_small, mExtSettings->mTCPWin );
++            if ( mExtSettings->mTCPWizBuf < 2048 ) {
++                fprintf( stderr, warn_buf_small, mExtSettings->mTCPWizBuf );
+             }
+             break;
+ 
+@@ -809,7 +841,8 @@
+         if ( hdr->bufferlen != 0 ) {
+             (*client)->mBufLen = ntohl(hdr->bufferlen);
+         }
+-        (*client)->mTCPWin = ntohl(hdr->mWindowSize);
++        (*client)->mTCPRcvBuf = ntohl(hdr->mRcvBand);
++        (*client)->mTCPSndBuf = ntohl(hdr->mSndBand);
+ 	if ( !isBWSet(server) ) {
+ 	    (*client)->mUDPRate = ntohl(hdr->mRate); 
+ 	    if ((flags & UNITS_PPS) == UNITS_PPS) {
+@@ -872,7 +905,8 @@
+     } else {
+         hdr->bufferlen = 0;
+     }
+-    hdr->mWindowSize  = htonl(client->mTCPWin);
++    hdr->mRcvBand = htonl(client->mTCPRcvBuf);
++    hdr->mSndBand = htonl(client->mTCPSndBuf);
+     hdr->mRate = htonl(client->mUDPRate);
+     if ( client->mListenPort != 0 ) {
+         hdr->mPort  = htonl(client->mListenPort);
+diff -Nur iperf-2.0.9/src/tcp_window_size.c iperf-2.0.9-arm/src/tcp_window_size.c
+--- iperf-2.0.9/src/tcp_window_size.c	2016-06-21 01:41:31.000000000 +0200
++++ iperf-2.0.9-arm/src/tcp_window_size.c	2020-02-18 14:49:50.152520700 +0100
+@@ -59,7 +59,7 @@
+ #endif
+ 
+ /* -------------------------------------------------------------------
+- * If inTCPWin > 0, set the TCP window size (via the socket buffer
++ * If inBufSize > 0, set the TCP window size (via the socket buffer
+  * sizes) for inSock. Otherwise leave it as the system default.
+  *
+  * This must be called prior to calling listen() or connect() on
+@@ -70,21 +70,21 @@
+  * returns -1 on error, 0 on no error.
+  * ------------------------------------------------------------------- */
+ 
+-int setsock_tcp_windowsize( int inSock, int inTCPWin, int inSend ) {
+-#ifdef SO_SNDBUF
++int setsock_buffer_size( int inSock, int inBufSize, int inWhichBuf ) {
++#if defined(SO_SNDBUF) && defined(SO_RCVBUF)
+     int rc;
+-    int newTCPWin;
++    int newBufSize;
+ 
+     assert( inSock >= 0 );
+ 
+-    if ( inTCPWin > 0 ) {
++    if ( inBufSize > 0 ) {
+ 
+ #ifdef TCP_WINSHIFT
+ 
+         /* UNICOS requires setting the winshift explicitly */
+-        if ( inTCPWin > 65535 ) {
++        if ( inBufSize > 65535 ) {
+             int winShift = 0;
+-            int scaledWin = inTCPWin >> 16;
++            int scaledWin = inBufSize >> 16;
+             while ( scaledWin > 0 ) {
+                 scaledWin >>= 1;
+                 winShift++;
+@@ -106,7 +106,7 @@
+         /* On AIX, RFC 1323 extensions can be set system-wide,
+          * using the 'no' network options command. But we can also set them
+          * per-socket, so let's try just in case. */
+-        if ( inTCPWin > 65535 ) {
++        if ( inBufSize > 65535 ) {
+             /* enable RFC 1323 */
+             int on = 1;
+             rc = setsockopt( inSock, IPPROTO_TCP, TCP_RFC1323,
+@@ -117,59 +117,61 @@
+         }
+ #endif /* TCP_RFC1323 */
+ 
+-        if ( !inSend ) {
++        if ( inWhichBuf == SO_RCVBUF ) {
+             /* receive buffer -- set
+              * note: results are verified after connect() or listen(),
+              * since some OS's don't show the corrected value until then. */
+-            newTCPWin = inTCPWin;
++            newBufSize = inBufSize;
+             rc = setsockopt( inSock, SOL_SOCKET, SO_RCVBUF,
+-                             (char*) &newTCPWin, sizeof( newTCPWin ));
+-        } else {
++                             (char*) &newBufSize, sizeof( newBufSize ));
++        } else if ( inWhichBuf == SO_SNDBUF ) {
+             /* send buffer -- set
+              * note: results are verified after connect() or listen(),
+              * since some OS's don't show the corrected value until then. */
+-            newTCPWin = inTCPWin;
++            newBufSize = inBufSize;
+             rc = setsockopt( inSock, SOL_SOCKET, SO_SNDBUF,
+-                             (char*) &newTCPWin, sizeof( newTCPWin ));
++                             (char*) &newBufSize, sizeof( newBufSize ));
+         }
+         if ( rc < 0 ) {
+             return rc;
+         }
+     }
+-#endif /* SO_SNDBUF */
++#endif /* SO_SNDBUF && SO_RCVBUF */
+ 
+     return 0;
+-} /* end setsock_tcp_windowsize */
++} /* end setsock_buffer_size */
+ 
+ /* -------------------------------------------------------------------
+- * returns the TCP window size (on the sending buffer, SO_SNDBUF),
+- * or -1 on error.
++ * returns the socket buffer size or -1 on error.
+  * ------------------------------------------------------------------- */
+ 
+-int getsock_tcp_windowsize( int inSock, int inSend ) {
+-    int theTCPWin = 0;
++int getsock_buffer_size( int inSock, int inWhichBuf ) {
++    int bufsize = 0;
++
+ 
+-#ifdef SO_SNDBUF
+     int rc;
+-    Socklen_t len;
++    Socklen_t len = sizeof(bufsize);
+ 
+-    /* send buffer -- query for buffer size */
+-    len = sizeof( theTCPWin );
+-    if ( inSend ) {
++#ifdef SO_SNDBUF
++    if ( inWhichBuf == SO_SNDBUF ) {
+         rc = getsockopt( inSock, SOL_SOCKET, SO_SNDBUF,
+-                         (char*) &theTCPWin, &len );
+-    } else {
++                         (char*) &bufsize, &len );
++#endif
++#ifdef SO_RCVBUF
++    } else if(inWhichBuf == SO_RCVBUF) {
+         rc = getsockopt( inSock, SOL_SOCKET, SO_RCVBUF,
+-                         (char*) &theTCPWin, &len );
++                         (char*) &bufsize, &len );
+     }
++#endif
+     if ( rc < 0 ) {
+         return rc;
+     }
+ 
+-#endif
+ 
+-    return theTCPWin;
+-} /* end getsock_tcp_windowsize */
++
++    return bufsize;
++} /* end getsock_buffer_size */
++
+ 
+ #ifdef __cplusplus
+ } /* end extern "C" */
