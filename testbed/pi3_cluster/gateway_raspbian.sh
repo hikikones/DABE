@@ -46,8 +46,8 @@ nano /etc/network/interfaces
 echo 'net.ipv4.ip_forward=1' >> /etc/sysctl.conf
 
 # NAT
-sudo update-alternatives --set iptables /usr/sbin/iptables-legacy
-sudo iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+update-alternatives --set iptables /usr/sbin/iptables-legacy
+iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
 
 ##################
 ## TEACUP Setup
@@ -80,6 +80,9 @@ tar -xf teacup-1.1.tar.gz
 # cp teacup-1.1/example_configs/config-scenario1.py experiment/config.py
 # cp teacup-1.1/run.sh experiment/
 # cp teacup-1.1/fabfile.py experiment/
+
+# fab run_experiment_single
+# fab run_experiment_multiple
 
 ##################
 ## TCP Setup
