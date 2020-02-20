@@ -2,10 +2,14 @@
 
 This chapter presents the background theory for which this thesis is based upon.
 
+\todo{improve introduction to chapter...}
+
 
 \section{Network Delay and Latency}
 
-The time it takes for a bit of data to travel across the network from one communication endpoint to another is known as \textit{delay}. The process for such a transmission involves many components. Let us demonstrate with a typical example where the data traverses an intermediate device before reaching destination. First, the data to be sent is usually created by an application. The data will then be handed over to the \gls{os} which passes it to a network card. From there, the data will be encoded and transmitted over a physical medium and eventually received by an intermediate device, such as a router. The router will then analyze the data and retransmit it over another medium that points to the destination. Finally, the data reaches the receiver. The whole process can happen in either multiples or fractions of seconds.
+The time it takes for a bit of data to travel across the network from one communication endpoint to another is known as \textit{delay}. The process for such a transmission involves many components. A typical example where the data traverses an intermediate device before reaching destination follows. First, the data to be sent is usually created by an application. The data will then be handed over to the \gls{os} which passes it to a network card. From there, the data will be encoded and transmitted over a physical medium and eventually received by an intermediate device, such as a router. The router will then analyze the data and retransmit it over another medium that points to the destination. Finally, the data reaches the receiver. The whole process can happen in either multiples or fractions of seconds.
+
+\todo{maybe show a picture of the typical example}
 
 Network delay is therefore divided into the following four parts:
 
@@ -16,31 +20,53 @@ Network delay is therefore divided into the following four parts:
     \item Propagation delay – time for a signal to reach its destination
 \end{itemize}
 
-It is common to notify the sender that the receiver actually got the data. This is done by sending a signal from the receiver to the sender, known as an \gls{ack}. The total time it takes for a sender to send data \textit{and} receive back an \gls{ack} is known as \textit{latency} or \textit{rtt}.
+It is common to notify the sender that the receiver actually got the data. This is done by sending a signal from the receiver to the sender, known as an \gls{ack}. The total time it takes for a sender to send data \textit{and} receive back an \gls{ack} is known as \textit{latency} or \gls{rtt}.
 
 In this thesis, we are mainly concerned with the \textit{queuing} delay part.
 
-\section{Bufferbloat}
+% \section{Bufferbloat}
 
-A common cause of latency in packet switched networks is bufferbloat. It occurs when a router, with a large buffer gets congested. the tcp \gls{cc} will fill up the entire buffer, before it starts backing off. Packets become queued for a long period of time, untill the buffer is drained, \gls{cc} resets and TCP connection ramps back up to speed to fill the buffer again.
+% A common cause of latency in packet switched networks is bufferbloat. It occurs when a router, with a large buffer gets congested. the tcp \gls{cc} will fill up the entire buffer, before it starts backing off. Packets become queued for a long period of time, untill the buffer is drained, \gls{cc} resets and TCP connection ramps back up to speed to fill the buffer again.
 
-This causes high and variable latency, in addition to "blocking" the bottleneck for other flows when the buffer is full and packets are droped. Several technical solutions exists, that try to solve the problem of bufferbloat and we will outline some of them  in this section.
-
-\section{Network Congestion}
-
-\todo{write about congestion...}
+% This causes high and variable latency, in addition to "blocking" the bottleneck for other flows when the buffer is full and packets are droped. Several technical solutions exists, that try to solve the problem of bufferbloat and we will outline some of them  in this section.
 
 \section{Transmission Control Protocol}
 
-\gls{tcp} is the one of the main protocols for transmitting data on the internet. It is a connection based, reliable protocoll and is used by for instance World Wide Web (WWW), email, File Transfer Protocoll (FTP) and streaming media. \gls{tcp} requires that the sender and reciever establishes a connection through a three-way handshake before transmission starts. All segments sent have a sequence number, and the reciver sends an \gls{ack} for every segment it recieves. This, in addition to retransmission and error-checking ensures reliable transfer, but also lengthens latency.
+Whenever a user sends an email, or any data over the network for that matter, one should expect some kind of assurance that the delivery of the data was successful. This notion is known as \textit{reliability}, and is one of the key components of the \gls{tcp} and why it is one of the main protocols for transmitting data on the Internet. In essence, \gls{tcp} provides reliable, ordered, and error-checked delivery of data between applications such as \gls{www}, email and file transfer.
+
+\todo{write a bit more about tcp in general such a connection managent and flow control}
+
+% Today, most online web services \todo{citation} are based on transmissions from the \gls{tcp}.
+
+
+
+% \gls{tcp} is the one of the main protocols for transmitting data on the internet. It is a connection based, reliable protocoll and is used by for instance World Wide Web (WWW), email, File Transfer Protocoll (FTP) and streaming media. \gls{tcp} requires that the sender and reciever establishes a connection through a three-way handshake before transmission starts. All segments sent have a sequence number, and the reciver sends an \gls{ack} for every segment it recieves. This, in addition to retransmission and error-checking ensures reliable transfer, but also lengthens latency.
+
+\subsection{Network Congestion}
+
+In the same sense that traffic on the road can come to a halt, the same is true for traffic on a network. This is known as \textit{congestion}, and is usually caused by overutilization. That is, network devices such as a router have finite resources, and thus too much traffic will cause the device to carry more data than it can handle which leads to congestion on the network. Typical effects include queueing delay, packet loss or the blocking of new connections.
+
+\todo{show image illustrating congestion}
+
+\todo{write more about general network congestion...}
 
 \subsection{Congestion Control}
 
-To help reduce congestion on the links \gls{tcp} maintains a \gls{cwnd}, which limits the total number of unacknowledged packets that it can send at a time. This is  done in multiple fases.
+Another key compononent of the \gls{tcp} is the ability to either prevent congestion or mitigate it after it occurs, known simply as \gls{cc}. The means of applying \gls{cc} is simple; ensure that the sender does not overflow the network. In other words, the sender's rate needs to be adjusted based on the condition of the network. Now to the hard part; how to adjust it?
 
-In the slow start fase,  right after a connection is established. the congestion window starts as a small multiple of \gls{mss} and is effectivley doubled for every \gls{rtt}. When it reaches the slow-start threshold(ssthresh), \gls{cwnd} is reduced by half and a new fase starts, congestion avoidance. In this fase \gls{cwnd} is increased linearly by one \gls{mss} every \gls{rtt}. If loss occurs, it could mean there is congestion, and steps will be taken to reduce load on the network. The steps depend on what exact congestion avoidance algorithm is used.
+To answer this question, the \gls{tcp} includes a state variable called \gls{cwnd} which controls the amount of data that a sender can send before receiving an \gls{ack}.
+
+\todo{todo}
+
+% To help reduce congestion on the links \gls{tcp} maintains a \gls{cwnd}, which limits the total number of unacknowledged packets that it can send at a time. This is done in multiple fases.
+
+% In the slow start fase,  right after a connection is established. the congestion window starts as a small multiple of \gls{mss} and is effectivley doubled for every \gls{rtt}. When it reaches the slow-start threshold(ssthresh), \gls{cwnd} is reduced by half and a new fase starts, congestion avoidance. In this fase \gls{cwnd} is increased linearly by one \gls{mss} every \gls{rtt}. If loss occurs, it could mean there is congestion, and steps will be taken to reduce load on the network. The steps depend on what exact congestion avoidance algorithm is used.
+
+
 
 \section{Active Queue Management}
+
+
 
 \section{Explicit Congestion Notification}
 
