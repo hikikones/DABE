@@ -50,6 +50,12 @@ update-alternatives --set iptables /usr/sbin/iptables-legacy
 iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
 
 ##################
+## Time
+##################
+
+timedatectl set-timezone Europe/Oslo
+
+##################
 ## TEACUP Setup
 ##################
 

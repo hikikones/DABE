@@ -34,10 +34,8 @@ echo 'defaultrouter="10.0.0.254"' >> /etc/rc.conf
 echo 'ifconfig_ue0_alias0="inet 192.168.10.1 netmask 255.255.255.0"' >> /etc/rc.conf
 echo 'ifconfig_ue0_alias1="inet 192.168.20.1 netmask 255.255.255.0"' >> /etc/rc.conf
 
-#static routes for testnetwork
-static_routes="net1 net2"
-route_net1="-net 192.168.10.0/24 192.168.10.1"
-route_net2="-net 192.168.20.0/24 192.168.20.1"
+# Enable IP forwarding
+echo 'gateway_enable="YES"' >> /etc/rc.conf
 
 
 ##################
