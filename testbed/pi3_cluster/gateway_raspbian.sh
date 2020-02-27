@@ -48,6 +48,7 @@ echo 'net.ipv4.ip_forward=1' >> /etc/sysctl.conf
 # NAT
 update-alternatives --set iptables /usr/sbin/iptables-legacy
 iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+apt install iptables-persistent #to save rules
 
 ##################
 ## TEACUP Setup
