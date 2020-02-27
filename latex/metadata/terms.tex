@@ -11,7 +11,15 @@
     name={World Wide Web (WWW)},
     first={World Wide Web (WWW)},
     text={WWW},
-    description={Commonly known as the Web. It is an information system in the form of a collection of webpages that web browsers can read and interact with.}
+    description={Commonly known as the Web; an information system in the form of webpages that web browsers can read and interact with.}
+}
+
+\newglossaryentry{aimd}
+{
+    name={Additive-increase/Multiplicative-decrease (AIMD)},
+    first={additive-increase/multiplicative-decrease (AIMD)},
+    text={AIMD},
+    description={A feedback control algorithm best known for its use in TCP congestion control. AIMD combines linear growth of the congestion window with an exponential reduction when congestion is detected.}
 }
 
 \newglossaryentry{cwnd}
@@ -19,7 +27,15 @@
     name={Congestion Window (CWND)},
     first={Congestion Window (CWND)},
     text={CWND},
-    description={A TCP state variable that limits the amount of data the TCP can send into the network before receiving an ACK.}
+    description={A TCP state variable that limits the amount of data the sender can send into the network before receiving an ACK.}
+}
+
+\newglossaryentry{rwnd}
+{
+    name={Receiver Window (RWND)},
+    first={Receiver Window (RWND)},
+    text={RWND},
+    description={A TCP state variable that advertises the amount of data that the receiver can receive.}
 }
 
 \newglossaryentry{mss}
@@ -41,7 +57,7 @@
 \newglossaryentry{ack}
 {
     name={Acknowledgement (ACK)},
-    first={Acknowledgement (ACK)},
+    first={acknowledgement (ACK)},
     text={ACK},
     description={A signal that is passed between communicating processes, computers, or devices to signify acknowledgement, or receipt of message, as part of a communications protocol.}
 }
@@ -52,6 +68,14 @@
     first={Congestion Control (CC)},
     text={CC},
     description={The process of managing the sender's packet rate to not overwhelm the network.}
+}
+
+\newglossaryentry{ssthresh}
+{
+    name={Slow start threshold (ssthresh)},
+    first={slow start threshold (ssthresh)},
+    text={ssthresh},
+    description={A TCP state variable used to determine whether the slow start or congestion avoidance algorithm is used to control data transmission.}
 }
 
 \newglossaryentry{ecn}
