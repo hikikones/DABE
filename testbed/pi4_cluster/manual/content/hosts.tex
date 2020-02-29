@@ -1,0 +1,50 @@
+\chapter{Hosts}
+
+\todo{briefly explain section content}
+
+\section{Preliminaries}
+
+Before you begin, make sure the following have been done:
+
+\begin{itemize}
+    \item Install an \gls{os} as specified in \ref{install_os}.
+    \item Change keyboard layout as specified in \ref{keyboard_layout}.
+    \item Create a root user account as specified in \ref{root_account}.
+    \item Update the system as specified in \ref{update_system}.
+    \item Enable SSH as specified in \ref{enable_ssh}.
+\end{itemize}
+
+The rest of the section will assume \lstinline{root} access and that the \gls{os} from \ref{install_os} is used.
+
+
+\section{Network}
+
+The hosts are separated into two subnets. Hosts 2, 3 and 4 are on the network \lstinline{192.168.10.0/24} (VLAN10), while hosts 5, 6 and 7 are on \lstinline{192.168.20.0/24} (VLAN20). The main interface on each host is statically connected to the controller network, with an additional virtual interface statically connected to the experimental network. To set up each host, add the following to the \lstinline{/etc/network/interfaces} file, but replace \lstinline{yy} with the appropriate \gls{vlan} and \lstinline{x} with the correct host number as illustrated in \ref{topology}:
+
+\begin{lstlisting}
+# Main interface (controller-network)
+auto eth0
+iface eth0 inet static
+address 10.0.0.x
+netmask 255.255.255.0
+gateway 10.0.0.254
+
+# Subinterface (experiment-network)
+auto eth0:yy
+iface eth0:yy inet static
+address 192.168.yy.x
+netmask 255.255.255.0
+gateway 192.168.yy.1
+\end{lstlisting}
+
+Finally, change the hostname to \lstinline{pihostX} as specified in \ref{change_hostname} but replace \lstinline{X} with the correct host number, and then reboot to apply all network changes.
+
+
+\section{Web10g}
+
+\todo{show how to compile web10g for Pi4}
+
+
+\section{TEACUP}
+
+\todo{show all tools needed on the hosts for TEACUP to work properly}

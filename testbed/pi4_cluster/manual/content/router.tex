@@ -1,0 +1,64 @@
+\chapter{Router}
+
+\todo{briefly explain section content}
+
+\section{Preliminaries}
+
+Before you begin, make sure the following have been done:
+
+\begin{itemize}
+    \item Install an \gls{os} as specified in \ref{install_os}.
+    \item Change keyboard layout as specified in \ref{keyboard_layout}.
+    \item Create a root user account as specified in \ref{root_account}.
+    \item Update the system as specified in \ref{update_system}.
+    \item Enable SSH as specified in \ref{enable_ssh}.
+\end{itemize}
+
+The rest of the section will assume \lstinline{root} access and that the \gls{os} from \ref{install_os} is used.
+
+
+\section{Network}
+
+The router serves as the intermediate device for the hosts in order to conduct more realistic experiments. The main interface is statically connected to the controller network, with additionally two virtual interfaces that function as the default gateway for the two separate subnets that the hosts reside in. To set the router up as such, add the following to the \lstinline{/etc/network/interfaces} file:
+
+\begin{lstlisting}
+# Main interface (controller-network)
+auto eth0
+iface eth0 inet static
+address 10.0.0.1
+netmask 255.255.255.0
+gateway 10.0.0.254
+
+# Subinterface for VLAN 10 (experiment-network)
+auto eth0:10
+iface eth0:10 inet static
+address 192.168.10.1
+netmask 255.255.255.0
+gateway 10.0.0.254
+
+# Subinterface for VLAN 20 (experiment-network)
+auto eth0:20
+iface eth0:20 inet static
+address 192.168.20.1
+netmask 255.255.255.0
+gateway 10.0.0.254
+\end{lstlisting}
+
+In order for the hosts to communicate through the router, IP forwarding must be enabled:
+
+\begin{lstlisting}
+# Enable IP forwarding
+echo 'net.ipv4.ip_forward=1' >> /etc/sysctl.conf
+\end{lstlisting}
+
+Finally, change the hostname to \lstinline{pirouter} as specified in \ref{change_hostname} and reboot to apply all network changes.
+
+
+\section{TEACUP}
+
+The router only needs one tool for TEACUP to work properly when controlled from the gateway, and that is \lstinline{tcpdump}:
+
+\begin{lstlisting}
+# TEACUP tools on router
+apt install -y tcpdump
+\end{lstlisting}

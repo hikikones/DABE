@@ -1,0 +1,103 @@
+\chapter{Gateway}
+
+\todo{briefly explain section content}
+
+\section{Preliminaries}
+
+Before you begin, make sure the following have been done:
+
+\begin{itemize}
+    \item Install an \gls{os} as specified in \ref{install_os}.
+    \item Change keyboard layout as specified in \ref{keyboard_layout}.
+    \item Create a root user account as specified in \ref{root_account}.
+    \item Update the system as specified in \ref{update_system}.
+    \item Enable SSH as specified in \ref{enable_ssh}.
+\end{itemize}
+
+The rest of the section will assume \lstinline{root} access and that the \gls{os} from \ref{install_os} is used.
+
+
+\section{Network}
+
+The gateway is the only machine with direct Internet access through \gls{dhcp} on its main interface, with a virtual interface statically connected to the private controller network in order to communicate with the rest of the machines. To set up this, add the following to the \lstinline{/etc/network/interfaces} file:
+
+\begin{lstlisting}
+# Main interface (Internet access)
+auto eth0
+iface eth0 inet dhcp
+
+# Subinterface (controller-network)
+auto eth0:1
+iface eth0:1 inet static
+address 10.10.10.254
+netmask 255.255.255.0
+\end{lstlisting}
+
+In order for the machines on the internal network to gain Internet access through the gateway, both IP forwarding and \gls{nat} must be set up:
+
+\begin{lstlisting}
+# Enable IP forwarding
+echo 'net.ipv4.ip_forward=1' >> /etc/sysctl.conf
+
+# NAT
+update-alternatives --set iptables /usr/sbin/iptables-legacy
+iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+apt install iptables-persistent
+\end{lstlisting}
+
+Finally, change the hostname to \lstinline{pigate} as specified in \ref{change_hostname} and reboot to apply all network changes.
+
+\todo{ssh login without password}
+
+
+\section{TEACUP}
+
+TEACUP requires a bunch of tools in order to function properly, as noted from the \href{http://caia.swin.edu.au/tools/teacup/TEACUP-0.9_INSTALL.txt}{install} guide. The following commands will install TEACUP properly:
+
+\begin{lstlisting}
+# R
+apt install -y r-base
+
+# PDFJAM
+apt install -y texlive-extra-utils
+
+# SPP
+apt install -y mercurial libpcap-dev build-essential
+hg clone https://bitbucket.org/caia-swin/spp
+cd spp
+make
+mkdir /usr/local/man/man1
+make install
+cd ..
+
+# Fabric
+apt install -y fabric python-pip python-dev libffi-dev libssl-dev
+pip install fabric3
+pip install -Iv pexpect==3.2
+
+# TEACUP
+wget https://sourceforge.net/projects/teacup/files/teacup-1.1.tar.gz
+tar -xf teacup-1.1.tar.gz
+\end{lstlisting}
+
+To verify that TEACUP has been properly installed, a simple check can be done as follows:
+
+\begin{lstlisting}
+mkdir experiment
+cp teacup-1.1/example_configs/config-scenario1.py experiment/config.py
+cp teacup-1.1/run.sh experiment/
+cp teacup-1.1/fabfile.py experiment/
+\end{lstlisting}
+
+Go into the \lstinline{experiment} folder and prepare to edit the \lstinline{config.py} file. Find the line containing \lstinline{TPCONF_script_path = '/home/teacup/teacup-0.8'} and change the \lstinline{path} to where you extracted \lstinline{teacup-1.1}. Finally, verify TEACUP installation with the command \lstinline{fab check_config}. If no errors appear, all is good.
+
+
+\subsection{Modification}
+
+Due to the restricted physical set up as explained in \ref{pi4cluster} and \ref{topology}, virtual interfaces have been used extensively. \todo{explain why tcpdump doesn't like this}
+
+A slight adjustment to TEACUP was therefore necessary.
+
+\todo{show the teacup tcpdump unique name modification}
+
+\todo{completed experiments must be analysed on an x86 computer since the tool spp shits the bed on ARM}
