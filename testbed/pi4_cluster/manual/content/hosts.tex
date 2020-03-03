@@ -37,7 +37,7 @@ netmask 255.255.255.0
 gateway 192.168.yy.1
 \end{lstlisting}
 
-In order for the hosts to communicate with each from each subnet, a static route must be added. Create a file in \lstinline{/etc/network/if-up.d/} called simply \lstinline{route}, and add the following:
+In order for the hosts to communicate between each subnet, a static route must be added. Create a file in \lstinline{/etc/network/if-up.d/} called simply \lstinline{route}, and add the following:
 
 \begin{lstlisting}
 #!/bin/sh
