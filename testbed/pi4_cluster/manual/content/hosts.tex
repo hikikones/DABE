@@ -37,8 +37,21 @@ netmask 255.255.255.0
 gateway 192.168.yy.1
 \end{lstlisting}
 
+In order for the hosts to communicate with each from each subnet, a static route must be added. Create a file in \lstinline{/etc/network/if-up.d/} called simply \lstinline{route}, and add the following:
+
+\begin{lstlisting}
+#!/bin/sh
+ip route add 192.168.yy.0/24 via 192.168.xx.1
+\end{lstlisting}
+
+Replace \lstinline{yy} with the destination \gls{vlan} and \lstinline{xx} with the source \gls{vlan}. For this script to be executed upon reboot, make it executable with the command \lstinline{chmod +x /etc/network/if-up.d/route}.
+
 Finally, change the hostname to \lstinline{pihostX} as specified in \ref{change_hostname} but replace \lstinline{X} with the correct host number, and then reboot to apply all network changes.
 
+
+\section{NTP Client}
+
+To synchronizate time for each host against the gateway, set up each host as an \gls{ntp} client as specified in \ref{time_sync}.
 
 \section{Web10g}
 

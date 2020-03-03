@@ -49,47 +49,31 @@ There are two files that needs to be edited in order to change hostname. First, 
 
 Reboot to apply the changes.
 
-% \section{Setting Up Dual Boot}
 
-% First install Ubuntu. When asked for partitioning the disk, choose \lstinline{manual}, select the disk and confirm creating a new empty partition with \lstinline{yes}. Select the newly created empty partition followed by \lstinline{create a new partition} and set a size for it. The type should be of \lstinline{primary}, location at \lstinline{beginning} and mounting point \lstinline{root}. Finish off with \lstinline{done setting up the partition} followed by \lstinline{finish partitioning and write changes to disk}.
+\section{Time Synchronization} \label{time_sync}
 
-% % \begin{figure}[H]
-% %     \centering
-% %     \includegraphics[width=0.75\linewidth]{ubuntu_partition}
-% %     \captionsetup{width=0.75\linewidth}
-% %     \caption{The partition editor for Ubuntu.}
-% %     \label{fig:ubuntu_partition}
-% % \end{figure}
+First, set up a common timezone on all machines with \lstinline{timedatectl set-timezone CET}.
 
-% Next, install FreeBSD. When asked for partitioning the disk, choose \lstinline{auto (UFS)} followed by \lstinline{partition}. Set a size, hit \lstinline{ok} and \lstinline{finish}.
+\subsubsection{NTP Server}
 
-% % \begin{figure}[H]
-% %     \centering
-% %     \includegraphics[width=0.75\linewidth]{freebsd_partition}
-% %     \captionsetup{width=0.75\linewidth}
-% %     \caption{The partition editor for FreeBSD.}
-% %     \label{fig:freebsd_partition}
-% % \end{figure}
+Install \lstinline{ntp} with \lstinline{apt install ntp}. Then check if any \gls{ntp} peers are connected with \lstinline{ntpq -p}. If not, consider replacing the default pools or servers in \lstinline{/etc/ntp.conf} with another, such as \lstinline{server ntp.uio.no} followed up by \lstinline{systemctl restart ntp}.
 
-% After installing both systems, only Ubuntu is presented in the \gls{grub}. To add FreeBSD as an option, run \lstinline{sudo nano /etc/grub.d/40_custom} in Ubuntu, and add the following entry:
+\subsubsection{NTP Client}
 
-% \begin{lstlisting}
-% menuentry "FreeBSD" {
-%     insmod ufs2
-%     set root=(hd0,2)
-%     kfreebsd /boot/loader
-% }
-% \end{lstlisting}
+To automatically query for time from the \gls{ntp} server, the Raspbian Buster \gls{os} already comes with a lightweight daemon called \lstinline{systemd-timesyncd} that allows for synchronizing the system clock across the network. To specify which server to get the time from, prepare to edit the \lstinline{/etc/systemd/timesyncd.conf} file. Uncomment the \lstinline{#NTP=} line, and add \lstinline{10.0.0.254} to it, which is the gateway.
 
-% Then update \gls{grub} with \lstinline{sudo update-grub}. The FreeBSD option should now be available when rebooting. If the bootloader won't display, hold the \lstinline{RIGHT SHIFT} key upon booting.
+Next, to enable and start the daemon, simply run \lstinline{timedatectl set-ntp true}. Finally, either wait a bit or simply reboot, and verify time synchronization with either \lstinline{timedatectl timesync-status} or \lstinline{date}.
 
-% To enable a one-time reboot into FreeBSD from Ubuntu, run the command \lstinline{grub-editenv /boot/grub/grubenv set next_entry="FreeBSD"} and reboot with \lstinline{sudo reboot}.
+%To automatically query for time from the \gls{ntp} server, install \lstinline{ntp} with \lstinline{apt install ntp}. To specify which server to get the time from, prepare to edit the \lstinline{/etc/ntp.conf} file. Comment out the default pools, and add the entry \lstinline{server 10.0.0.254} instead which is the gateway.
 
+% Next, disable the \lstinline{systemd-timesyncd} with \lstinline{timedatectl set-ntp off} as we are using \lstinline{ntp} to update the time. Finally, restart the service with \lstinline{systemctl restart ntp}. Wait a bit, and verify time synchronization with either \lstinline{ntpq -p} or simply \lstinline{date}.
 
+%%%% FREEBSD TIME SYNC
+% echo 'ntpd_enable=YES' >> /etc/rc.conf
+% echo 'ntpd_sync_on_start=YES' >> /etc/rc.conf
+% echo 'ntpdate_hosts="10.0.1.254"' >> /etc/rc.conf
+%%%%
 
-
-
-% \section{Compiling Mainline Kernel 5.5 for Raspberry Pi 4}
-
-
-% \section{Patching web10g on Mainline Kernel 5.5}
+%%%% FREEBSD TIMEZONE
+% tzsetup CET
+%%%%

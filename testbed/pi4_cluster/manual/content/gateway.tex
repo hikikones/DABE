@@ -50,6 +50,11 @@ Finally, change the hostname to \lstinline{pigate} as specified in \ref{change_h
 \todo{ssh login without password}
 
 
+\section{NTP Server}
+
+TEACUP requires that time is synchronized on all machines when running experiments. In order for the internal machines to synchronize their clock, an \gls{ntp} server must be set up. The gateway will provide this service, and is set up as specified in \ref{time_sync}.
+
+
 \section{TEACUP}
 
 TEACUP requires a bunch of tools in order to function properly, as noted from the \href{http://caia.swin.edu.au/tools/teacup/TEACUP-0.9_INSTALL.txt}{install} guide. The following commands will install TEACUP properly:
