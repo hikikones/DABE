@@ -31,8 +31,8 @@
 \usepackage{titlesec}
 \titleformat{\chapter}[display]
 {\centering} % Common format
-{\chaptertitlename \, \Large \thechapter} % Label
-{0.5ex} % Vertical separation
+{} % Label
+{0cm} % Vertical separation
 {\bfseries\Huge} % Title
 [] % After
 \titlespacing*{\chapter}{0pt}{-20pt}{40pt} % Margins
@@ -54,7 +54,7 @@
 }
 
 % Image support
-\usepackage{graphicx, float}
+\usepackage{graphicx, wrapfig, float}
 \usepackage[font=small,labelfont=bf]{caption}
 \graphicspath{{images/}}
 
@@ -75,12 +75,13 @@
 	captionpos=b,
 	breakatwhitespace=false,
 	mathescape=true,
+	keepspaces=true,
 	showspaces=false,
 	showstringspaces=false,
-	numbers=left,
+	numbers=none,
 	numbersep=10pt,
-	showtabs=false,
-	tabsize=2,
+	showtabs=true,
+	tabsize=4,
 	breaklines=true
 }
 

@@ -51,6 +51,12 @@ iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
 apt install iptables-persistent #to save rules
 
 ##################
+## Time
+##################
+
+timedatectl set-timezone Europe/Oslo
+
+##################
 ## TEACUP Setup
 ##################
 

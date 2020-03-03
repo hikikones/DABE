@@ -1,0 +1,100 @@
+%----------------------------------------------------------------------------------------
+%	PACKAGES AND OTHER DOCUMENT CONFIGURATIONS
+%----------------------------------------------------------------------------------------
+
+\documentclass[11pt]{report}
+
+% Redefine margins
+\usepackage[
+	left=2cm,
+	right=2cm,
+	top=2.54cm,
+	bottom=2.54cm]
+	{geometry}
+
+% New lines, no indent
+\usepackage[parfill]{parskip}
+
+% Encoding of international characters
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[english]{babel}
+\usepackage{csquotes}
+
+% Palatino font
+\usepackage{mathpazo}
+%\usepackage{ebgaramond}
+%\usepackage{kpfonts}
+%\usepackage{librecaslon}
+
+% Custom chapter title
+\usepackage{titlesec}
+\titleformat{\chapter}[display]
+{\centering} % Common format
+{\chaptertitlename \, \Large \thechapter} % Label
+{0.5ex} % Vertical separation
+{\bfseries\Huge} % Title
+[] % After
+\titlespacing*{\chapter}{0pt}{-20pt}{40pt} % Margins
+
+% Two-column table of contents
+\usepackage[toc]{multitoc}
+\renewcommand*{\multicolumntoc}{2}
+\setlength{\columnseprule}{0.5pt}
+\setlength{\columnsep}{1cm}
+
+% Hyperlinks
+\usepackage{hyperref}
+\usepackage[dvipsnames]{xcolor}
+\hypersetup{
+    colorlinks=true,
+    linkcolor={NavyBlue},
+	urlcolor={NavyBlue},
+	citecolor={Maroon}
+}
+
+% Image support
+\usepackage{graphicx, wrapfig, float}
+\usepackage[font=small,labelfont=bf]{caption}
+\graphicspath{{images/}}
+
+% Syntax highlighting
+\usepackage{listings}
+\definecolor{LightGray}{gray}{0.95}
+\lstset{
+	backgroundcolor=\color{LightGray},
+	commentstyle=\color{OliveGreen},
+	rulecolor=\color{Black},
+	stringstyle=\color{BrickRed},
+	basicstyle=\footnotesize,
+	language=C,
+	columns=fullflexible,
+	frame=tlbr,
+	framesep=5pt,
+	framerule=0pt,
+	captionpos=b,
+	breakatwhitespace=false,
+	mathescape=true,
+	keepspaces=true,
+	showspaces=false,
+	showstringspaces=false,
+	numbers=left,
+	numbersep=10pt,
+	showtabs=true,
+	tabsize=4,
+	breaklines=true
+}
+
+% Glossaries, acronyms etc
+\usepackage[nopostdot,toc,acronym,nomain,nonumberlist]{glossaries}
+\makeglossaries
+\loadglsentries{metadata/terms}
+\renewcommand*{\glstextformat}[1]{\textcolor{Brown}{#1}}
+
+% Bibliography
+\usepackage[backend=biber,style=numeric]{biblatex}
+\addbibresource{metadata/refs.bib}
+
+% TODO macro
+\newcommand{\todo}[1]{}
+\renewcommand{\todo}[1]{{\color{red} TODO: {#1}}}
