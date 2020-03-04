@@ -5,7 +5,7 @@
 To use the Raspberry Pi, an \gls{os} first needs to installed. \href{https://www.raspberrypi.org/downloads/raspbian/}{Raspbian Buster Lite} is the official \gls{os} for Raspberry Pi 4, and is used on every machine in the cluster.
 
 
-After downloading the \gls{os}, uncompress the file. The extracted file should be of type \lstinline{.img}, containing a preinstalled Raspbian Buster \gls{os} that now must be written to the SD card. To write the image file to the SD card, several tools exists that can be used, with some examples as follows:
+After downloading the \gls{os}, uncompress the file. The extracted file should be of type \lstinline{.img}, containing a preinstalled Raspbian Buster \gls{os} that now must be written to the SD card. To write the image file to the SD card, several tools exists that can be used, with some examples following:
 
 \begin{itemize}
     \item balenaEtcher (cross-platform)
@@ -49,47 +49,19 @@ There are two files that needs to be edited in order to change hostname. First, 
 
 Reboot to apply the changes.
 
-% \section{Setting Up Dual Boot}
 
-% First install Ubuntu. When asked for partitioning the disk, choose \lstinline{manual}, select the disk and confirm creating a new empty partition with \lstinline{yes}. Select the newly created empty partition followed by \lstinline{create a new partition} and set a size for it. The type should be of \lstinline{primary}, location at \lstinline{beginning} and mounting point \lstinline{root}. Finish off with \lstinline{done setting up the partition} followed by \lstinline{finish partitioning and write changes to disk}.
+\section{Time Synchronization} \label{time_sync}
 
-% % \begin{figure}[H]
-% %     \centering
-% %     \includegraphics[width=0.75\linewidth]{ubuntu_partition}
-% %     \captionsetup{width=0.75\linewidth}
-% %     \caption{The partition editor for Ubuntu.}
-% %     \label{fig:ubuntu_partition}
-% % \end{figure}
+First, set up a common timezone on all machines with \lstinline{timedatectl set-timezone CET}.
 
-% Next, install FreeBSD. When asked for partitioning the disk, choose \lstinline{auto (UFS)} followed by \lstinline{partition}. Set a size, hit \lstinline{ok} and \lstinline{finish}.
+\subsubsection{NTP Server}
 
-% % \begin{figure}[H]
-% %     \centering
-% %     \includegraphics[width=0.75\linewidth]{freebsd_partition}
-% %     \captionsetup{width=0.75\linewidth}
-% %     \caption{The partition editor for FreeBSD.}
-% %     \label{fig:freebsd_partition}
-% % \end{figure}
+Install \lstinline{ntp} with \lstinline{apt install ntp}. Then check if any \gls{ntp} peers are connected with \lstinline{ntpq -p}. If not, consider replacing the default pools or servers in \lstinline{/etc/ntp.conf} with another, such as \lstinline{server ntp.uio.no} followed up by \lstinline{systemctl restart ntp}.
 
-% After installing both systems, only Ubuntu is presented in the \gls{grub}. To add FreeBSD as an option, run \lstinline{sudo nano /etc/grub.d/40_custom} in Ubuntu, and add the following entry:
+\subsubsection{NTP Client}
 
-% \begin{lstlisting}
-% menuentry "FreeBSD" {
-%     insmod ufs2
-%     set root=(hd0,2)
-%     kfreebsd /boot/loader
-% }
-% \end{lstlisting}
+To automatically query for time from the \gls{ntp} server, the Raspbian Buster \gls{os} already comes with a lightweight daemon called \lstinline{systemd-timesyncd} that allows for synchronizing the system clock across the network. However, TEACUP prefers to use \lstinline{ntp} instead, and so \lstinline{ntp} will be used.
 
-% Then update \gls{grub} with \lstinline{sudo update-grub}. The FreeBSD option should now be available when rebooting. If the bootloader won't display, hold the \lstinline{RIGHT SHIFT} key upon booting.
+Install \lstinline{ntp} with \lstinline{apt install ntp}. To specify which server to get the time from, prepare to edit the \lstinline{/etc/ntp.conf} file. Comment out the default pools, and add the entry \lstinline{server 10.0.0.254 iburst} which refers to the gateway.
 
-% To enable a one-time reboot into FreeBSD from Ubuntu, run the command \lstinline{grub-editenv /boot/grub/grubenv set next_entry="FreeBSD"} and reboot with \lstinline{sudo reboot}.
-
-
-
-
-
-% \section{Compiling Mainline Kernel 5.5 for Raspberry Pi 4}
-
-
-% \section{Patching web10g on Mainline Kernel 5.5}
+Next, disable the \lstinline{systemd-timesyncd} with \lstinline{timedatectl set-ntp false} as we are using \lstinline{ntp} directly to update the time. Finally, either restart the service with \lstinline{systemctl restart ntp} or reboot. Wait a bit, and verify time synchronization with either \lstinline{ntpq -p} or simply \lstinline{date}.

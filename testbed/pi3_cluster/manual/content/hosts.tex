@@ -1,0 +1,53 @@
+\chapter{Hosts}
+
+\todo{briefly explain section content}
+
+\section{Preliminaries}
+
+Before you begin, make sure the following have been done:
+
+\begin{itemize}
+    \item Install FreeBSD \gls{os} as specified in \ref{install_os}.
+    \item Change keyboard layout as specified in \ref{keyboard_layout}.
+    \item Create a root user account as specified in \ref{root_account}.
+    \item Update the system as specified in \ref{update_system}.
+    \item Enable SSH as specified in \ref{enable_ssh}.
+\end{itemize}
+
+The rest of the section will assume \lstinline{root} access and that FreeBSD \gls{os} from \ref{install_os} is used.
+
+
+\section{Network}
+
+The hosts are separated into two subnets. Hosts 2, 3 and 4 are on the network \lstinline{172.16.10.0/24} (VLAN 10), while hosts 5, 6 and 7 are on \lstinline{172.16.20.0/24} (VLAN 20). The main interface on each host is statically connected to the controller network, with an additional virtual interface (or \textit{alias} in FreeBSD) statically connected to the experimental network. To set up each host, run the following, but replace \lstinline{yy} with the appropriate \gls{vlan} and \lstinline{x} with the correct host number as illustrated in \ref{topology}:
+
+\begin{lstlisting}
+# Main interface (controller-network)
+echo 'ifconfig_ue0="inet 10.0.1.x netmask 255.255.255.0"' >> /etc/rc.conf
+echo 'defaultrouter="10.0.1.254"' >> /etc/rc.conf
+
+# Alias (experiment-network)
+echo 'ifconfig_ue0_alias0="inet 172.16.yy.x netmask 255.255.255.0"' >> /etc/rc.conf
+\end{lstlisting}
+
+In order for the hosts to communicate between each subnet, a static route must be added. Run the following to do so:
+
+\begin{lstlisting}
+# Static route
+echo 'static_routes="intnet"' >> /etc/rc.conf
+echo 'route_intnet="-net 172.16.yy.0/24 172.16.xx.1"' >> /etc/rc.conf
+\end{lstlisting}
+
+Replace \lstinline{yy} with the destination \gls{vlan} and \lstinline{xx} with the source \gls{vlan}.
+
+Finally, change the hostname to \lstinline{pi3hostX} as specified in \ref{change_hostname} but replace \lstinline{X} with the correct host number, and then reboot to apply all network changes.
+
+
+\section{NTP Client}
+
+To synchronizate time for each host against the gateway, set up each host as an \gls{ntp} client as specified in \ref{time_sync}.
+
+
+\section{TEACUP}
+
+\todo{show all tools needed on the hosts for TEACUP to work properly}
