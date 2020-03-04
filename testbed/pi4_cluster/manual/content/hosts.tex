@@ -19,7 +19,7 @@ The rest of the section will assume \lstinline{root} access and that the \gls{os
 
 \section{Network}
 
-The hosts are separated into two subnets. Hosts 2, 3 and 4 are on the network \lstinline{192.168.10.0/24} (VLAN10), while hosts 5, 6 and 7 are on \lstinline{192.168.20.0/24} (VLAN20). The main interface on each host is statically connected to the controller network, with an additional virtual interface statically connected to the experimental network. To set up each host, add the following to the \lstinline{/etc/network/interfaces} file, but replace \lstinline{yy} with the appropriate \gls{vlan} and \lstinline{x} with the correct host number as illustrated in \ref{topology}:
+The hosts are separated into two subnets. Hosts 2, 3 and 4 are on the network \lstinline{192.168.10.0/24} (VLAN 10), while hosts 5, 6 and 7 are on \lstinline{192.168.20.0/24} (VLAN 20). The main interface on each host is statically connected to the controller network, with an additional virtual interface statically connected to the experimental network. To set up each host, add the following to the \lstinline{/etc/network/interfaces} file, but replace \lstinline{yy} with the appropriate \gls{vlan} and \lstinline{x} with the correct host number as illustrated in \ref{topology}:
 
 \begin{lstlisting}
 # Main interface (controller-network)
@@ -46,7 +46,7 @@ ip route add 192.168.yy.0/24 via 192.168.xx.1
 
 Replace \lstinline{yy} with the destination \gls{vlan} and \lstinline{xx} with the source \gls{vlan}. For this script to be executed upon reboot, make it executable with the command \lstinline{chmod +x /etc/network/if-up.d/route}.
 
-Finally, change the hostname to \lstinline{pihostX} as specified in \ref{change_hostname} but replace \lstinline{X} with the correct host number, and then reboot to apply all network changes.
+Finally, change the hostname to \lstinline{pi4hostX} as specified in \ref{change_hostname} but replace \lstinline{X} with the correct host number, and then reboot to apply all network changes.
 
 
 \section{NTP Client}

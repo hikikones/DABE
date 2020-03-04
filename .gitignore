@@ -3,7 +3,8 @@
 #############
 
 thesis.pdf
-manual.pdf
+pi3cluster_manual.pdf
+pi4cluster_manual.pdf
 
 #############
 # Vagrant

@@ -1,0 +1,39 @@
+%------------------------------------------------
+%	Preamble
+%------------------------------------------------
+
+\input{document/preamble.tex}
+
+%------------------------------------------------
+%	Contents
+%------------------------------------------------
+
+\begin{document}
+
+% Title
+\include{document/title}
+
+% Table of contents
+\tableofcontents
+\newpage
+
+% Chapters
+\pagenumbering{arabic}
+\include{content/overview}
+\include{content/zyxel}
+\include{content/gateway}
+\include{content/router}
+\include{content/hosts}
+
+% Appendix
+\appendix
+\include{content/appendix}
+
+% Terms
+\printglossary[title=Terms]
+
+% References
+%\printbibliography[title=References]
+%\addcontentsline{toc}{chapter}{References}
+
+\end{document}

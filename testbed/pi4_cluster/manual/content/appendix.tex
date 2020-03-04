@@ -5,7 +5,7 @@
 To use the Raspberry Pi, an \gls{os} first needs to installed. \href{https://www.raspberrypi.org/downloads/raspbian/}{Raspbian Buster Lite} is the official \gls{os} for Raspberry Pi 4, and is used on every machine in the cluster.
 
 
-After downloading the \gls{os}, uncompress the file. The extracted file should be of type \lstinline{.img}, containing a preinstalled Raspbian Buster \gls{os} that now must be written to the SD card. To write the image file to the SD card, several tools exists that can be used, with some examples as follows:
+After downloading the \gls{os}, uncompress the file. The extracted file should be of type \lstinline{.img}, containing a preinstalled Raspbian Buster \gls{os} that now must be written to the SD card. To write the image file to the SD card, several tools exists that can be used, with some examples following:
 
 \begin{itemize}
     \item balenaEtcher (cross-platform)
@@ -60,20 +60,8 @@ Install \lstinline{ntp} with \lstinline{apt install ntp}. Then check if any \gls
 
 \subsubsection{NTP Client}
 
-To automatically query for time from the \gls{ntp} server, the Raspbian Buster \gls{os} already comes with a lightweight daemon called \lstinline{systemd-timesyncd} that allows for synchronizing the system clock across the network. To specify which server to get the time from, prepare to edit the \lstinline{/etc/systemd/timesyncd.conf} file. Uncomment the \lstinline{#NTP=} line, and add \lstinline{10.0.0.254} to it, which is the gateway.
+To automatically query for time from the \gls{ntp} server, the Raspbian Buster \gls{os} already comes with a lightweight daemon called \lstinline{systemd-timesyncd} that allows for synchronizing the system clock across the network. However, TEACUP prefers to use \lstinline{ntp} instead, and so \lstinline{ntp} will be used.
 
-Next, to enable and start the daemon, simply run \lstinline{timedatectl set-ntp true}. Finally, either wait a bit or simply reboot, and verify time synchronization with either \lstinline{timedatectl timesync-status} or \lstinline{date}.
+Install \lstinline{ntp} with \lstinline{apt install ntp}. To specify which server to get the time from, prepare to edit the \lstinline{/etc/ntp.conf} file. Comment out the default pools, and add the entry \lstinline{server 10.0.0.254 iburst} which refers to the gateway.
 
-%To automatically query for time from the \gls{ntp} server, install \lstinline{ntp} with \lstinline{apt install ntp}. To specify which server to get the time from, prepare to edit the \lstinline{/etc/ntp.conf} file. Comment out the default pools, and add the entry \lstinline{server 10.0.0.254} instead which is the gateway.
-
-% Next, disable the \lstinline{systemd-timesyncd} with \lstinline{timedatectl set-ntp off} as we are using \lstinline{ntp} to update the time. Finally, restart the service with \lstinline{systemctl restart ntp}. Wait a bit, and verify time synchronization with either \lstinline{ntpq -p} or simply \lstinline{date}.
-
-%%%% FREEBSD TIME SYNC
-% echo 'ntpd_enable=YES' >> /etc/rc.conf
-% echo 'ntpd_sync_on_start=YES' >> /etc/rc.conf
-% echo 'ntpdate_hosts="10.0.1.254"' >> /etc/rc.conf
-%%%%
-
-%%%% FREEBSD TIMEZONE
-% tzsetup CET
-%%%%
+Next, disable the \lstinline{systemd-timesyncd} with \lstinline{timedatectl set-ntp false} as we are using \lstinline{ntp} directly to update the time. Finally, either restart the service with \lstinline{systemctl restart ntp} or reboot. Wait a bit, and verify time synchronization with either \lstinline{ntpq -p} or simply \lstinline{date}.

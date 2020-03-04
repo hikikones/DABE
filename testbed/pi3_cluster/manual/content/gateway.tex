@@ -7,14 +7,14 @@
 Before you begin, make sure the following have been done:
 
 \begin{itemize}
-    \item Install an \gls{os} as specified in \ref{install_os}.
+    \item Install Raspbian Buster \gls{os} as specified in \ref{install_os}.
     \item Change keyboard layout as specified in \ref{keyboard_layout}.
     \item Create a root user account as specified in \ref{root_account}.
     \item Update the system as specified in \ref{update_system}.
     \item Enable SSH as specified in \ref{enable_ssh}.
 \end{itemize}
 
-The rest of the section will assume \lstinline{root} access and that the \gls{os} from \ref{install_os} is used.
+The rest of the section will assume \lstinline{root} access and that Raspbian Buster \gls{os} from \ref{install_os} is used.
 
 
 \section{Network}
@@ -29,7 +29,7 @@ iface eth0 inet dhcp
 # Subinterface (controller-network)
 auto eth0:1
 iface eth0:1 inet static
-address 10.0.0.254
+address 10.0.1.254
 netmask 255.255.255.0
 \end{lstlisting}
 
