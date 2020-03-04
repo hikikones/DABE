@@ -95,3 +95,18 @@ tar -xf teacup-1.1.tar.gz
 ## TCP Setup
 ##################
 
+#####################
+## Teacup changes
+######################
+nano /home/teacup/teacup-1.1/hostsettup.py
+#LINUX
+#ctrl + w search for rmem, change 87380 to 873800 in this line
+#run('sysctl net.ipv4.tcp_rmem=\'4096 87380 6291456\'')
+#and 65535 to 655350 in this line
+#run('sysctl net.ipv4.tcp_wmem=\'4096 655350 4194304\'')
+#for some reason these default recive and send buffer values prevent cwind from
+#going over that value, so multipling by 10 solves this.
+#FREEBSD
+#QUICK HACK FOR RAISING RECV/SEND BUFFER, multiplying by 10 from default.
+#run('sysctl net.inet.tcp.recvspace=655360') 
+#run('sysctl net.inet.tcp.sendspace=327680') 
