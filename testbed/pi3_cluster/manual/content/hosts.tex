@@ -50,4 +50,40 @@ To synchronizate time for each host against the gateway, set up each host as an 
 
 \section{TEACUP}
 
-\todo{show all tools needed on the hosts for TEACUP to work properly}
+TEACUP requires four tools that must be installed on each host in order to run experiments, namely \lstinline{lighttpd},  \lstinline{iperf}, \lstinline{httperf} and \lstinline{nttcp}.
+
+\subsubsection{Lighttpd}
+
+The \lstinline{lighttpd} tool can be installed from the package repository with \lstinline{pkg install lighttpd}.
+
+\subsubsection{Iperf}
+
+TEACUP uses a modified version of \lstinline{iperf}, and so must be installed from source as follows:
+
+\begin{lstlisting}
+# Installing modified iperf on FreeBSD
+wget https://sourceforge.net/projects/iperf2/files/iperf-2.0.9.tar.gz --no-check-certificate
+tar -xf iperf-2.0.9.tar.gz
+cd iperf-2.0.9
+patch -p1 < iperf-2.0.9.patch
+./configure
+make
+make install
+\end{lstlisting}
+
+\subsubsection{Httperf}
+
+TEACUP uses a modified version of \lstinline{httperf}, but installing from source has proven unsuccessful. Thus, an unmodified version is therefore installed with \lstinline{pkg install httperf}.
+
+\subsubsection{Nttcp}
+
+TEACUP uses a modified version of \lstinline{nttcp}, and so must be installed from source as follows:
+
+\begin{lstlisting}
+# Installing modified nttcp on FreeBSD
+wget http://caia.swin.edu.au/tools/teacup/downloads/nttcp-1.47-mod.tar.gz
+tar -xf nttcp-1.47-mod.tar.gz
+cd nttcp-1.47-mod
+make
+cp nttcp /bin/
+\end{lstlisting}
