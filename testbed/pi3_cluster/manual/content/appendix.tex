@@ -103,7 +103,7 @@ Install \lstinline{ntp} with \lstinline{apt install ntp}. Then check if any \gls
 
 To automatically query for time from the \gls{ntp} server, the Raspbian Buster \gls{os} already comes with a lightweight daemon called \lstinline{systemd-timesyncd} that allows for synchronizing the system clock across the network. However, TEACUP prefers to use \lstinline{ntp} instead, and so \lstinline{ntp} will be used.
 
-Install \lstinline{ntp} with \lstinline{apt install ntp}. To specify which server to get the time from, prepare to edit the \lstinline{/etc/ntp.conf} file. Comment out the default pools, and add the entry \lstinline{server 10.0.0.254 iburst} which refers to the gateway.
+Install \lstinline{ntp} with \lstinline{apt install ntp}. To specify which server to get the time from, prepare to edit the \lstinline{/etc/ntp.conf} file. Comment out the default pools, and add the entry \lstinline{server 10.0.1.254 iburst} which refers to the gateway.
 
 Next, disable the \lstinline{systemd-timesyncd} with \lstinline{timedatectl set-ntp false} as we are using \lstinline{ntp} directly to update the time. Finally, either restart the service with \lstinline{systemctl restart ntp} or reboot. Wait a bit, and verify time synchronization with either \lstinline{ntpq -p} or simply \lstinline{date}.
 
