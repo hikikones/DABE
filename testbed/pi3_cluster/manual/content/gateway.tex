@@ -45,9 +45,7 @@ iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
 apt install iptables-persistent
 \end{lstlisting}
 
-Finally, change the hostname to \lstinline{pigate} as specified in \ref{change_hostname} and reboot to apply all network changes.
-
-\todo{ssh login without password}
+Finally, change the hostname to \lstinline{pi3gate} as specified in \ref{change_hostname} and reboot to apply all network changes.
 
 
 \section{NTP Server}
@@ -57,7 +55,7 @@ TEACUP requires that time is synchronized on all machines when running experimen
 
 \section{TEACUP}
 
-TEACUP requires a bunch of tools in order to function properly, as noted from the \href{http://caia.swin.edu.au/tools/teacup/TEACUP-0.9_INSTALL.txt}{install} guide. The following commands will install TEACUP properly:
+Every network experiment orchestrated by TEACUP is initiated from the gateway, and so the majority of the tools for TEACUP to work are installed on this machine. As described from the official \href{http://caia.swin.edu.au/tools/teacup/TEACUP-0.9_INSTALL.txt}{install} guide, with some slight adjustments, the following commands will install TEACUP properly:
 
 \begin{lstlisting}
 # R
@@ -99,7 +97,7 @@ Go into the \lstinline{experiment} folder and prepare to edit the \lstinline{con
 
 \subsection{Modification}
 
-Due to the restricted physical set up as explained in \ref{pi4cluster} and \ref{topology}, virtual interfaces have been used extensively. \todo{explain why tcpdump doesn't like this}
+Due to the restricted physical set up as shown in \ref{pi4cluster} and discussed in \ref{topology}, virtual interfaces have been used extensively. \todo{explain why tcpdump doesn't like this}
 
 A slight adjustment to TEACUP was therefore necessary.
 
