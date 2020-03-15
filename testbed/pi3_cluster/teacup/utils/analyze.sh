@@ -16,4 +16,4 @@ ssh danerik@ssh1.ux.uis.no scp -r root@pi3cluster.ux.uis.no:/home/danny/teacup/e
 scp -r danerik@ssh1.ux.uis.no:/home/stud/danerik/teacup/experiment/* ./
 
 # Analyze results
-fab analyse_all:test_id=result,lnames='Receiver;Sender'
+fab analyse_all:test_id=result,lnames='Receiver;Sender',plot_params="TC_TITLE\='TCP NewReno Sawtooth'"

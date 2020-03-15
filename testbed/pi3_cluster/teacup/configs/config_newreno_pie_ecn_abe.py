@@ -91,9 +91,11 @@ TPCONF_bc_ping_rate = 1
 TPCONF_router_queues = [
     # Set same delay for every host
     ('1', " source='172.16.10.0/24', dest='172.16.20.0/24', delay=V_delay, "
-     " loss=V_loss, rate=V_up_rate, queue_disc=V_aqm, queue_size=V_bsize "),
+     " loss=V_loss, rate=V_up_rate, queue_disc=V_aqm, queue_size=V_bsize, "
+     "queue_disc_params=V_aqm_params "),
     ('2', " source='172.16.20.0/24', dest='172.16.10.0/24', delay=V_delay, "
-     " loss=V_loss, rate=V_down_rate, queue_disc=V_aqm, queue_size=V_bsize "),
+     " loss=V_loss, rate=V_down_rate, queue_disc=V_aqm, queue_size=V_bsize, "
+     "queue_disc_params=V_aqm_params "),
 ]
 
 # List of traffic generators
@@ -119,7 +121,7 @@ TPCONF_duration = 30
 TPCONF_runs = 1
 
 # If '1' enable ecn for all hosts, if '0' disable ecn for all hosts
-TPCONF_ECN = ['0']
+TPCONF_ECN = ['1']
 
 # TCP congestion control algorithm used
 # Possible algos are: default, host<N>, newreno, cubic, cdg, hd, htcp, compound, vegas
@@ -160,12 +162,12 @@ TPCONF_host_TCP_algo_params = {
 # executed in the shell as written after any V_ variables have been replaced.
 # LIMITATION: only one V_ variable per command
 TPCONF_host_init_custom_cmds = {
-    'pi3host2' : [ 'sysctl net.inet.tcp.cc.abe=0' ],
-    'pi3host7' : [ 'sysctl net.inet.tcp.cc.abe=0' ]
+    'pi3host2' : [ 'sysctl net.inet.tcp.cc.abe=1' ],
+    'pi3host7' : [ 'sysctl net.inet.tcp.cc.abe=1' ]
 }
 
 # Delays in ms
-TPCONF_delays = [50]
+TPCONF_delays = [100]
 
 # Loss rates in percent
 TPCONF_loss_rates = [0]
@@ -181,7 +183,12 @@ TPCONF_bandwidths = [
 # Linux: fifo (mapped to pfifo), pfifo, bfifo, fq_codel, codel, pie, red, ...
 #        (see tc man page for full list)
 # FreeBSD: fifo, red
-TPCONF_aqms = ['pfifo', ]
+TPCONF_aqms = ['pie', ]
+
+# AQM parameters
+# example for PIE: 'ecn target 20ms tupdate 30ms'
+# check manual for more: man tc-pie, tc-fq_codel...
+TPCONF_aqms_params = 'ecn target 20ms tupdate 30ms'
 
 # Buffer size
 # If router is Linux this is mostly in packets/slots, but it depends on AQM
@@ -240,6 +247,7 @@ TPCONF_variable_defaults = {
     'V_down_rate'   	:	TPCONF_bandwidths[0][0],
     'V_up_rate'	    	:	TPCONF_bandwidths[0][1],
     'V_aqm'	    	    :	TPCONF_aqms[0],
+    'V_aqm_params'      :   TPCONF_aqms_params,
     'V_bsize'	    	:	TPCONF_buffer_sizes[0],
     #'V_cdg_beta_delay'	: 	TPCONF_cdg_beta_delay_facs[0],
     #'V_cdg_beta_loss'	: 	TPCONF_cdg_beta_loss_facs[0],
