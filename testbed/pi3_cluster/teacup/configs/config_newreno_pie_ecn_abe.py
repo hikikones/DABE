@@ -188,7 +188,7 @@ TPCONF_aqms = ['pie', ]
 # AQM parameters
 # example for PIE: 'ecn target 20ms tupdate 30ms'
 # check manual for more: man tc-pie, tc-fq_codel...
-TPCONF_aqms_params = 'ecn target 20ms tupdate 30ms'
+TPCONF_aqms_params = ['ecn target 20ms tupdate 30ms', ]
 
 # Buffer size
 # If router is Linux this is mostly in packets/slots, but it depends on AQM
@@ -219,14 +219,15 @@ TPCONF_buffer_sizes = [64]
 # are the variable names and the values are the variable values.
 
 TPCONF_parameter_list = {
-#   Vary name		V_ variable	            file name	values      extra vars
-    'ecns' 	        :  (['V_ecn'],	        ['ecn'], 	TPCONF_ECN, {}),
-    'delays' 	    :  (['V_delay'], 	    ['del'], 	TPCONF_delays, {}),
-    'loss'  	    :  (['V_loss'], 	    ['loss'], 	TPCONF_loss_rates, {}),
-    'tcpalgos' 	    :  (['V_tcp_cc_algo'],  ['tcp'], 	TPCONF_TCP_algos, {}),
-    'aqms'	        :  (['V_aqm'], 	        ['aqm'], 	TPCONF_aqms, {}),
-    'bsizes'	    :  (['V_bsize'], 	    ['bs'], 	TPCONF_buffer_sizes, {}),
-    'runs'	        :  (['V_runs'],         ['run'], 	range(TPCONF_runs), {}),
+#   Vary name		V_ variable	            file name	    values      extra vars
+    'ecns' 	        :  (['V_ecn'],	        ['ecn'], 	    TPCONF_ECN, {}),
+    'delays' 	    :  (['V_delay'], 	    ['del'], 	    TPCONF_delays, {}),
+    'loss'  	    :  (['V_loss'], 	    ['loss'],   	TPCONF_loss_rates, {}),
+    'tcpalgos' 	    :  (['V_tcp_cc_algo'],  ['tcp'], 	    TPCONF_TCP_algos, {}),
+    'aqms'	        :  (['V_aqm'], 	        ['aqm'], 	    TPCONF_aqms, {}),
+    'aqms_params'   :  (['V_aqm_params'],   ['aqm_params'], TPCONF_aqms_params, {}),
+    'bsizes'	    :  (['V_bsize'], 	    ['bs'], 	    TPCONF_buffer_sizes, {}),
+    'runs'	        :  (['V_runs'],         ['run'], 	    range(TPCONF_runs), {}),
     'bandwidths'    :  (['V_down_rate', 'V_up_rate'], ['down', 'up'], TPCONF_bandwidths, {}),
     # 'cdg_beta_dels' :  (['V_cdg_beta_delay'], ['cdgbdel'], TPCONF_cdg_beta_delay_facs, {}),
     # 'cdg_beta_loss' :  (['V_cdg_beta_loss'], ['cdgblo'],   TPCONF_cdg_beta_loss_facs,  {}),
@@ -247,7 +248,7 @@ TPCONF_variable_defaults = {
     'V_down_rate'   	:	TPCONF_bandwidths[0][0],
     'V_up_rate'	    	:	TPCONF_bandwidths[0][1],
     'V_aqm'	    	    :	TPCONF_aqms[0],
-    'V_aqm_params'      :   TPCONF_aqms_params,
+    'V_aqm_params'      :   TPCONF_aqms_params[0],
     'V_bsize'	    	:	TPCONF_buffer_sizes[0],
     #'V_cdg_beta_delay'	: 	TPCONF_cdg_beta_delay_facs[0],
     #'V_cdg_beta_loss'	: 	TPCONF_cdg_beta_loss_facs[0],
@@ -257,4 +258,4 @@ TPCONF_variable_defaults = {
 # Specify the parameters we vary through all values, all others will be fixed
 # according to TPCONF_variable_defaults
 TPCONF_vary_parameters = ['tcpalgos', 'delays', 'loss', 'bandwidths',
-                          'aqms', 'bsizes', 'runs', ]
+                          'aqms', 'aqms_params', 'bsizes', 'runs', ]
