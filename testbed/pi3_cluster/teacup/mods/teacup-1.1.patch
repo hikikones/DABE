@@ -1,0 +1,32 @@
+diff -Nur teacup-1.1/hostsetup.py teacup-1.1-modified/hostsetup.py
+--- teacup-1.1/hostsetup.py	2018-02-10 01:44:32.000000000 +0100
++++ teacup-1.1-modified/hostsetup.py	2020-03-15 12:57:21.903926598 +0100
+@@ -858,7 +858,7 @@
+ 
+     if htype == 'FreeBSD':
+         # record the number of reassembly queue overflows
+-        run('sysctl net.inet.tcp.reass.overflows')
++        #run('sysctl net.inet.tcp.reass.overflows')
+ 
+         # disable auto-tuning of receive buffer
+         run('sysctl net.inet.tcp.recvbuf_auto=0')
+diff -Nur teacup-1.1/loggers.py teacup-1.1-modified/loggers.py
+--- teacup-1.1/loggers.py	2018-02-10 01:44:32.000000000 +0100
++++ teacup-1.1-modified/loggers.py	2020-03-15 12:56:06.294435569 +0100
+@@ -41,6 +41,7 @@
+ from getfile import getfile
+ from runbg import runbg
+ 
++import random
+ 
+ ## Collect all the arguments (here basically a dummy method because we
+ ## don't used the return value)
+@@ -505,7 +506,7 @@
+                     snap_len, interface, file_name, tcpdump_filter)
+         pid = runbg(tcpdump_cmd)
+ 
+-        name = 'tcpdump-' + interface
++        name = 'tcpdump-' + interface + str(random.randint(0, 50000))
+         #bgproc.register_proc(env.host_string, name, '0', pid, file_name)
+         bgproc.register_proc_later(
+             env.host_string,
