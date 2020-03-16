@@ -53,7 +53,7 @@ Finally, change the hostname to \lstinline{pi3gate} as specified in \ref{change_
 TEACUP requires that time is synchronized on all machines when running experiments. In order for the internal machines to synchronize their clock, an \gls{ntp} server must be set up. The gateway will provide this service, and is set up as specified in \ref{time_sync}.
 
 
-\section{TEACUP}
+\section{TEACUP} \label{teacup_gateway}
 
 Every network experiment orchestrated by TEACUP is initiated from the gateway, and so the majority of the tools for TEACUP to work are installed on this machine. As described from the official \href{http://caia.swin.edu.au/tools/teacup/TEACUP-0.9_INSTALL.txt}{install} guide, with some slight adjustments, the following commands will install TEACUP properly:
 
@@ -95,12 +95,48 @@ cp teacup-1.1/fabfile.py experiment/
 Go into the \lstinline{experiment} folder and prepare to edit the \lstinline{config.py} file. Find the line containing \lstinline{TPCONF_script_path = '/home/teacup/teacup-0.8'} and change the \lstinline{path} to where you extracted \lstinline{teacup-1.1}. Finally, verify TEACUP installation with the command \lstinline{fab check_config}. If no errors appear, all is good.
 
 
-\subsection{Modification}
+\subsection{Modifications}
 
-Due to the restricted physical set up as shown in \ref{pi4cluster} and discussed in \ref{topology}, virtual interfaces have been used extensively. \todo{explain why tcpdump doesn't like this}
+Due to the restricted physical set up as shown in \ref{fig:pi3cluster} and discussed in \ref{topology}, virtual interfaces have been used extensively, particularly on the router. This introduced a conflict to the TEACUP codebase, as it assigns a name to each interface before performing network logging with \lstinline{tcpdump}. However, this name is not unique since both the controller and experiment network shares the same interface, resulting in a \lstinline{duplicate handle error} from TEACUP. A slight adjustment to the codebase was therefore necessary.
 
-A slight adjustment to TEACUP was therefore necessary.
+Applying the following "band-aid" to the TEACUP codebase fixes the error:
 
-\todo{show the teacup tcpdump unique name modification}
+\begin{lstlisting}
+--- teacup-1.1/loggers.py
++++ teacup-1.1-modified/loggers.py
+@@ -41,6 +41,7 @@
+    from getfile import getfile
+    from runbg import runbg
+    
++   import random
+    
+    ## Collect all the arguments (here basically a dummy method because we
+    ## dont used the return value)
+@@ -505,7 +506,7 @@
+                    snap_len, interface, file_name, tcpdump_filter)
+        pid = runbg(tcpdump_cmd)
+    
+-       name = 'tcpdump-' + interface
++       name = 'tcpdump-' + interface + str(random.randint(0, 50000))
+        #bgproc.register_proc(env.host_string, name, '0', pid, file_name)
+        bgproc.register_proc_later(
+            env.host_string,
+\end{lstlisting}
 
-\todo{completed experiments must be analysed on an x86 computer since the tool spp shits the bed on ARM}
+In additon, TEACUP checks if the \lstinline{sysctl} variable \lstinline{net.inet.tcp.reass.overflows} exists. This does not exist in the FreeBSD version that we are using. Simply comment the check out for an easy fix:
+
+\begin{lstlisting}
+--- teacup-1.1/hostsetup.py
++++ teacup-1.1-modified/hostsetup.py
+@@ -858,7 +858,7 @@
+
+    if htype == 'FreeBSD':
+        # record the number of reassembly queue overflows
+-       run('sysctl net.inet.tcp.reass.overflows')
++       #run('sysctl net.inet.tcp.reass.overflows')
+
+        # disable auto-tuning of receive buffer
+        run('sysctl net.inet.tcp.recvbuf_auto=0')
+\end{lstlisting}
+
+Finally, the tool \lstinline{spp} does not run on the Raspberry Pi 3 or ARM architecture at all, only displaying the helpful message \lstinline{aborting} when running it. TEACUP uses this tool to calculate \gls{rtt}, and fortunately is only needed when analyzing the results. In other words, the experiment data can easily be copied over to an x86 where \lstinline{spp} works, and then be analyzed from there. That is, follow the install instructions above from \ref{teacup_gateway} again as normal, but on an x86 machine instead.
