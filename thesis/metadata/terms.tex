@@ -6,6 +6,14 @@
     description={One of the main communication protocols of the Internet that defines how to establish and maintain a network conversation through which applications can exchange data.}
 }
 
+\newglossaryentry{ip}
+{
+    name={Internet Protocol (IP)},
+    first={Internet Protocol (IP)},
+    text={IP},
+    description={The principal communications protocol for relaying datagrams across network boundaries. Its routing function enables internetworking, and essentially establishes the Internet.}
+}
+
 \newglossaryentry{www}
 {
     name={World Wide Web (WWW)},
@@ -78,12 +86,85 @@
     description={A TCP state variable used to determine whether the slow start or congestion avoidance algorithm is used to control data transmission.}
 }
 
+\newglossaryentry{bdp}
+{
+    name={Bandwidth Delay Product (BDP)},
+    first={bandwidth delay product (BDP)},
+    text={BDP},
+    description={The product of a data link's capacity and RTT. Widely used in determing the buffer size.}
+}
+
+\newglossaryentry{aqm}
+{
+    name={Active Queue Management (AQM)},
+    first={active queue management (AQM)},
+    text={AQM},
+    description={The policy in routers and switches for what to do with packets inside a buffer before it becomes full.}
+}
+
+\newglossaryentry{red}
+{
+    name={Random Early Detection (RED)},
+    first={random early detection (RED)},
+    text={RED},
+    description={One of the first and most widely supported AQM algorithms. It monitors the average queue size and drops packets based on statistical probabilities.}
+}
+
+\newglossaryentry{codel}
+{
+    name={Controlled Delay (CoDel)},
+    first={Controlled Delay (CoDel)},
+    text={CoDel},
+    description={A more recent AQM that seeks to control bufferbloat-generated excess delay in modern
+    networking environments.}
+}
+
+\newglossaryentry{pie}
+{
+    name={Proportional Integral Controller Enhanced (PIE)},
+    first={Proportional Integral Controller Enhanced (PIE)},
+    text={PIE},
+    description={A more recent and lightweight AQM that seeks to control the average queuing latency to a target value.}
+}
+
 \newglossaryentry{ecn}
 {
     name={Explicit Congestion Notification (ECN)},
     first={Explicit Congestion Notification (ECN)},
     text={ECN},
     description={An extension to IP and TCP that allows end-to-end notification of network congestion without dropping packets.}
+}
+
+\newglossaryentry{ect}
+{
+    name={ECN-Capable Transport (ECT)},
+    first={ECT},
+    text={ECT},
+    description={A bit set in the IP header to indicate if a transport protocol connection is ECN-capable.}
+}
+
+\newglossaryentry{ce}
+{
+    name={Congestion Encountered (CE)},
+    first={Congestion Encountered (CE)},
+    text={CE},
+    description={A bit set in the IP header by a router with AQM support to indicate congestion in an ECN-capable network.}
+}
+
+\newglossaryentry{ece}
+{
+    name={ECN-Echo (ECE)},
+    first={ECN-Echo (ECE)},
+    text={ECE},
+    description={A flag in the TCP header so that a receiver can echo back to the sender when a CE packet has been received. Only applicable in an ECN-capable network.}
+}
+
+\newglossaryentry{cwr}
+{
+    name={Congestion Window Reduced (CWR)},
+    first={Congestion Window Reduced (CWR)},
+    text={CWR},
+    description={A flag in the TCP header so that a sender can inform the receiver that the CWND has been reduced. Only applicable in an ECN-capable network.}
 }
 
 \newglossaryentry{grub}
@@ -100,4 +181,52 @@
     first={Operating System (OS)},
     text={OS},
     description={System software that manages computer hardware, software resources, and provides common services for computer programs.}
+}
+
+\newglossaryentry{nat}
+{
+    name={Network Address Translation (NAT)},
+    first={Network Address Translation (NAT)},
+    text={NAT},
+    description={A method of remapping one IP address space into another. Often used such that one Internet-routable IP address of a NAT gateway can be used for an entire private network. This is used in conjunction with IP masquerading, which is a technique that hides an entire IP address space, usually consisting of private IP addresses, behind a single IP address in another, usually public address space.}
+}
+
+\newglossaryentry{dhcp}
+{
+    name={Dynamic Host Configuration Protocol (DHCP)},
+    first={Dynamic Host Configuration Protocol (DHCP)},
+    text={DHCP},
+    description={A client/server protocol that automatically provides an Internet Protocol (IP) host with its IP address and other related configuration information such as the subnet mask and default gateway.}
+}
+
+\newglossaryentry{vlan}
+{
+    name={Virtual LAN (VLAN)},
+    first={virtual LAN (VLAN)},
+    text={VLAN},
+    description={Any broadcast domain that is partitioned and isolated in a computer network at the data link layer (OSI layer 2).}
+}
+
+\newglossaryentry{ntp}
+{
+    name={Network Time Protocol (NTP)},
+    first={Network Time Protocol (NTP)},
+    text={NTP},
+    description={A networking protocol for clock synchronization between computer systems.}
+}
+
+\newglossaryentry{poe}
+{
+    name={Power over Ethernet (PoE)},
+    first={Power over Ethernet (PoE)},
+    text={PoE},
+    description={A standard or ad hoc systems which pass electric power along with data on twisted pair Ethernet cabling. This allows a single cable to provide both data connection and electric power to devices such as wireless access points, IP cameras, VoIP phones and later Raspberry Pi machines.}
+}
+
+\newglossaryentry{teacup}
+{
+    name={TCP Experiment Automation Controlled Using Python (TEACUP)},
+    first={TCP Experiment Automation Controlled Using Python (TEACUP)},
+    text={TEACUP},
+    description={A tool for automating repeatable TCP experiments using Python.}
 }

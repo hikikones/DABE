@@ -43,9 +43,9 @@ To enable SSH access, simply run \lstinline{systemctl enable ssh}. To allow SSH 
 
 There are two files that needs to be edited in order to change hostname. First, the \lstinline{/etc/hostname} file, which only contains the current hostname. Simply change whatever is in it to what you want, say \lstinline{new_hostname}. Second, the file \lstinline{/etc/hosts} needs one line changed. Edit the line containg \lstinline{127.0.1.1} so that it looks as follows:
 
-\begin{lstlisting}
+\begin{minted}{bash}
 127.0.1.1       new_hostname
-\end{lstlisting}
+\end{minted}
 
 Reboot to apply the changes.
 

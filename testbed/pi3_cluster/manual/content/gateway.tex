@@ -21,7 +21,7 @@ The rest of the section will assume \lstinline{root} access and that Raspbian Bu
 
 The gateway is the only machine with direct Internet access through \gls{dhcp} on its main interface, with a virtual interface statically connected to the private controller network in order to communicate with the rest of the machines. To set up this, add the following to the \lstinline{/etc/network/interfaces} file:
 
-\begin{lstlisting}
+\begin{minted}{bash}
 # Main interface (Internet access)
 auto eth0
 iface eth0 inet dhcp
@@ -31,11 +31,11 @@ auto eth0:1
 iface eth0:1 inet static
 address 10.0.1.254
 netmask 255.255.255.0
-\end{lstlisting}
+\end{minted}
 
 In order for the machines on the internal network to gain Internet access through the gateway, both IP forwarding and \gls{nat} must be set up:
 
-\begin{lstlisting}
+\begin{minted}{bash}
 # Enable IP forwarding
 echo 'net.ipv4.ip_forward=1' >> /etc/sysctl.conf
 
@@ -43,7 +43,7 @@ echo 'net.ipv4.ip_forward=1' >> /etc/sysctl.conf
 update-alternatives --set iptables /usr/sbin/iptables-legacy
 iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
 apt install iptables-persistent
-\end{lstlisting}
+\end{minted}
 
 Finally, change the hostname to \lstinline{pi3gate} as specified in \ref{change_hostname} and reboot to apply all network changes.
 
@@ -57,7 +57,7 @@ TEACUP requires that time is synchronized on all machines when running experimen
 
 Every network experiment orchestrated by TEACUP is initiated from the gateway, and so the majority of the tools for TEACUP to work are installed on this machine. As described from the official \href{http://caia.swin.edu.au/tools/teacup/TEACUP-0.9_INSTALL.txt}{install} guide, with some slight adjustments, the following commands will install TEACUP properly:
 
-\begin{lstlisting}
+\begin{minted}{bash}
 # R
 apt install -y r-base
 
@@ -81,16 +81,16 @@ pip install -Iv pexpect==3.2
 # TEACUP
 wget https://sourceforge.net/projects/teacup/files/teacup-1.1.tar.gz
 tar -xf teacup-1.1.tar.gz
-\end{lstlisting}
+\end{minted}
 
 To verify that TEACUP has been properly installed, a simple check can be done as follows:
 
-\begin{lstlisting}
+\begin{minted}{bash}
 mkdir experiment
 cp teacup-1.1/example_configs/config-scenario1.py experiment/config.py
 cp teacup-1.1/run.sh experiment/
 cp teacup-1.1/fabfile.py experiment/
-\end{lstlisting}
+\end{minted}
 
 Go into the \lstinline{experiment} folder and prepare to edit the \lstinline{config.py} file. Find the line containing \lstinline{TPCONF_script_path = '/home/teacup/teacup-0.8'} and change the \lstinline{path} to where you extracted \lstinline{teacup-1.1}. Finally, verify TEACUP installation with the command \lstinline{fab check_config}. If no errors appear, all is good.
 
@@ -101,7 +101,7 @@ Due to the restricted physical set up as shown in \ref{fig:pi3cluster} and discu
 
 Applying the following "band-aid" to the TEACUP codebase fixes the error:
 
-\begin{lstlisting}
+\begin{minted}{bash}
 --- teacup-1.1/loggers.py
 +++ teacup-1.1-modified/loggers.py
 @@ -41,6 +41,7 @@
@@ -121,11 +121,11 @@ Applying the following "band-aid" to the TEACUP codebase fixes the error:
         #bgproc.register_proc(env.host_string, name, '0', pid, file_name)
         bgproc.register_proc_later(
             env.host_string,
-\end{lstlisting}
+\end{minted}
 
 In additon, TEACUP checks if the \lstinline{sysctl} variable \lstinline{net.inet.tcp.reass.overflows} exists. This does not exist in the FreeBSD version that we are using. Simply comment the check out for an easy fix:
 
-\begin{lstlisting}
+\begin{minted}{bash}
 --- teacup-1.1/hostsetup.py
 +++ teacup-1.1-modified/hostsetup.py
 @@ -858,7 +858,7 @@
@@ -137,6 +137,6 @@ In additon, TEACUP checks if the \lstinline{sysctl} variable \lstinline{net.inet
 
         # disable auto-tuning of receive buffer
         run('sysctl net.inet.tcp.recvbuf_auto=0')
-\end{lstlisting}
+\end{minted}
 
-Finally, the tool \lstinline{spp} does not run on the Raspberry Pi 3 or ARM architecture at all, only displaying the helpful message \lstinline{aborting} when running it. TEACUP uses this tool to calculate \gls{rtt}, and fortunately is only needed when analyzing the results. In other words, the experiment data can easily be copied over to an x86 where \lstinline{spp} works, and then be analyzed from there. That is, follow the install instructions above from \ref{teacup_gateway} again as normal, but on an x86 machine instead.
+Finally, the tool \lstinline{spp} does not run on the Raspberry Pi 3 or ARM architecture at all, only displaying the helpful message \lstinline{aborting} when running it. TEACUP uses this tool to calculate \gls{rtt}, and fortunately is only needed when analyzing the results. In other words, the experiment data can easily be copied over to an x86 machine where \lstinline{spp} works, and then be analyzed from there. That is, follow the install instructions above from \ref{teacup_gateway} again as normal, but on an x86 machine instead.

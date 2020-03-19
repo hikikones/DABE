@@ -88,6 +88,15 @@
 	breaklines=true
 }
 
+% Syntax highlighting with minted
+\usepackage{minted}
+%\usemintedstyle{monokai}
+%\definecolor{bg}{HTML}{282828} % from https://github.com/kevinsawicki/monokai
+\definecolor{CodeBG}{gray}{0.95}
+\setminted[c]{obeytabs=true, tabsize=4, bgcolor=CodeBG, frame=single, framesep=2mm, rulecolor=CodeBG, fontsize=\small}
+\setminted[bash]{obeytabs=true, tabsize=4, bgcolor=CodeBG, frame=single, framesep=2mm, rulecolor=CodeBG, fontsize=\small}
+\setminted[python]{obeytabs=true, tabsize=4, bgcolor=CodeBG, frame=single, framesep=2mm, rulecolor=CodeBG, fontsize=\small}
+
 % Glossaries, acronyms etc
 \usepackage[nopostdot,toc,acronym,nomain,nonumberlist]{glossaries}
 \makeglossaries

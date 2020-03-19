@@ -1,8 +1,10 @@
-@article{abe,
-  author  = {Naeem Khademi and Grenville Armitage and Michael Welzl and Sebastian Zander and Gorry Fairhurst and David Ros},
-  title   = {Alternative Backoff: Achieving Low Latency and High Throughput with ECN and AQM},
-  year    = 2017,
-  pages   = 9
+@inproceedings{abe,
+  author = {Khademi, Naeem and Armitage, Grenville and Welzl, Michael and Zander, Sebastian and Fairhurst, Gorry and Ros, David},
+  year = {2017},
+  month = {06},
+  pages = {1-9},
+  title = {Alternative backoff: Achieving low latency and high throughput with ECN and AQM},
+  doi = {10.23919/IFIPNetworking.2017.8264863}
 }
 
 @techreport{rfc6691,
@@ -30,4 +32,114 @@
   publisher = {RFC Editor},
   institution = {RFC Editor},
   url = {https://tools.ietf.org/html/rfc5681}
+}
+
+@ARTICLE{ieee251892,
+  author={S. {Floyd} and V. {Jacobson}},
+  journal={IEEE/ACM Transactions on Networking},
+  title={Random early detection gateways for congestion avoidance},
+  year={1993},
+  volume={1},
+  number={4},
+  pages={397-413},
+  keywords={internetworking;network servers;packet switching;protocols;queueing theory;simulations;gateways;congestion avoidance;random early detection;packet-switched networks;average queue size;bandwidth;transport-layer congestion control protocol;TCP;bursty traffic;TCP/IP network;performance;Transport protocols;Delay effects;Throughput;Propagation delay;Bandwidth;TCPIP;Traffic control;High-speed networks;Feedback;Delay estimation},
+  doi={10.1109/90.251892},
+  ISSN={1558-2566},
+  month={Aug}
+}
+
+@inproceedings{sizing_router_buffers,
+  author = {Appenzeller, Guido and Keslassy, Isaac and McKeown, Nick},
+  title = {Sizing Router Buffers},
+  year = {2004},
+  isbn = {1581138628},
+  publisher = {Association for Computing Machinery},
+  address = {New York, NY, USA},
+  url = {https://doi.org/10.1145/1015467.1015499},
+  doi = {10.1145/1015467.1015499},
+  booktitle = {Proceedings of the 2004 Conference on Applications, Technologies, Architectures, and Protocols for Computer Communications},
+  pages = {281–292},
+  numpages = {12},
+  keywords = {bandwidth delay product, internet router, buffer size, TCP},
+  location = {Portland, Oregon, USA},
+  series = {SIGCOMM ’04}
+}
+
+@article{a_rant_on_queues,
+  author = {Jacobson, Van},
+  title = {A rant on queues. A talk presented at MIT Lincoln Labs, Lexington, MA},
+  year = {2006},
+  url = {http://www.pollere.net/Pdfdocs/QrantJul06.pdf}
+}
+
+@article{controlling_queue_delay,
+  author = {Nichols, Kathleen and Jacobson, Van},
+  title = {Controlling Queue Delay},
+  year = {2012},
+  issue_date = {May 2012},
+  publisher = {Association for Computing Machinery},
+  address = {New York, NY, USA},
+  volume = {10},
+  number = {5},
+  issn = {1542-7730},
+  url = {https://doi.org/10.1145/2208917.2209336},
+  doi = {10.1145/2208917.2209336},
+  journal = {Queue},
+  month = may,
+  pages = {20–34},
+  numpages = {15}
+}
+
+@misc{rfc8289,
+	series =	{Request for Comments},
+	number =	8289,
+	howpublished =	{RFC 8289},
+	publisher =	{RFC Editor},
+	doi =		{10.17487/RFC8289},
+	url =		{https://rfc-editor.org/rfc/rfc8289.html},
+  author =	{Kathleen Nichols and Van Jacobson and Andrew McGregor and Jana Iyengar},
+	title =		{{Controlled Delay Active Queue Management}},
+	pagetotal =	25,
+	year =		2018,
+	month =		jan,
+	abstract =	{This document describes CoDel (Controlled Delay) -- a general framework that controls bufferbloat-generated excess delay in modern networking environments. CoDel consists of an estimator, a setpoint, and a control loop. It requires no configuration in normal Internet deployments.},
+}
+
+@misc{rfc8033,
+	series =	{Request for Comments},
+	number =	8033,
+	howpublished =	{RFC 8033},
+	publisher =	{RFC Editor},
+	doi =		{10.17487/RFC8033},
+	url =		{https://rfc-editor.org/rfc/rfc8033.html},
+  author =	{Rong Pan and Preethi Natarajan and Fred Baker and Greg White},
+	title =		{{Proportional Integral Controller Enhanced (PIE): A Lightweight Control Scheme to Address the Bufferbloat Problem}},
+	pagetotal =	30,
+	year =		2017,
+	month =		feb,
+	abstract =	{Bufferbloat is a phenomenon in which excess buffers in the network cause high latency and latency variation. As more and more interactive applications (e.g., voice over IP, real-time video streaming, and financial transactions) run in the Internet, high latency and latency variation degrade application performance. There is a pressing need to design intelligent queue management schemes that can control latency and latency variation, and hence provide desirable quality of service to users. This document presents a lightweight active queue management design called "PIE" (Proportional Integral controller Enhanced) that can effectively control the average queuing latency to a target value. Simulation results, theoretical analysis, and Linux testbed results have shown that PIE can ensure low latency and achieve high link utilization under various congestion situations. The design does not require per-packet timestamps, so it incurs very little overhead and is simple enough to implement in both hardware and software.},
+}
+
+@article{on_traffic_phase_effects_in_packet_switched_gateways,
+  author = {Floyd, Sally and Jacobson, Van},
+  year = {1991},
+  month = {02},
+  pages = {},
+  title = {On Traffic Phase Effects in Packet-Switched Gateways},
+  journal = {ACM SIGCOMM Computer Communication Review}
+}
+
+@misc{rfc3168,
+	series =	{Request for Comments},
+	number =	3168,
+	howpublished =	{RFC 3168},
+	publisher =	{RFC Editor},
+	doi =		{10.17487/RFC3168},
+	url =		{https://rfc-editor.org/rfc/rfc3168.txt},
+        author =	{Sally Floyd and Dr. K. K. Ramakrishnan and David L. Black},
+	title =		{{The Addition of Explicit Congestion Notification (ECN) to IP}},
+	pagetotal =	63,
+	year =		2001,
+	month =		sep,
+	abstract =	{This memo specifies the incorporation of ECN (Explicit Congestion Notification) to TCP and IP, including ECN's use of two bits in the IP header. {[}STANDARDS-TRACK{]}},
 }

@@ -24,7 +24,7 @@ For most full-sized keyboards, the following options are what you want; \lstinli
 
 \subsubsection{FreeBSD}
 
-To change keyboard layout with a graphical user guide, run \lstinline{kbdmap}. To make the changes persist, add the resulting configuration to the \lstinline{/etc/rc.conf} file. For example, if norwegian was selected, run \lstinline{echo 'keymap="no.kbd"' >> /etc/rc.conf}.
+To change keyboard layout with a graphical user guide, run \lstinline{kbdmap}. To make the changes persist, add the resulting configuration to the \lstinline{/etc/rc.conf} file. For example, if Norwegian was selected, run \lstinline{echo 'keymap="no.kbd"' >> /etc/rc.conf}.
 
 
 \section{Root Account} \label{root_account}
@@ -52,13 +52,13 @@ To update the system, run \lstinline{apt update && apt upgrade}. If an error abo
 
 To update the system, run the following:
 
-\begin{lstlisting}
+\begin{minted}{bash}
 # Update FreeBSD system
 freebsd-update fetch && freebsd-update install
 
 # Update FreeBSD packages
 pkg upgrade
-\end{lstlisting}
+\end{minted}
 
 
 \section{Enable SSH} \label{enable_ssh}
@@ -80,9 +80,9 @@ SSH on FreeBSD is installed and enabled by default as seen by \lstinline{sshd_en
 
 There are two files that needs to be edited in order to change hostname. First, the \lstinline{/etc/hostname} file, which only contains the current hostname. Simply change whatever is in it to what you want, say \lstinline{new_hostname}. Second, the file \lstinline{/etc/hosts} needs one line changed. Edit the line containg \lstinline{127.0.1.1} so that it looks as follows:
 
-\begin{lstlisting}
+\begin{minted}{bash}
 127.0.1.1       new_hostname
-\end{lstlisting}
+\end{minted}
 
 Reboot to apply the changes.
 
@@ -111,10 +111,10 @@ Next, disable the \lstinline{systemd-timesyncd} with \lstinline{timedatectl set-
 
 FreeBSD comes preinstalled with \lstinline{ntp}. To enable it on boot, run the following:
 
-\begin{lstlisting}
+\begin{minted}{bash}
 # Enable NTP on FreeBSD
 echo 'ntpd_enable=YES' >> /etc/rc.conf
 echo 'ntpd_sync_on_start=YES' >> /etc/rc.conf
-\end{lstlisting}
+\end{minted}
 
 To specify which server to get the time from, prepare to edit the \lstinline{/etc/ntp.conf} file. Comment out any default pool or server entries, and add the new entry \lstinline{server 10.0.1.254 iburst} to it, which refers to the gateway. Reboot and verify time synchronization with \lstinline{date}.

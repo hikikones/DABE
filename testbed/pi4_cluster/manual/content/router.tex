@@ -21,7 +21,7 @@ The rest of the section will assume \lstinline{root} access and that the \gls{os
 
 The router serves as the intermediate device for the hosts in order to conduct more realistic experiments. The main interface is statically connected to the controller network, with additionally two virtual interfaces that function as the default gateway for the two separate subnets that the hosts reside in. To set the router up as such, add the following to the \lstinline{/etc/network/interfaces} file:
 
-\begin{lstlisting}
+\begin{minted}{bash}
 # Main interface (controller-network)
 auto eth0
 iface eth0 inet static
@@ -42,28 +42,28 @@ iface eth0:20 inet static
 address 192.168.20.1
 netmask 255.255.255.0
 gateway 10.0.0.254
-\end{lstlisting}
+\end{minted}
 
 In order for the hosts to communicate through the router, IP forwarding must be enabled:
 
-\begin{lstlisting}
+\begin{minted}{bash}
 # Enable IP forwarding
 echo 'net.ipv4.ip_forward=1' >> /etc/sysctl.conf
-\end{lstlisting}
+\end{minted}
 
 Finally, change the hostname to \lstinline{pi4router} as specified in \ref{change_hostname} and reboot to apply all network changes.
 
 
 \section{NTP Client}
 
-To synchronizate time for the router against the gateway, set the router up as an \gls{ntp} client as specified in \ref{time_sync}.
+To synchronize time for the router against the gateway, set the router up as an \gls{ntp} client as specified in \ref{time_sync}.
 
 
 \section{TEACUP}
 
 The router only needs two tools for TEACUP to work properly when controlled from the gateway, and that is \lstinline{tcpdump} and \lstinline{ntp}:
 
-\begin{lstlisting}
+\begin{minted}{bash}
 # TEACUP tools on router
 apt install -y tcpdump ntp
-\end{lstlisting}
+\end{minted}

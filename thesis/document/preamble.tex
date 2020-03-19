@@ -55,7 +55,7 @@
 
 % Image support
 \usepackage{graphicx, wrapfig, float}
-\usepackage[font=small,labelfont=bf]{caption}
+\usepackage[font=small,labelfont=bf]{caption, subcaption}
 \graphicspath{{images/}}
 
 % Syntax highlighting
@@ -69,6 +69,9 @@
 	basicstyle=\footnotesize,
 	language=C,
 	columns=fullflexible,
+	literate=
+		{*}{{\char 42}}1
+        {-}{{\char 45}}1,
 	frame=tlbr,
 	framesep=5pt,
 	framerule=0pt,
@@ -78,12 +81,21 @@
 	keepspaces=true,
 	showspaces=false,
 	showstringspaces=false,
-	numbers=left,
+	numbers=none,
 	numbersep=10pt,
 	showtabs=true,
 	tabsize=4,
 	breaklines=true
 }
+
+% Syntax highlighting with minted
+\usepackage{minted}
+%\usemintedstyle{monokai}
+%\definecolor{bg}{HTML}{282828} % from https://github.com/kevinsawicki/monokai
+\definecolor{CodeBG}{gray}{0.95}
+\setminted[c]{obeytabs=true, tabsize=4, bgcolor=CodeBG, frame=single, framesep=2mm, rulecolor=CodeBG, fontsize=\small}
+\setminted[bash]{obeytabs=true, tabsize=4, bgcolor=CodeBG, frame=single, framesep=2mm, rulecolor=CodeBG, fontsize=\small}
+\setminted[python]{obeytabs=true, tabsize=4, bgcolor=CodeBG, frame=single, framesep=2mm, rulecolor=CodeBG, fontsize=\small}
 
 % Glossaries, acronyms etc
 \usepackage[nopostdot,toc,acronym,nomain,nonumberlist]{glossaries}
@@ -92,9 +104,16 @@
 \renewcommand*{\glstextformat}[1]{\textcolor{Brown}{#1}}
 
 % Bibliography
-\usepackage[backend=biber,style=numeric]{biblatex}
+\usepackage[
+	backend=biber,
+	style=ieee,
+	citestyle=numeric
+]{biblatex}
 \addbibresource{metadata/refs.bib}
 
 % TODO macro
 \newcommand{\todo}[1]{}
 \renewcommand{\todo}[1]{{\color{red} TODO: {#1}}}
+
+% SI units with bytes
+\usepackage[binary-units=true]{siunitx}
