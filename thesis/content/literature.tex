@@ -130,16 +130,27 @@ The goal of congestion avoidance is also simple --- avoid congestion, as the nam
 
 \todo{maybe write more about AIMD with some math}
 
-\todo{addd conclusion to this section}
+\todo{add conclusion to this section}
 
 
 
 
 \subsubsection{Fast Retransmit and Fast Recovery}
 
-Every packet sent using TCP has a \textit{sequence number}, so that the data can reassembled in correct order on the receiver side. But it is important to note that \gls{tcp} may send an out-of-order packet, to which the receiver should act upon immediately by sending back a duplicate \gls{ack}.
+Fast retransmit and fast recovery are two algorithms that aims to speed up the recovery process of a \gls{tcp} connection in the event of a segment loss, but without re-entering the slow start phase. As with slow start and congestion avoidance, both are in practice implemented together and so will be discussed together.
 
-\todo{follow up...}
+In a \gls{tcp} connection, the sender uses a simple timer to recognize lost segments. That is, if an \gls{ack} is not received within a specified time, the sender will assume that the segment has been lost and so will retransmit it. Fast retransmit is an enhancement to \gls{tcp} that reduces the time a sender waits before retransmitting a lost segment. The duration is determined by the amount of duplicate \gls{ack}s, which the receiver will keep sending to indicate the next expected sequence number. Generally, if only one or two duplicate \gls{ack}s are experienced, it is assumed that a simple reordering of the segments will solve the problem. But when three or more duplicate \gls{ack}s are received in a row, it signals a strong indication that a segment has been lost. In such a case, \gls{tcp} will perform a retransmission instead of waiting for a timeout, known as a \textit{fast transmit}.
+
+When a fast retransmit has occured, the sender will transmit what appears to be the missing segment. However, the slow start phase will not be performed after this, but rather the congestion avoidance phase. This is known as the \textit{fast recovery} algorithm. Since only a segment seems to be missing, it would be wasteful to redue the traffic flow abruptly by going into slow start. Instead, a fast recovery is initiated, allowing for sustained high throughput under moderate congestion.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{TCP_Congestion_Control_Complete}
+    \captionsetup{width=0.6\textwidth}
+    \caption{A more complete illustration of a congestion-control algorithm including all four parts --- slow start, congestion avoidance, fast retransmit and fast recovery. \todo{update image}}
+\end{figure}
+
+
 
 
 
@@ -174,23 +185,6 @@ Every packet sent using TCP has a \textit{sequence number}, so that the data can
 
 
 
-
-
-\subsection{Tahoe and Reno}
-
-\todo{show some early examples TCP congestion-control algorithms}
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.6\textwidth]{TCP_CC_NewReno}
-    \captionsetup{width=0.6\textwidth}
-    \caption{The classic \textit{sawtooth} pattern of \gls{cwnd} using an older \gls{tcp} congestion-algorithm known as \textit{NewReno}. \todo{update image}}
-\end{figure}
-
-
-
-
-
 \subsection{Bufferbloat}
 
 It is easy to fall into the trap of believing that bigger buffers would increase network performance. After all, why drop a packet when you can avoid it by a buffer that never gets full in the first place. Likewise, it is easy to see why a big buffer is bad --- it takes time to drain the queue. If more packets come in than can be transmitted, the longer the queue gets. As a result, the latency spikes. Excess buffering of packets is referred to as \textit{bufferbloat}, causing high latency and reducing the overall network throughput.
@@ -206,7 +200,24 @@ where $RTT_{avg}$ is the average \gls{rtt} of the flow passing through the link 
 
 
 
+\subsection{NewReno}
 
+\todo{explain...}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{TCP_CC_NewReno}
+    \captionsetup{width=0.6\textwidth}
+    \caption{The classic \textit{sawtooth} pattern of \gls{cwnd} using the \gls{tcp} congestion-algorithm known as \textit{NewReno}. \todo{update image}}
+\end{figure}
+
+
+
+
+
+\subsection{}
+\subsection{}
+\subsection{}
 
 
 

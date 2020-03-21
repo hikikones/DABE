@@ -21,17 +21,19 @@
   url = {https://tools.ietf.org/html/rfc6691}
 }
 
-@techreport{rfc5681,
-  author = {M. Allman and V. Paxson and E. Blanton},
-  title = {TCP Congestion Control},
-  howpublished = {Internet Requests for Comments},
-  type = {RFC},
-  number = 5681,
-  year = {2009},
-  month = {8},
-  publisher = {RFC Editor},
-  institution = {RFC Editor},
-  url = {https://tools.ietf.org/html/rfc5681}
+@misc{rfc5681,
+	series =	{Request for Comments},
+	number =	5681,
+	howpublished =	{RFC 5681},
+	publisher =	{RFC Editor},
+	doi =		{10.17487/RFC5681},
+	url =		{https://rfc-editor.org/rfc/rfc5681.txt},
+        author =	{Ethan Blanton and Dr. Vern Paxson and Mark Allman},
+	title =		{{TCP Congestion Control}},
+	pagetotal =	18,
+	year =		2009,
+	month =		sep,
+	abstract =	{This document defines TCP's four intertwined congestion control algorithms: slow start, congestion avoidance, fast retransmit, and fast recovery. In addition, the document specifies how TCP should begin transmission after a relatively long idle period, as well as discussing various acknowledgment generation methods. This document obsoletes RFC 2581. {[}STANDARDS-TRACK{]}},
 }
 
 @ARTICLE{ieee251892,
@@ -136,10 +138,26 @@
 	publisher =	{RFC Editor},
 	doi =		{10.17487/RFC3168},
 	url =		{https://rfc-editor.org/rfc/rfc3168.txt},
-        author =	{Sally Floyd and Dr. K. K. Ramakrishnan and David L. Black},
+  author =	{Sally Floyd and Dr. K. K. Ramakrishnan and David L. Black},
 	title =		{{The Addition of Explicit Congestion Notification (ECN) to IP}},
 	pagetotal =	63,
 	year =		2001,
 	month =		sep,
 	abstract =	{This memo specifies the incorporation of ECN (Explicit Congestion Notification) to TCP and IP, including ECN's use of two bits in the IP header. {[}STANDARDS-TRACK{]}},
+}
+
+@techreport{cardwell-iccrg-bbr-congestion-control-00,
+	number =	{draft-cardwell-iccrg-bbr-congestion-control-00},
+	type =		{Internet-Draft},
+	institution =	{Internet Engineering Task Force},
+	publisher =	{Internet Engineering Task Force},
+	note =		{Work in Progress},
+	url =		{https://datatracker.ietf.org/doc/html/draft-cardwell-iccrg-bbr-congestion-control-00},
+  author =	{Neal Cardwell and Yuchung Cheng and Soheil Hassas Yeganeh and Van Jacobson},
+	title =		{{BBR Congestion Control}},
+	pagetotal =	34,
+	year =		2017,
+	month =		jul,
+	day =		3,
+	abstract =	{This document specifies the BBR congestion control algorithm. BBR uses recent measurements of a transport connection's delivery rate and round-trip time to build an explicit model that includes both the maximum recent bandwidth available to that connection, and its minimum recent round-trip delay. BBR then uses this model to control both how fast it sends data and the maximum amount of data it allows in flight in the network at any time. Relative to loss-based congestion control algorithms such as Reno {[}RFC5681{]} or CUBIC {[}draft-ietf-tcpm-cubic{]}, BBR offers substantially higher throughput for bottlenecks with shallow buffers or random losses, and substantially lower queueing delays for bottlenecks with deep buffers (avoiding "bufferbloat"). This algorithm can be implemented in any transport protocol that supports packet-delivery acknowledgment (thus far, open source implementations are available for TCP {[}RFC793{]} and QUIC {[}draft-ietf-quic-transport-00{]}).},
 }
