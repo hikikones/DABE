@@ -63,9 +63,11 @@ TEACUP uses a modified version of \lstinline{iperf}, and so must be installed fr
 \begin{minted}{bash}
 # Installing modified iperf on FreeBSD
 wget https://sourceforge.net/projects/iperf2/files/iperf-2.0.9.tar.gz --no-check-certificate
+wget http://caia.swin.edu.au/urp/newtcp/tools/caia_iperf208_1.1.patch
 tar -xf iperf-2.0.9.tar.gz
 cd iperf-2.0.9
-patch -p1 < iperf-2.0.9.patch
+patch -p1 < ../caia_iperf208_1.1.patch
+# Fix the small patch error that appears, then:
 ./configure
 make
 make install
