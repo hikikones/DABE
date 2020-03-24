@@ -21,11 +21,14 @@ with open("result") as f:
     for index, line in enumerate(f):
         fields = line.rstrip().split(" ")
 
-        cwnd = int(fields[9].split(":")[1])
-        cwndList.append(cwnd)
-
         timeList.append(time)
         time += step
+
+        for field in fields:
+            if "cwnd" in field:
+                cwnd = int(field.split(":")[1])
+                cwndList.append(cwnd)
+
 
 plt.plot(timeList, cwndList)
 plt.suptitle(title)

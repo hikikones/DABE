@@ -13,7 +13,7 @@ import os
 #########################
 
 class Config:
-    def __init__(self, aqm, aqm_params, cc_algo, bandwidth, duration, title, subtitle, ylabel, xlabel):
+    def __init__(self, aqm, aqm_params, cc_algo, bandwidth, delay, duration):
         self.aqm = aqm
         self.aqm_params = aqm_params
         self.cc_algo = cc_algo
@@ -22,11 +22,12 @@ class Config:
             'sysctl -w net.ipv4.tcp_ecn=1',
         ]
         self.bandwidth = bandwidth
+        self.delay = delay
         self.duration = duration
-        self.title = title
-        self.subtitle = subtitle
-        self.ylabel = ylabel
-        self.xlabel = xlabel
+        self.title = aqm + ' ' + cc_algo
+        self.subtitle = aqm_params
+        self.ylabel = 'CWND (MSS)'
+        self.xlabel = 'Time (s)'
 
 
 #########################
@@ -39,22 +40,40 @@ configs = {
         aqm_params='rate 100mbit latency 30ms burst 64kb',
         cc_algo='reno',
         bandwidth='100mbit',
-        duration=30,
-        title='TBF, NewReno',
-        subtitle='rate 100mbit latency 30ms burst 64kb',
-        ylabel='CWND (MSS)',
-        xlabel='Time (s)'
+        delay='10ms',
+        duration=30
         ),
     'fifo': Config(
         aqm='pfifo',
         aqm_params='limit 32',
         cc_algo='reno',
         bandwidth='5mbit',
-        duration=30,
-        title='FIFO, NewReno',
-        subtitle='pfifo 5mbit limit 32',
-        ylabel='CWND (MSS)',
-        xlabel='Time (s)'
+        delay='10ms',
+        duration=30
+        ),
+    'red': Config(
+        aqm='red',
+        aqm_params='limit 400000 min 30000 max 90000 avpkt 1000 burst 55 ecn adaptive bandwidth 10Mbit',
+        cc_algo='reno',
+        bandwidth='10mbit',
+        delay='10ms',
+        duration=5
+        ),
+    'codel': Config(
+        aqm='codel',
+        aqm_params='limit 32 ecn',
+        cc_algo='reno',
+        bandwidth='10mbit',
+        delay='10ms',
+        duration=5
+        ),
+    'pie': Config(
+        aqm='pie',
+        aqm_params='limit 64 target 15ms tupdate 15ms ecn',
+        cc_algo='reno',
+        bandwidth='100mbit',
+        delay='5ms',
+        duration=10
         ),
 }
 
@@ -81,12 +100,12 @@ def run():
     router = net.get('r0')
 
     print('\nSetting up router:\n')
-    for i in range(1, 3):
-        router.cmdPrint('tc qdisc add dev h%s-eth root handle 1:0 htb default 1' % i)
-        router.cmdPrint('tc class add dev h%s-eth classid 1:1 htb rate %s' % (i, config.bandwidth))
-        router.cmdPrint('tc qdisc add dev h%s-eth parent 1:1 handle 10:1 %s %s' % (i, config.aqm, config.aqm_params))
+    router.cmdPrint('tc qdisc add dev h1-eth root netem delay %s' % config.delay)
+    router.cmdPrint('tc qdisc add dev h2-eth root handle 1:0 htb default 1')
+    router.cmdPrint('tc class add dev h2-eth classid 1:1 htb rate %s ceil %s' % (config.bandwidth, config.bandwidth))
+    router.cmdPrint('tc qdisc add dev h2-eth parent 1:1 handle 10:1 %s %s' % (config.aqm, config.aqm_params))
 
-        # router.cmdPrint('tc qdisc add dev h%s-eth root %s' % (i, qdisc))
+    #router.cmdPrint('tc qdisc add dev h2-eth root %s %s' % (config.aqm, config.aqm_params))
 
     print('\n\nSetting up hosts:\n')
     for cmd in config.host_cmds:
