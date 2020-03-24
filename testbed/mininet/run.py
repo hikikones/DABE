@@ -34,13 +34,24 @@ class Config:
 #########################
 
 configs = {
+    'tbf': Config(
+        aqm='tbf',
+        aqm_params='rate 100mbit latency 30ms burst 64kb',
+        cc_algo='reno',
+        bandwidth='100mbit',
+        duration=30,
+        title='TBF, NewReno',
+        subtitle='rate 100mbit latency 30ms burst 64kb',
+        ylabel='CWND (MSS)',
+        xlabel='Time (s)'
+        ),
     'fifo': Config(
         aqm='pfifo',
         aqm_params='limit 32',
         cc_algo='reno',
         bandwidth='5mbit',
         duration=30,
-        title='FIFO NewReno',
+        title='FIFO, NewReno',
         subtitle='pfifo 5mbit limit 32',
         ylabel='CWND (MSS)',
         xlabel='Time (s)'
@@ -51,7 +62,7 @@ configs = {
 ## Chosen Config
 #########################
 
-config = configs['fifo']
+config = configs['tbf']
 
 
 
