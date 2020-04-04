@@ -13,19 +13,20 @@ import os
 #########################
 
 class Config:
-    def __init__(self, aqm, aqm_params, cc_algo, bandwidth, delay, duration):
+    def __init__(self, aqm, aqm_params, cc_algo, limit, bandwidth, delay, duration):
         self.aqm = aqm
-        self.aqm_params = aqm_params
+        self.aqm_params = "limit {lmt} {params}".format(lmt=limit, params=aqm_params)
         self.cc_algo = cc_algo
         self.host_cmds = [
             'sysctl -w net.ipv4.tcp_congestion_control=%s' % cc_algo,
             'sysctl -w net.ipv4.tcp_ecn=1',
         ]
+        self.limit = limit
         self.bandwidth = bandwidth
         self.delay = delay
         self.duration = duration
         self.title = aqm + ' ' + cc_algo
-        self.subtitle = aqm_params
+        self.subtitle = self.aqm_params
         self.ylabel = 'CWND (MSS)'
         self.xlabel = 'Time (s)'
 
@@ -35,44 +36,40 @@ class Config:
 #########################
 
 configs = {
-    'tbf': Config(
-        aqm='tbf',
-        aqm_params='rate 100mbit latency 30ms burst 64kb',
-        cc_algo='reno',
-        bandwidth='100mbit',
-        delay='10ms',
-        duration=30
-        ),
     'fifo': Config(
         aqm='pfifo',
-        aqm_params='limit 32',
+        aqm_params='',
         cc_algo='reno',
+        limit=32,
         bandwidth='5mbit',
         delay='10ms',
-        duration=30
+        duration=10
         ),
     'red': Config(
         aqm='red',
-        aqm_params='limit 400000 min 30000 max 90000 avpkt 1000 burst 55 ecn adaptive bandwidth 10Mbit',
+        aqm_params='min 30000 max 90000 avpkt 1000 burst 55 ecn adaptive bandwidth 10Mbit',
         cc_algo='reno',
+        limit=400000,
         bandwidth='10mbit',
         delay='10ms',
         duration=5
         ),
     'codel': Config(
         aqm='codel',
-        aqm_params='limit 32 ecn',
+        aqm_params='ecn',
         cc_algo='reno',
+        limit=32,
         bandwidth='10mbit',
         delay='10ms',
         duration=5
         ),
     'pie': Config(
         aqm='pie',
-        aqm_params='limit 64 target 15ms tupdate 15ms ecn',
+        aqm_params='target 15ms tupdate 15ms ecn',
         cc_algo='reno',
+        limit=64,
         bandwidth='100mbit',
-        delay='5ms',
+        delay='50ms',
         duration=10
         ),
 }
@@ -81,7 +78,7 @@ configs = {
 ## Chosen Config
 #########################
 
-config = configs['tbf']
+config = configs['fifo']
 
 
 
@@ -98,14 +95,31 @@ def run():
     sender = net.get('h1')
     receiver = net.get('h2')
     router = net.get('r0')
+    router_interfaces = ['h1-eth', 'h2-eth']
 
     print('\nSetting up router:\n')
-    router.cmdPrint('tc qdisc add dev h1-eth root netem delay %s' % config.delay)
-    router.cmdPrint('tc qdisc add dev h2-eth root handle 1:0 htb default 1')
-    router.cmdPrint('tc class add dev h2-eth classid 1:1 htb rate %s ceil %s' % (config.bandwidth, config.bandwidth))
-    router.cmdPrint('tc qdisc add dev h2-eth parent 1:1 handle 10:1 %s %s' % (config.aqm, config.aqm_params))
+    ingress = (
+        "ip link add name {pface} type ifb;"
+        "tc qdisc del dev {iface} ingress;"
+        "tc qdisc add dev {iface} handle ffff: ingress;"
+        "tc qdisc del dev {pface} root;"
+        "tc qdisc add dev {pface} root {aqm} {params};"
+        "ip link set dev {pface} up;"
+        "tc filter add dev {iface} parent ffff: protocol all prio 10 u32 match u32 0 0"
+            " flowid 1:1 action mirred egress redirect dev {pface};"
+    )
 
-    #router.cmdPrint('tc qdisc add dev h2-eth root %s %s' % (config.aqm, config.aqm_params))
+    egress = (
+        "tc qdisc del dev {iface} root; "
+        "tc qdisc add dev {iface} root handle 1: htb default 10; "
+        "tc class add dev {iface} parent 1: classid 1:10 htb rate {rate} ceil {rate}; "
+        "tc qdisc add dev {iface} parent 1:10 handle 20: netem delay {delay} limit {queue}; "
+    )
+
+    for intf in router_interfaces:
+        router.cmdPrint(ingress.format(iface=intf, pface=intf+'-ifb', aqm=config.aqm, params=config.aqm_params))
+        router.cmdPrint(egress.format(iface=intf, rate=config.bandwidth, delay=config.delay, queue=config.limit))
+
 
     print('\n\nSetting up hosts:\n')
     for cmd in config.host_cmds:
@@ -118,7 +132,7 @@ def run():
 
     print('\n\nStarting experiment... %s second(s).\n' % config.duration)
     receiver.cmdPrint('iperf -s &')
-    sender.cmdPrint('iperf -t %s -b %s -c %s &' % (config.duration * 2, config.bandwidth, receiver.IP()))
+    sender.cmdPrint('iperf -t %s -c %s &' % (config.duration * 2, receiver.IP()))
     sender.cmd('ss -i dst %s > test' % receiver.IP())
 
     time = 0
