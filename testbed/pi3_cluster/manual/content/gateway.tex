@@ -99,7 +99,7 @@ Go into the \lstinline{experiment} folder and prepare to edit the \lstinline{con
 
 Due to the restricted physical set up as shown in \ref{fig:pi3cluster} and discussed in \ref{topology}, virtual interfaces have been used extensively, particularly on the router. This introduced a conflict to the TEACUP codebase, as it assigns a name to each interface before performing network logging with \lstinline{tcpdump}. However, this name is not unique since both the controller and experiment network shares the same interface, resulting in a \lstinline{duplicate handle error} from TEACUP. A slight adjustment to the codebase was therefore necessary.
 
-Applying the following "band-aid" to the TEACUP codebase fixes the error:
+Applying the following "band-aid" to the \lstinline{loggers.py} file in TEACUP should fix the error:
 
 \begin{minted}{bash}
 --- teacup-1.1/loggers.py
@@ -123,20 +123,29 @@ Applying the following "band-aid" to the TEACUP codebase fixes the error:
             env.host_string,
 \end{minted}
 
-In additon, TEACUP checks if the \lstinline{sysctl} variable \lstinline{net.inet.tcp.reass.overflows} exists. This does not exist in the FreeBSD version that we are using. Simply comment the check out for an easy fix:
+In additon, a few changes to the \lstinline{hostsetup.py} file in TEACUP must be done. TEACUP checks if the \lstinline{sysctl} variable \lstinline{net.inet.tcp.reass.overflows} exists, which it does not for the FreeBSD version that we are using. The default sender and receiver buffer on FreeBSD hosts must also be set to a higher value, otherwise TEACUP produces results with a capped \gls{cwnd} value. The changes are easily done as follows:
 
 \begin{minted}{bash}
 --- teacup-1.1/hostsetup.py
 +++ teacup-1.1-modified/hostsetup.py
 @@ -858,7 +858,7 @@
-
-    if htype == 'FreeBSD':
-        # record the number of reassembly queue overflows
--       run('sysctl net.inet.tcp.reass.overflows')
-+       #run('sysctl net.inet.tcp.reass.overflows')
-
-        # disable auto-tuning of receive buffer
-        run('sysctl net.inet.tcp.recvbuf_auto=0')
+ 
+     if htype == 'FreeBSD':
+         # record the number of reassembly queue overflows
+-        run('sysctl net.inet.tcp.reass.overflows')
++        #run('sysctl net.inet.tcp.reass.overflows')
+ 
+         # disable auto-tuning of receive buffer
+         run('sysctl net.inet.tcp.recvbuf_auto=0')
+@@ -869,6 +869,8 @@
+         # send and receiver buffer max (2MB by default on FreeBSD 9.2 anyway)
+         run('sysctl net.inet.tcp.sendbuf_max=2097152')
+         run('sysctl net.inet.tcp.recvbuf_max=2097152')
++        run('sysctl net.inet.tcp.recvspace=655360')
++        run('sysctl net.inet.tcp.sendspace=327680')
+ 
+         # clear host cache quickly, otherwise successive TCP connections will
+         # start with ssthresh and cwnd from the end of most recent tcp
 \end{minted}
 
-Finally, the tool \lstinline{spp} does not run on the Raspberry Pi 3 or ARM architecture at all, only displaying the helpful message \lstinline{aborting} when running it. TEACUP uses this tool to calculate \gls{rtt}, and fortunately is only needed when analyzing the results. In other words, the experiment data can easily be copied over to an x86 machine where \lstinline{spp} works, and then be analyzed from there. That is, follow the install instructions above from \ref{teacup_gateway} again as normal, but on an x86 machine instead.
+Finally, the tool \lstinline{spp} does not run on the Raspberry Pi 3 or ARM architecture at all, only displaying the helpful message "\lstinline{aborting}" when running it. TEACUP uses this tool to calculate \gls{rtt}, and fortunately is only needed when analyzing the results. In other words, the experiment data can easily be copied over to an x86 machine where \lstinline{spp} works, and then be analyzed from there. That is, follow the install instructions above from \ref{teacup_gateway} again as normal, but on an x86 machine instead.
