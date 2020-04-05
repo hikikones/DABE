@@ -52,16 +52,16 @@ configs = {
         limit=400000,
         bandwidth='10mbit',
         delay='10ms',
-        duration=5
+        duration=10
         ),
     'codel': Config(
         aqm='codel',
         aqm_params='ecn',
         cc_algo='reno',
         limit=32,
-        bandwidth='10mbit',
+        bandwidth='5mbit',
         delay='10ms',
-        duration=5
+        duration=10
         ),
     'pie': Config(
         aqm='pie',
