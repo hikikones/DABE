@@ -9,6 +9,28 @@
  * SIGCOMM '88, p. 328.
  */
 
+#define RENOTCP_BETA_SCALE 1024 /* Scale factor beta calculation
+                                 * max_cwnd = snd_cwnd * beta
+                                 */
+/* beta with loss during CA */ 
+static int beta __read_mostly = 512;
+/* beta with loss during SS */
+static int ss_beta __read_mostly = 512;
+/* beta with ECN during CA */ 
+static int abe_beta __read_mostly = 819;
+/* beta with ECN during SS */ 
+static int abe_ss_beta __read_mostly = 819;
+
+/* Note parameters that are used for precomputing scale factors are read-only */
+module_param(beta, int, 0644);
+MODULE_PARM_DESC(beta, "beta for multiplicative decrease in CA without ECN");
+module_param(ss_beta, int, 0644);
+MODULE_PARM_DESC(ss_beta, "beta for multiplicative decrease in SS without ECN");
+module_param(abe_beta, int, 0644);
+MODULE_PARM_DESC(abe_beta, "beta for multiplicative decrease in CA with ECN");
+module_param(abe_ss_beta, int, 0644);
+MODULE_PARM_DESC(abe_ss_beta, "beta for multiplicative decrease in SS with ECN");
+
 void tcp_reno_cong_avoid(struct sock *sk, u32 ack, u32 acked)
 {
 	struct tcp_sock *tp = tcp_sk(sk);
@@ -31,7 +53,31 @@ u32 tcp_reno_ssthresh(struct sock *sk)
 {
 	const struct tcp_sock *tp = tcp_sk(sk);
 
-	return max(tp->snd_cwnd >> 1U, 2U);
+	//return max(tp->snd_cwnd >> 1U, 2U);
+
+	/* Below code applies Alternative Backoff with ECN (ABE) from   
+	* Naeem Khademi et al., "Alternative Backoff: Achieving Low Latency 
+	* and High Throughput with ECN and AQM", IFIP NETWORKING 2017 and also in 
+	* https://tools.ietf.org/html/draft-ietf-tcpm-alternativebackoff-ecn
+	*/
+
+	int used_beta;
+
+	if (sock_net(sk)->ipv4.sysctl_tcp_ecn > 0) {
+		/* if ECN enabled and we see ECE */
+		if (tp->snd_cwnd < tp->snd_ssthresh)
+		used_beta = abe_ss_beta;
+	else
+		used_beta = abe_beta;
+	} else {
+		/* if we see packet loss */
+		if (tp->snd_cwnd < tp->snd_ssthresh)
+			used_beta = ss_beta;
+		else
+			used_beta = beta;
+	}
+
+	return max((tp->snd_cwnd * used_beta) / RENOTCP_BETA_SCALE, 2U);
 }
 
 u32 tcp_reno_undo_cwnd(struct sock *sk)
