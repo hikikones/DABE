@@ -15,7 +15,7 @@ import os
 class Config:
     def __init__(self, aqm, aqm_params, cc_algo, limit, bandwidth, delay, duration):
         self.aqm = aqm
-        self.aqm_params = "limit {lmt} {params}".format(lmt=limit, params=aqm_params)
+        self.aqm_params = "limit %s %s" % (limit, aqm_params)
         self.cc_algo = cc_algo
         self.host_cmds = [
             'sysctl -w net.ipv4.tcp_congestion_control=%s' % cc_algo,
@@ -27,8 +27,6 @@ class Config:
         self.duration = duration
         self.title = aqm + ' ' + cc_algo
         self.subtitle = self.aqm_params
-        self.ylabel = 'CWND (MSS)'
-        self.xlabel = 'Time (s)'
 
 
 #########################
@@ -42,15 +40,6 @@ configs = {
         cc_algo='reno',
         limit=32,
         bandwidth='5mbit',
-        delay='10ms',
-        duration=10
-        ),
-    'red': Config(
-        aqm='red',
-        aqm_params='min 30000 max 90000 avpkt 1000 burst 55 ecn adaptive bandwidth 10Mbit',
-        cc_algo='reno',
-        limit=400000,
-        bandwidth='10mbit',
         delay='10ms',
         duration=10
         ),
@@ -117,8 +106,10 @@ def run():
     )
 
     for intf in router_interfaces:
-        router.cmdPrint(ingress.format(iface=intf, pface=intf+'-ifb', aqm=config.aqm, params=config.aqm_params))
-        router.cmdPrint(egress.format(iface=intf, rate=config.bandwidth, delay=config.delay, queue=config.limit))
+        router.cmdPrint(ingress.format(
+            iface=intf, pface=intf+'-ifb', aqm=config.aqm, params=config.aqm_params))
+        router.cmdPrint(egress.format(
+            iface=intf, rate=config.bandwidth, delay=config.delay, queue=config.limit))
 
 
     print('\n\nSetting up hosts:\n')
@@ -131,19 +122,20 @@ def run():
     #########################
 
     print('\n\nStarting experiment... %s second(s).\n' % config.duration)
+    result = '/tmp/result'
     receiver.cmdPrint('iperf -s &')
     sender.cmdPrint('iperf -t %s -c %s &' % (config.duration * 2, receiver.IP()))
-    sender.cmd('ss -i dst %s > test' % receiver.IP())
+    sender.cmd('ss -i dst %s > %s' % (receiver.IP(), result))
 
     time = 0
     step = 0.01
 
     while time <= config.duration:
-        sender.cmd('ss -i dst %s | grep cwnd >> test' % receiver.IP())
+        sender.cmd('ss -i dst %s | grep cwnd >> %s' % (receiver.IP(), result))
         sleep(step)
         time += step
 
-    sender.cmdPrint('cat test | grep cwnd > result')
+    sender.cmdPrint('cat test | grep rtt > %s' % result)
 
 
     #########################
@@ -160,7 +152,7 @@ def run():
 
 
 def plot():
-    os.system('python3 plot.py "%s" "%s" "%s" "%s"' % (config.title, config.subtitle, config.ylabel, config.xlabel))
+    os.system('python3 plot.py "%s" "%s"' % (config.title, config.subtitle))
 
 
 class LinuxRouter( Node ):

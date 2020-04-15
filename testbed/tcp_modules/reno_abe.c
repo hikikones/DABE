@@ -31,6 +31,30 @@ MODULE_PARM_DESC(abe_beta, "beta for multiplicative decrease in CA with ECN");
 module_param(abe_ss_beta, int, 0644);
 MODULE_PARM_DESC(abe_ss_beta, "beta for multiplicative decrease in SS with ECN");
 
+struct reno_abe {
+	s32 rtt;
+	s32 rtt_prev;
+	s32 rtt_delta;
+	int rtt_delta_perc;
+};
+
+static void tcp_reno_abe_acked(struct sock *sk, const struct ack_sample *sample)
+{
+	//const struct tcp_sock *tp = tcp_sk(sk);
+	struct reno_abe *ca = inet_csk_ca(sk);
+
+	if (sample->rtt_us <= 0)
+		return;
+
+	ca->rtt_prev = ca->rtt;
+	ca->rtt = sample->rtt_us;
+	ca->rtt_delta = ca->rtt - ca->rtt_prev;
+	ca->rtt_delta_perc = 100 * ca->rtt_prev / ca->rtt;
+
+	// printk("ACKS: %u\t   RTT: %d\tDELTA: %d\n", sample->pkts_acked, ca->rtt, ca->rtt_delta);
+	// printk("RATIO: %d", ca->rtt_delta_perc);
+}
+
 void tcp_reno_cong_avoid(struct sock *sk, u32 ack, u32 acked)
 {
 	struct tcp_sock *tp = tcp_sk(sk);
@@ -61,12 +85,19 @@ u32 tcp_reno_ssthresh(struct sock *sk)
 	* https://tools.ietf.org/html/draft-ietf-tcpm-alternativebackoff-ecn
 	*/
 
+	struct reno_abe *ca = inet_csk_ca(sk);
 	int used_beta;
 
 	if (sock_net(sk)->ipv4.sysctl_tcp_ecn > 0) {
 		/* if ECN enabled and we see ECE */
-		if (tp->snd_cwnd < tp->snd_ssthresh)
-		used_beta = abe_ss_beta;
+		if (tp->snd_cwnd < tp->snd_ssthresh) {
+			used_beta = abe_ss_beta;
+			
+			printk("BETA: %d\n", used_beta);
+			printk("RTT: %d\tDELTA: %d \t RATIO: %d\n", ca->rtt, ca->rtt_delta, ca->rtt_delta_perc);
+			used_beta = used_beta * ca->rtt_delta_perc / 100;
+			printk("BETA AFTER: %d\n\n", used_beta);
+		}
 	else
 		used_beta = abe_beta;
 	} else {
@@ -94,11 +125,12 @@ struct tcp_congestion_ops tcp_reno = {
 	.ssthresh	= tcp_reno_ssthresh,
 	.cong_avoid	= tcp_reno_cong_avoid,
 	.undo_cwnd	= tcp_reno_undo_cwnd,
+	.pkts_acked	= tcp_reno_abe_acked,
 };
 
 static int __init renotcp_register(void)
 {
-	printk("\n\nHelloooooooooooooooooo!!\n\n");
+	BUILD_BUG_ON(sizeof(struct reno_abe) > ICSK_CA_PRIV_SIZE);
 	return tcp_register_congestion_control(&tcp_reno);
 }
 
