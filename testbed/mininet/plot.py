@@ -5,15 +5,16 @@ import sys
 
 
 args = sys.argv[1:]
-title = args[0]
-subtitle = args[1]
+result = args[0]
+title = args[1]
+subtitle = args[2]
 
 timeList = []
 cwndList = []
 rttList = []
 rateList = []
 
-with open("result") as file:
+with open(result) as file:
     time = 0
     step = 0.01
 

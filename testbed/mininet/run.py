@@ -122,16 +122,17 @@ def run():
     #########################
 
     print('\n\nStarting experiment... %s second(s).\n' % config.duration)
-    result = '/tmp/result'
+    temp = 'test'
+    result = 'result'
     receiver.cmdPrint('iperf -s &')
     sender.cmdPrint('iperf -t %s -c %s &' % (config.duration * 2, receiver.IP()))
-    sender.cmd('ss -i dst %s > %s' % (receiver.IP(), result))
+    sender.cmd('ss -i dst %s > %s' % (receiver.IP(), temp))
 
     time = 0
     step = 0.01
 
     while time <= config.duration:
-        sender.cmd('ss -i dst %s | grep cwnd >> %s' % (receiver.IP(), result))
+        sender.cmd('ss -i dst %s | grep cwnd >> %s' % (receiver.IP(), temp))
         sleep(step)
         time += step
 
@@ -148,11 +149,12 @@ def run():
     sender.cmdPrint('pkill iperf')
     receiver.cmdPrint('pkill iperf')
     net.stop()
-    plot()
+    plot(result)
+    os.system('rm %s %s' % (temp, result))
 
 
-def plot():
-    os.system('python3 plot.py "%s" "%s"' % (config.title, config.subtitle))
+def plot(result):
+    os.system('python3 plot.py %s "%s" "%s"' % (result, config.title, config.subtitle))
 
 
 class LinuxRouter( Node ):
