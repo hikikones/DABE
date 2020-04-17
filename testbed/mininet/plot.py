@@ -34,7 +34,13 @@ with open(result) as file:
                 rttList.append(rtt)
             
             if "send" in field:
-                rate = float(fields[index + 1].split("M")[0])
+                rateField = fields[index + 1]
+                rate = None
+                if "Mbps" in rateField:
+                    rate = float(rateField.split("M")[0])
+                elif "Kbps" in rateField:
+                    rate = float(rateField.split("K")[0])
+                    rate /= 1000
                 rateList.append(rate)
 
 
@@ -43,7 +49,7 @@ plt.subplot(3, 1, 1)
 plt.plot(timeList, cwndList)
 plt.suptitle(title)
 plt.title(subtitle, fontsize=10)
-plt.ylabel("CWND (packets)")
+plt.ylabel("CWND (k)")
 
 # RTT plot
 plt.subplot(3, 1, 2)

@@ -38,8 +38,8 @@ configs = {
         aqm='pfifo',
         aqm_params='',
         cc_algo='reno',
-        limit=32,
-        bandwidth='5mbit',
+        limit=64,
+        bandwidth='10mbit',
         delay='10ms',
         duration=10
         ),
@@ -84,38 +84,40 @@ def run():
     sender = net.get('h1')
     receiver = net.get('h2')
     router = net.get('r0')
-    router_interfaces = ['h1-eth', 'h2-eth']
 
     print('\nSetting up router:\n')
+
+    router_interfaces = ['h1-eth', 'h2-eth']
+    tcp_segment_offload = ("ethtool -K {iface} tso off gso off gro off")
     ingress = (
         "ip link add name {pface} type ifb;"
-        "tc qdisc del dev {iface} ingress;"
         "tc qdisc add dev {iface} handle ffff: ingress;"
-        "tc qdisc del dev {pface} root;"
         "tc qdisc add dev {pface} root {aqm} {params};"
         "ip link set dev {pface} up;"
         "tc filter add dev {iface} parent ffff: protocol all prio 10 u32 match u32 0 0"
             " flowid 1:1 action mirred egress redirect dev {pface};"
     )
-
     egress = (
-        "tc qdisc del dev {iface} root; "
-        "tc qdisc add dev {iface} root handle 1: htb default 10; "
-        "tc class add dev {iface} parent 1: classid 1:10 htb rate {rate} ceil {rate}; "
-        "tc qdisc add dev {iface} parent 1:10 handle 20: netem delay {delay} limit {queue}; "
+        "tc qdisc add dev {iface} root handle 1: htb default 10;"
+        "tc class add dev {iface} parent 1: classid 1:10 htb rate {rate} ceil {rate};"
+        "tc qdisc add dev {iface} parent 1:10 handle 20: netem delay {delay} limit {queue};"
     )
 
     for intf in router_interfaces:
-        router.cmdPrint(ingress.format(
-            iface=intf, pface=intf+'-ifb', aqm=config.aqm, params=config.aqm_params))
-        router.cmdPrint(egress.format(
-            iface=intf, rate=config.bandwidth, delay=config.delay, queue=config.limit))
+        router.cmdPrint(tcp_segment_offload.format(iface=intf))
+        router.cmdPrint(ingress.format(iface=intf, pface=intf+'-ifb', aqm=config.aqm, params=config.aqm_params))
+        router.cmdPrint(egress.format(iface=intf, rate=config.bandwidth, delay=config.delay, queue=config.limit))
+
 
 
     print('\n\nSetting up hosts:\n')
-    for cmd in config.host_cmds:
-        sender.cmdPrint(cmd)
-        receiver.cmdPrint(cmd)
+
+    hosts = [sender, receiver]
+
+    for host in hosts:
+        host.cmdPrint(tcp_segment_offload.format(iface=host.intf()))
+        for cmd in config.host_cmds:
+            host.cmdPrint(cmd)
 
     #########################
     ## Start Experiment
@@ -144,10 +146,11 @@ def run():
     #########################
 
     print('\n\nExperiment done.\n')
-    sender.cmdPrint('pkill iperf')
-    receiver.cmdPrint('pkill iperf')
-    sender.cmdPrint('pkill iperf')
-    receiver.cmdPrint('pkill iperf')
+
+    for host in hosts:
+        host.cmdPrint('pkill iperf')
+        host.cmdPrint('pkill iperf')
+    
     net.stop()
     plot(result)
     os.system('rm %s %s' % (temp, result))
