@@ -47,8 +47,8 @@ configs = {
         aqm='codel',
         aqm_params='ecn',
         cc_algo='reno',
-        limit=32,
-        bandwidth='5mbit',
+        limit=64,
+        bandwidth='10mbit',
         delay='10ms',
         duration=10
         ),
@@ -57,8 +57,8 @@ configs = {
         aqm_params='target 15ms tupdate 15ms ecn',
         cc_algo='reno',
         limit=64,
-        bandwidth='100mbit',
-        delay='50ms',
+        bandwidth='10mbit',
+        delay='10ms',
         duration=10
         ),
 }

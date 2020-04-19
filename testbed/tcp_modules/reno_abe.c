@@ -1,13 +1,8 @@
+#include <linux/kernel.h>
 #include <linux/module.h>
+#include <linux/init.h>
 #include <net/tcp.h>
 
-/*
- * TCP Reno congestion control
- * This is special case used for fallback as well.
- */
-/* This is Jacobson's slow start and congestion avoidance.
- * SIGCOMM '88, p. 328.
- */
 
 #define RENOTCP_BETA_SCALE 1024 /* Scale factor beta calculation
                                  * max_cwnd = snd_cwnd * beta
@@ -31,12 +26,81 @@ MODULE_PARM_DESC(abe_beta, "beta for multiplicative decrease in CA with ECN");
 module_param(abe_ss_beta, int, 0644);
 MODULE_PARM_DESC(abe_ss_beta, "beta for multiplicative decrease in SS with ECN");
 
+#define RTT_SAMPLES 10
+
 struct reno_abe {
-	s32 rtt;
-	s32 rtt_prev;
-	s32 rtt_delta;
-	int rtt_delta_perc;
+	s32 rtts[RTT_SAMPLES];
+	s32 sum;
+	u32 size;
+	u32 front;
+	u32 back;
 };
+
+static s32 average(struct reno_abe *ca)
+{
+	return ca->sum / ca->size;
+}
+
+static s32 simple_moving_average(struct reno_abe *ca)
+{
+	s32 prev_sum = ca->sum - ca->rtts[ca->front];
+	s32 prev_avg = prev_sum / (ca->size-1);
+	s32 ma;
+
+	if (ca->rtts[ca->front] > ca->rtts[ca->back])
+		ma = (ca->rtts[ca->front] - ca->rtts[ca->back]) / ca->size;
+	else
+		ma = (ca->rtts[ca->back] - ca->rtts[ca->front]) / ca->size;
+
+	return prev_avg + ma;
+}
+
+static s32 weighted_moving_average(struct reno_abe *ca, s32 prev_weight, s32 curr_weight)
+{
+    s32 sum = 0;
+    s32 index = ca->back;
+	s32 curr_rtt = ca->rtts[ca->front];
+	s32 prev_avg;
+
+    s32 i = 0;
+    while (i < ca->size-1) {
+        sum += ca->rtts[index];
+        index++;
+        if (index == ca->size) index = 0;
+		i++;
+    }
+
+	prev_avg = sum / (ca->size-1);
+    return prev_avg * prev_weight / 100 + curr_rtt * curr_weight / 100;
+}
+
+static void print_test(struct reno_abe *ca)
+{
+	s32 i;
+	printk("RTTS: ");
+	for (i = 0; i < ca->size; i++) {
+		printk(KERN_CONT "%d\t", ca->rtts[i]);
+	}
+	printk("RTTS: ");
+	for (i = 0; i < ca->size; i++) {
+		if (ca->front == i)     printk(KERN_CONT "F    \t");
+        else if (ca->back == i)  printk(KERN_CONT "B    \t");
+        else                    printk(KERN_CONT "     \t");
+	}
+	printk("SUM: %d", ca->sum);
+	printk("AVG: %d", average(ca));
+	printk("SMA: %d", simple_moving_average(ca));
+	printk("WMA: %d\n", weighted_moving_average(ca, 80, 20));
+}
+
+static void tcp_reno_abe_init(struct sock *sk)
+{
+	struct reno_abe *ca = inet_csk_ca(sk);
+	ca->sum = 0;
+	ca->size = 0;
+	ca->front = 0;
+	ca->back = 0;
+}
 
 static void tcp_reno_abe_acked(struct sock *sk, const struct ack_sample *sample)
 {
@@ -46,14 +110,41 @@ static void tcp_reno_abe_acked(struct sock *sk, const struct ack_sample *sample)
 	if (sample->rtt_us <= 0)
 		return;
 
-	ca->rtt_prev = ca->rtt;
-	ca->rtt = sample->rtt_us;
-	ca->rtt_delta = ca->rtt - ca->rtt_prev;
-	ca->rtt_delta_perc = 100 * ca->rtt_prev / ca->rtt;
+	ca->sum += sample->rtt_us;
 
-	// printk("ACKS: %u\t   RTT: %d\tDELTA: %d\n", sample->pkts_acked, ca->rtt, ca->rtt_delta);
-	// printk("RATIO: %d", ca->rtt_delta_perc);
+	if (ca->size > 0) {
+		ca->front++;
+	}
+
+    if (ca->size < RTT_SAMPLES) {
+		ca->rtts[ca->front] = sample->rtt_us;
+        ca->size++;
+        return;
+    }
+
+    if (ca->front == RTT_SAMPLES) {
+		ca->front = 0;
+	}
+
+	ca->sum -= ca->rtts[ca->back];
+    ca->rtts[ca->front] = sample->rtt_us;
+    ca->back = ca->front + 1;
+
+    if (ca->back == RTT_SAMPLES) {
+		ca->back = 0;
+	}
+
+	//print_test(ca);
 }
+
+
+/*
+ * TCP Reno congestion control
+ * This is special case used for fallback as well.
+ */
+/* This is Jacobson's slow start and congestion avoidance.
+ * SIGCOMM '88, p. 328.
+ */
 
 void tcp_reno_cong_avoid(struct sock *sk, u32 ack, u32 acked)
 {
@@ -92,14 +183,9 @@ u32 tcp_reno_ssthresh(struct sock *sk)
 		/* if ECN enabled and we see ECE */
 		if (tp->snd_cwnd < tp->snd_ssthresh) {
 			used_beta = abe_ss_beta;
-			
-			printk("BETA: %d\n", used_beta);
-			printk("RTT: %d\tDELTA: %d \t RATIO: %d\n", ca->rtt, ca->rtt_delta, ca->rtt_delta_perc);
-			used_beta = used_beta * ca->rtt_delta_perc / 100;
-			printk("BETA AFTER: %d\n\n", used_beta);
 		}
-	else
-		used_beta = abe_beta;
+		else
+			used_beta = abe_beta;
 	} else {
 		/* if we see packet loss */
 		if (tp->snd_cwnd < tp->snd_ssthresh)
@@ -107,6 +193,16 @@ u32 tcp_reno_ssthresh(struct sock *sk)
 		else
 			used_beta = beta;
 	}
+
+	printk("BETA: %d", used_beta);
+	int beta_avg = (used_beta * average(ca)) / ca->rtts[ca->front];
+	int beta_sma = (used_beta * simple_moving_average(ca)) / ca->rtts[ca->front];
+	int beta_wma = (used_beta * weighted_moving_average(ca, 20, 80)) / ca->rtts[ca->front];
+	printk("BETA AVG: %d", beta_avg);
+	printk("BETA SMA: %d", beta_sma);
+	printk("BETA WMA: %d", beta_wma);
+
+	//print_test(ca);
 
 	return max((tp->snd_cwnd * used_beta) / RENOTCP_BETA_SCALE, 2U);
 }
@@ -125,6 +221,7 @@ struct tcp_congestion_ops tcp_reno = {
 	.ssthresh	= tcp_reno_ssthresh,
 	.cong_avoid	= tcp_reno_cong_avoid,
 	.undo_cwnd	= tcp_reno_undo_cwnd,
+	.init		= tcp_reno_abe_init,
 	.pkts_acked	= tcp_reno_abe_acked,
 };
 
@@ -142,7 +239,4 @@ static void __exit renotcp_unregister(void)
 module_init(renotcp_register);
 module_exit(renotcp_unregister);
 
-MODULE_AUTHOR("Danny");
 MODULE_LICENSE("GPL");
-MODULE_DESCRIPTION("RENO TCP ABE");
-MODULE_VERSION("2.3");
