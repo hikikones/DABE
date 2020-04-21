@@ -77,8 +77,7 @@ def run():
     ## Network Setup
     #########################
 
-    topo = NetworkTopo()
-    net = Mininet( topo=topo )
+    net = Mininet( topo=NetworkTopo() )
     net.start()
 
     sender = net.get('h1')
@@ -109,7 +108,6 @@ def run():
         router.cmdPrint(egress.format(iface=intf, rate=config.bandwidth, delay=config.delay, queue=config.limit))
 
 
-
     print('\n\nSetting up hosts:\n')
 
     hosts = [sender, receiver]
@@ -124,22 +122,27 @@ def run():
     #########################
 
     print('\n\nStarting experiment... %s second(s).\n' % config.duration)
-    temp = 'test'
+
+    samples = []
+    temp = 'temp'
     result = 'result'
     receiver.cmdPrint('iperf -s &')
     sender.cmdPrint('iperf -t %s -c %s &' % (config.duration * 2, receiver.IP()))
-    sender.cmd('ss -i dst %s > %s' % (receiver.IP(), temp))
 
     time = 0
     step = 0.01
 
     while time <= config.duration:
-        sender.cmd('ss -i dst %s | grep cwnd >> %s' % (receiver.IP(), temp))
+        sample = sender.cmd('ss -i dst %s | grep cwnd' % receiver.IP())
+        samples.append(sample)
         sleep(step)
         time += step
-
-    sender.cmdPrint('cat test | grep rtt > %s' % result)
-
+    
+    with open(temp, "w") as file:
+        for sample in samples:
+            file.write(sample)
+    
+    os.system('cat %s | grep rtt > %s' % (temp, result))
 
     #########################
     ## End Experiment
@@ -152,12 +155,13 @@ def run():
         host.cmdPrint('pkill iperf')
     
     net.stop()
-    plot(result)
+    plot(result, step)
     os.system('rm %s %s' % (temp, result))
 
 
-def plot(result):
-    os.system('python3 plot.py %s "%s" "%s"' % (result, config.title, config.subtitle))
+def plot(result, step):
+    os.system('python3 plot.py %s %s "%s" "%s"'
+        % (result, step, config.title, config.subtitle))
 
 
 class LinuxRouter( Node ):

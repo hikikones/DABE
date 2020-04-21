@@ -6,8 +6,9 @@ import sys
 
 args = sys.argv[1:]
 result = args[0]
-title = args[1]
-subtitle = args[2]
+step = float(args[1])
+title = args[2]
+subtitle = args[3]
 
 timeList = []
 cwndList = []
@@ -16,7 +17,6 @@ rateList = []
 
 with open(result) as file:
     time = 0
-    step = 0.01
 
     for line in file:
         fields = line.rstrip().split(" ")
