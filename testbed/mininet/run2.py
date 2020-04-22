@@ -41,7 +41,7 @@ configs = {
         limit=64,
         bandwidth='10mbit',
         delay='10ms',
-        duration=5
+        duration=10
         ),
     'codel': Config(
         aqm='codel',
@@ -59,7 +59,7 @@ configs = {
         limit=64,
         bandwidth='10mbit',
         delay='10ms',
-        duration=5
+        duration=10
         ),
 }
 
@@ -123,14 +123,6 @@ def run():
         "tc qdisc add dev {iface} parent 1:10 netem delay {delay} limit {queue};"
     )
 
-    # ok = (
-    #     "tc qdisc add dev h1-eth root {aqm} {params};"
-    #     "tc qdisc add dev h2-eth root netem delay {delay} limit {queue} rate 10mbit;"
-    # )
-
-    # router.cmdPrint(ok.format(
-    #         aqm=config.aqm, params=config.aqm_params, delay=config.delay, queue=config.limit))
-
     for intf in router_interfaces:
         router.cmdPrint(tcp_segment_offload.format(iface=intf))
         router.cmdPrint(ifb.format(iface=intf, pface=intf+'-ifb'))
@@ -190,7 +182,7 @@ def run():
         host.cmdPrint('pkill iperf')
     
     net.stop()
-    #plot(result, step)
+    plot(result, step)
     os.system('rm %s %s' % (temp, result))
 
 

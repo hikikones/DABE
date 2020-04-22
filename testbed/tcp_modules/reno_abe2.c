@@ -3,8 +3,6 @@
 #include <linux/init.h>
 #include <net/tcp.h>
 
-#include <linux/slab.h>
-
 
 #define RENOTCP_BETA_SCALE 1024 /* Scale factor beta calculation
                                  * max_cwnd = snd_cwnd * beta
@@ -39,10 +37,9 @@ MODULE_PARM_DESC(abe_ss_beta, "beta for multiplicative decrease in SS with ECN")
 	- Reset both values above after changing ssthresh (tcp_reno_ssthresh())
 	- BDP
 	- Optimal delay threshold on AQM (i.e. target on CoDel and PIE)
-	- Set delay threshold to specified AQM target.
+	- Set delay threshold to speciofied AQM target.
 
 	- For every ACK, check for ECE flag. If ECE, mark cwnd.
-		- Compute new cwnd using dctcp formula (alpha)
 	- Gradient of gradient?
 		- Compute gradient from min and max rtts
 		- Collect gradient and compare with previous
@@ -50,13 +47,12 @@ MODULE_PARM_DESC(abe_ss_beta, "beta for multiplicative decrease in SS with ECN")
 
 struct reno_abe {
 	s32 rtts[RTT_SAMPLES];
-	//s32 *rtts2;
 	s32 sum;
 	u32 size;
 	u32 front;
 	u32 back;
 
-	s32 grad;
+	s32 gradient;
 	s32 sma;
 	s32 ema;
 
@@ -121,7 +117,7 @@ struct reno_abe {
 // 	//return 0; // TODO
 // }
 
-static s32 gradient_sum(struct reno_abe *ca)
+static s32 gradient(struct reno_abe *ca)
 {
 	s32 grad_sum = 0;
     s32 index = ca->front;
@@ -163,42 +159,28 @@ static void print_test(struct reno_abe *ca)
 	// printk("WMA: %d", exponential_moving_average(ca, 20));
 	// printk("\n");
 	//printk("SUM: %d", ca->sum);
-	printk("GRAD: %d", ca->grad);
-	printk("GSUM: %d", gradient_sum(ca));
+	printk("GRADIENT: %d", gradient(ca));
 	printk("CWND: %u", ca->cwnd_mark);
 	printk("SMA: %d", ca->sma);
 	printk("EMA: %d", ca->ema);
 	printk("\n");
 }
 
-// static void tcp_reno_abe_init(struct sock *sk)
-// {
-// 	struct reno_abe *ca = inet_csk_ca(sk);
+static void tcp_reno_abe_init(struct sock *sk)
+{
+	struct reno_abe *ca = inet_csk_ca(sk);
+	ca->sum = 0;
+	ca->size = 0;
+	ca->front = 0;
+	ca->back = 0;
 
-// 	//if (!ca->rtts2) ca->rtts2 = kmalloc(RTT_SAMPLES * sizeof(s32), GFP_NOWAIT | __GFP_NOWARN);
-// 	if (!ca->rtts) ca->rtts = kmalloc(RTT_SAMPLES * sizeof(s32), GFP_KERNEL);
+	ca->gradient = 0;
+	ca->sma = 0;
+	ca->ema = 0;
 
-// 	ca->sum = 0;
-// 	ca->size = 0;
-// 	ca->front = 0;
-// 	ca->back = 0;
-
-// 	ca->gradient = 0;
-// 	ca->sma = 0;
-// 	ca->ema = 0;
-
-// 	ca->cwnd_mark = 0;
-// 	ca->base_rtt = 0;
-
-// 	printk("INIT!!!!!!");
-// }
-
-// static void tcp_reno_abe_release(struct sock *sk)
-// {
-// 	struct reno_abe *ca = inet_csk_ca(sk);
-
-// 	kfree(ca->rtts);
-// }
+	ca->cwnd_mark = 0;
+	ca->base_rtt = 0;
+}
 
 static void tcp_reno_abe_acked(struct sock *sk, const struct ack_sample *sample)
 {
@@ -209,7 +191,7 @@ static void tcp_reno_abe_acked(struct sock *sk, const struct ack_sample *sample)
 		return;
 
 	ca->sum += sample->rtt_us;
-	ca->grad = sample->rtt_us - ca->rtts[ca->front];
+	ca->gradient = sample->rtt_us - ca->rtts[ca->front];
 	ca->ema = (ca->ema * 875) / 1000 + (sample->rtt_us * 125) / 1000;
 
 	if (ca->size > 0) {
@@ -237,7 +219,7 @@ static void tcp_reno_abe_acked(struct sock *sk, const struct ack_sample *sample)
 
 	ca->sma = ca->sum / ca->size;
 
-	//print_test(ca);
+	print_test(ca);
 
 	// if (gradient(ca) >= 1500 && ca->cwnd_mark == 0) {
 	// 	print_test(ca);
@@ -269,17 +251,15 @@ void tcp_reno_abe_cwnd_event(struct sock *sk, enum tcp_ca_event ev) {
 	case CA_EVENT_CWND_RESTART:
 		// Peak
 		//printk("RESTART -> CWND: %d \t RTT %d \t", tp->snd_cwnd, ca->rtts[ca->front]);
-		printk("PEAK");
-		print_test(ca);
+
 		//ca->cwnd_mark = 0;
 		break;
 	case CA_EVENT_COMPLETE_CWR:
 		// Bottom
 		//printk("CWR -> CWND: %d \t RTT %d \t", tp->snd_cwnd, ca->rtts[ca->front]);
-		printk("BOTTOM");
-		print_test(ca);
+		
 		// Reset stuff
-		//ca->cwnd_mark = 0;
+		ca->cwnd_mark = 0;
 		break;
 	case CA_EVENT_ECN_NO_CE:
 	case CA_EVENT_ECN_IS_CE:
@@ -291,13 +271,11 @@ void tcp_reno_abe_cwnd_event(struct sock *sk, enum tcp_ca_event ev) {
 }
 
 void tcp_reno_abe_in_ack_event(struct sock *sk, u32 flags) {
-	struct tcp_sock *tp = tcp_sk(sk);
+	// struct tcp_sock *tp = tcp_sk(sk);
 	// struct reno_abe *ca = inet_csk_ca(sk);
-	if (flags & CA_ACK_ECE) {
+	if (flags == CA_ACK_ECE) {
 		printk("ECE!");
 	}
-	//printk("FLAGS: %u", flags);
-	printk("DEL: %u\tDEL_CE: %u", tp->delivered, tp->delivered_ce);
 }
 
 /*
@@ -390,8 +368,7 @@ struct tcp_congestion_ops tcp_reno = {
 	.ssthresh	= tcp_reno_ssthresh,
 	.cong_avoid	= tcp_reno_cong_avoid,
 	.undo_cwnd	= tcp_reno_undo_cwnd,
-	// .init		= tcp_reno_abe_init,
-	// .release	= tcp_reno_abe_release,
+	.init		= tcp_reno_abe_init,
 	.pkts_acked	= tcp_reno_abe_acked,
 	.cwnd_event	= tcp_reno_abe_cwnd_event,
 	.in_ack_event = tcp_reno_abe_in_ack_event
