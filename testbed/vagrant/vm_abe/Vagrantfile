@@ -1,0 +1,66 @@
+Vagrant.configure("2") do |config|
+
+  config.vm.define "host1" do |host1|
+    host1.vm.box = "ubuntu/bionic64"
+    host1.vm.hostname = "host1"
+    host1.vm.network :private_network,
+      ip: "192.168.1.11",
+      virtualbox__intnet: "lan1"
+    host1.vm.provision "shell" do |s|
+      s.inline = $host_setup
+      s.args = ["192.168.2.0/24", "192.168.1.1"]
+    end
+  end
+
+  config.vm.define "router" do |router|
+    router.vm.box = "ubuntu/bionic64"
+    router.vm.hostname = "router"
+    router.vm.network "private_network",
+      ip: "192.168.1.1",
+      virtualbox__intnet: "lan1"
+    router.vm.network "private_network",
+      ip: "192.168.2.1",
+      virtualbox__intnet: "lan2"
+    router.vm.provision "shell",
+      inline: $router_setup
+  end
+
+  config.vm.define "host2" do |host2|
+    host2.vm.box = "ubuntu/bionic64"
+    host2.vm.hostname = "host2"
+    host2.vm.network :private_network,
+      ip: "192.168.2.22",
+      virtualbox__intnet: "lan2"
+    host2.vm.provision "shell" do |s|
+      s.inline = $host_setup
+      s.args = ["192.168.1.0/24", "192.168.2.1"]
+    end
+  end
+
+end
+
+
+
+$router_setup = <<SCRIPT
+  # Enable IP forwarding
+  sudo sysctl -w net.ipv4.ip_forward=1
+
+  # Enable ECN
+  sudo sysctl -w net.ipv4.tcp_ecn=1
+
+  # QoS
+  sudo tc qdisc add dev enp0s8 root netem delay 20ms rate 10mbit
+  sudo tc qdisc add dev enp0s9 root pie limit 64 target 15ms tupdate 15ms ecn
+SCRIPT
+
+
+$host_setup = <<SCRIPT
+  # Add route
+  sudo ip route add $1 via $2
+
+  # Enable ECN
+  sysctl -w net.ipv4.tcp_ecn=1
+
+  # Tools
+  sudo apt update && sudo apt install -y iperf
+SCRIPT
