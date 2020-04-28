@@ -125,6 +125,8 @@ struct cc_algo newreno_abe_cc_algo = {
 struct newreno_abe {
 	uint32_t beta;
 	uint32_t beta_ecn;
+
+	bool timeout;
 };
 
 static inline struct newreno_abe *
@@ -152,7 +154,6 @@ newreno_abe_cb_destroy(struct cc_var *ccv)
 static void
 newreno_abe_ack_received(struct cc_var *ccv, uint16_t type)
 {
-	printf("ACK!\n");
 	if (type == CC_ACK && !IN_RECOVERY(CCV(ccv, t_flags)) &&
 	    (ccv->flags & CCF_CWND_LIMITED)) {
 		u_int cw = CCV(ccv, snd_cwnd);
@@ -286,13 +287,17 @@ newreno_abe_cong_signal(struct cc_var *ccv, uint32_t type)
 				CCV(ccv, snd_ssthresh) = cwin;
 			ENTER_RECOVERY(CCV(ccv, t_flags));
 		}
+		nreno->timeout = true;
 		break;
 	case CC_ECN:
 		if (!IN_CONGRECOVERY(CCV(ccv, t_flags))) {
+			cwin = (nreno->timeout) ? cwin : CCV(ccv, snd_cwnd) - mss * 10;
+			// TODO: fix overflow when snd_cwnd < mss * 10
 			CCV(ccv, snd_ssthresh) = cwin;
 			CCV(ccv, snd_cwnd) = cwin;
 			ENTER_CONGRECOVERY(CCV(ccv, t_flags));
 		}
+		nreno->timeout = false;
 		break;
 	}
 }
