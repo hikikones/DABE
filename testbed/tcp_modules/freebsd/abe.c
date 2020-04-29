@@ -76,6 +76,9 @@
 #include <netinet/cc/cc_module.h>
 //#include <netinet/cc/cc_newreno_abe.h>
 
+#include <sys/khelp.h>
+#include <netinet/khelp/h_ertt.h>
+
 static MALLOC_DEFINE(M_NEWRENO, "newreno_abe data",
 	"newreno_abe beta values");
 
@@ -85,6 +88,7 @@ static void	newreno_abe_after_idle(struct cc_var *ccv);
 static void	newreno_abe_cong_signal(struct cc_var *ccv, uint32_t type);
 static void	newreno_abe_post_recovery(struct cc_var *ccv);
 static int newreno_abe_ctl_output(struct cc_var *ccv, struct sockopt *sopt, void *buf);
+static int newreno_abe_init(void);
 
 VNET_DEFINE_STATIC(uint32_t, newreno_abe_beta) = 50;
 VNET_DEFINE_STATIC(uint32_t, newreno_abe_beta_ecn) = 80;
@@ -120,14 +124,31 @@ struct cc_algo newreno_abe_cc_algo = {
 	.cong_signal = newreno_abe_cong_signal,
 	.post_recovery = newreno_abe_post_recovery,
 	.ctl_output = newreno_abe_ctl_output,
+	.mod_init = newreno_abe_init,
 };
+
+static int32_t ertt_id;
 
 struct newreno_abe {
 	uint32_t beta;
 	uint32_t beta_ecn;
 
-	bool timeout;
+	int rtt;
+	int base_rtt;
+	uint32_t base_cwnd;
+	int ema;
 };
+
+static int
+newreno_abe_init(void)
+{
+	ertt_id = khelp_get_id("ertt");
+	if (ertt_id <= 0) {
+		printf("%s: h_ertt module not found\n", __func__);
+		return (ENOENT);
+	}
+	return (0);
+}
 
 static inline struct newreno_abe *
 newreno_abe_malloc(struct cc_var *ccv)
@@ -154,6 +175,29 @@ newreno_abe_cb_destroy(struct cc_var *ccv)
 static void
 newreno_abe_ack_received(struct cc_var *ccv, uint16_t type)
 {
+	struct newreno_abe *nreno = ccv->cc_data;
+	struct ertt *e_t;
+	int rtt;
+	e_t = khelp_get_osd(CCV(ccv, osd), ertt_id);
+
+	rtt = e_t->rtt;
+
+	if (rtt != 0 && rtt < nreno->base_rtt) {
+		// buggy condition, use e_t->minrtt instead for base_rtt (also research how it works)
+		nreno->base_rtt = rtt;
+		nreno->base_cwnd = CCV(ccv, snd_cwnd);
+	}
+
+	nreno->base_rtt = e_t->minrtt;
+
+	//printf("RTT: %d\n", rtt);
+
+	//int rtt_prev = nreno->rtt;
+	nreno->rtt = rtt;
+	nreno->ema = (nreno->ema * 875) / 1000 + (nreno->rtt * 125) / 1000;
+
+	//printf("EMA: %d\n", nreno->ema);
+
 	if (type == CC_ACK && !IN_RECOVERY(CCV(ccv, t_flags)) &&
 	    (ccv->flags & CCF_CWND_LIMITED)) {
 		u_int cw = CCV(ccv, snd_cwnd);
@@ -287,17 +331,30 @@ newreno_abe_cong_signal(struct cc_var *ccv, uint32_t type)
 				CCV(ccv, snd_ssthresh) = cwin;
 			ENTER_RECOVERY(CCV(ccv, t_flags));
 		}
-		nreno->timeout = true;
 		break;
 	case CC_ECN:
 		if (!IN_CONGRECOVERY(CCV(ccv, t_flags))) {
-			cwin = (nreno->timeout) ? cwin : CCV(ccv, snd_cwnd) - mss * 10;
+			// printf("SND_CWND_ECN: %u\n", CCV(ccv, snd_cwnd));
+			// printf("CWIN_ECN: %u\n", cwin);
+
+			// CCV(ccv, snd_ssthresh) = cwin;
+			// CCV(ccv, snd_cwnd) = cwin;
+
+			//cwin = (nreno->timeout) ? cwin : CCV(ccv, snd_cwnd) - mss * 10;
 			// TODO: fix overflow when snd_cwnd < mss * 10
-			CCV(ccv, snd_ssthresh) = cwin;
-			CCV(ccv, snd_cwnd) = cwin;
+			// printf("OK: %u\n", backoff);
+
+			printf("CWND BEFORE: %u\tCWND_BASE_RTT: %u\n", CCV(ccv, snd_cwnd), nreno->base_cwnd);
+
+			//CCV(ccv, snd_ssthresh) = cwin * nreno->ema / nreno->rtt;
+
+			CCV(ccv, snd_ssthresh) = CCV(ccv, snd_cwnd) * nreno->base_rtt / nreno->rtt;
+
+			CCV(ccv, snd_cwnd) = CCV(ccv, snd_ssthresh);
+
+			printf("CWND: %u\tRTT: %d\tEMA: %d\tBRTT: %d\n", CCV(ccv, snd_cwnd), nreno->rtt, nreno->ema, nreno->base_rtt);
 			ENTER_CONGRECOVERY(CCV(ccv, t_flags));
 		}
-		nreno->timeout = false;
 		break;
 	}
 }
@@ -426,3 +483,4 @@ SYSCTL_PROC(_net_inet_tcp_cc_abe, OID_AUTO, beta_ecn,
 	"New Reno beta ecn, specified as number between 1 and 100");
 
 DECLARE_CC_MODULE(newreno_abe, &newreno_abe_cc_algo);
+MODULE_DEPEND(newreno_abe, ertt, 1, 1, 1);
