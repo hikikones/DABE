@@ -117,3 +117,22 @@
 
 % SI units with bytes
 \usepackage[binary-units=true]{siunitx}
+
+% Theorems, definitions etc
+\usepackage{amsthm}
+\makeatletter
+\newtheoremstyle{statement}
+    {3pt}            % Space above, empty = `usual value'
+    {3pt}            % Space below
+    {\itshape\addtolength{\@totalleftmargin}{3.5em}
+   	\addtolength{\linewidth}{-7.0em}
+  	\parshape 1 3.5em \linewidth} % Body font
+    {}            % Indent amount (empty = no indent, \parindent = para indent)
+    {\bfseries}   % Thm head font
+    {}            % Punctuation after thm head
+    {\newline}    % Space after thm head: \newline = linebreak
+	% {Definition \thmnumber{#2}\thmname{\hfill#1}}   % Thm head spec
+	{#3}   % Thm head spec
+\makeatother
+\theoremstyle{statement}
+\newtheorem{statement}{}

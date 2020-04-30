@@ -161,3 +161,38 @@
 	day =		3,
 	abstract =	{This document specifies the BBR congestion control algorithm. BBR uses recent measurements of a transport connection's delivery rate and round-trip time to build an explicit model that includes both the maximum recent bandwidth available to that connection, and its minimum recent round-trip delay. BBR then uses this model to control both how fast it sends data and the maximum amount of data it allows in flight in the network at any time. Relative to loss-based congestion control algorithms such as Reno {[}RFC5681{]} or CUBIC {[}draft-ietf-tcpm-cubic{]}, BBR offers substantially higher throughput for bottlenecks with shallow buffers or random losses, and substantially lower queueing delays for bottlenecks with deep buffers (avoiding "bufferbloat"). This algorithm can be implemented in any transport protocol that supports packet-delivery acknowledgment (thus far, open source implementations are available for TCP {[}RFC793{]} and QUIC {[}draft-ietf-quic-transport-00{]}).},
 }
+
+@misc{rfc6077,
+	series =	{Request for Comments},
+	number =	6077,
+	howpublished =	{RFC 6077},
+	publisher =	{RFC Editor},
+	doi =		{10.17487/RFC6077},
+	url =		{https://rfc-editor.org/rfc/rfc6077.txt},
+        author =	{Michael Welzl and Dimitri Papadimitriou and Bob Briscoe and Michael Scharf and Michael Welzl},
+	title =		{{Open Research Issues in Internet Congestion Control}},
+	pagetotal =	51,
+	year =		2011,
+	month =		feb,
+	abstract =	{This document describes some of the open problems in Internet congestion control that are known today. This includes several new challenges that are becoming important as the network grows, as well as some issues that have been known for many years. These challenges are generally considered to be open research topics that may require more study or application of innovative techniques before Internet-scale solutions can be confidently engineered and deployed. This document is not an Internet Standards Track specification; it is published for informational purposes.},
+}
+
+@ARTICLE{measuring_ecn++,
+  author={A. M. {Mandalari} and A. {Lutu} and B. {Briscoe} and M. {Bagnulo} and O. {Alay}},
+  journal={IEEE Communications Magazine},
+  title={Measuring ECN++: Good News for ++, Bad News for ECN over Mobile},
+  year={2018},
+  volume={56},
+  number={3},
+  pages={180-186},
+}
+
+@inproceedings{enabling_internet-wide_ecn,
+  author = {Trammell, Brian and Kühlewind, Mirja and Boppart, Damiano and Learmonth, Iain and Fairhurst, Gorry and Scheffenegger, Richard},
+  year = {2015},
+  month = {03},
+  pages = {193-205},
+  title = {Enabling Internet-Wide Deployment of Explicit Congestion Notification},
+  volume = {8995},
+  doi = {10.1007/978-3-319-15509-8_15}
+}

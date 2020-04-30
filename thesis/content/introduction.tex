@@ -1,24 +1,73 @@
 \chapter{Introduction}
 
-This chapter aims at giving an introduction and overview of the thesis. It starts with a brief explanation of why Internet today still feels slow despite major advances in technology, followed up by establishing the goals and research questions for the entire thesis. To address the research questions, a small look into the research methodology is presented. In the final section, an outline of the thesis structure is discussed.
+This chapter aims at giving an introduction and overview of the thesis. It starts with a brief explanation of why Internet today still feels slow despite major advances in technology, followed up by establishing the goals and research questions for the entire thesis. To address the research questions, a small look into the research methodology is presented. In the final section, an outline of the thesis structure is given.
 
-Donec vitae metus pretium \cite{abe}, tempus sapien eget, maximus . Nam dictum aliquam mi, ut fringilla nunc vehicula a. Morbi vitae dictum eros.
+
+
+
 
 \section{Background and Motivation}
 
-The Internet has evolved beyond its original purpose to send mail or use the \gls{www}. New expectations from end users are rapidly increasing by the demand for interactive applications such as online gaming, audio or video streaming. A critical component for these new services is the need for consistent low latency, otherwise the notion of \textit{lag} occurs. Despite this, many such services continue to run over \gls{tcp} which is known to be very sensitive to the variation in latency.
+The Internet has evolved beyond its original purpose to send mail or use the \gls{www}. New expectations from end users are rapidly increasing by the demand for interactive applications such as online gaming, audio or video streaming. A critical component for these new services is the need for consistent low latency, otherwise the notion of \textit{lag} occurs. Despite this, the \gls{tcp} still dominates the Internet today even though it's known to be very sensitive to the variation in latency.
 
-One of the key reasons for \gls{tcp} dominance is simply because the usage of new transport protocols is difficult. Another reason is legacy due to hardware support \todo{verify}. \todo{go on...}
+% Despite this, many such services continue to run over \gls{tcp} which is known to be very sensitive to the variation in latency. \todo{cite needed, tcp still dominates but maybe not for those specific services}
+
+% One of the key reasons for \gls{tcp} dominance is simply because the usage of new transport protocols is difficult. Another reason is legacy due to hardware support \todo{verify}. \todo{go on...}
+
+One reason for \gls{tcp} dominance is simply because the usage of new transport protocols is difficult. Another reason is legacy due to hardware support \todo{cite}. A more crucial reason is \textit{congestion control} --- a fundamental set of mechanisms for maintaining the stability and efficiency of the Internet. \cite{rfc6077} However, most mechanisms in use today still rely on lost packets as feedback for moderating the flow of a host. Such \textit{loss-based} mechanisms are one of the main sources for creating high latencies in the network.
+
+Many efforts to combat high latencies have been made. One is the introduction of \gls{aqm} on intermediary devices to minimize the time packets spend enqueued at a bottleneck. Building upon \gls{aqm} came the ability to explicitly signal congestion in the network, called \gls{ecn}. Although \gls{ecn} was standardized two decades ago, it has not seen much support due to compatibility issues with existing network equipment. However, recent years have shown a rapid change on this matter. The adoption of \gls{ecn} on end-systems has accelerated and is now supported on the majority of servers. \cite{enabling_internet-wide_ecn}
+
+The benefits of \gls{ecn} are clear --- instead of reacting to network congestion after the fact (i.e. after packet loss), one can take protective measures before it happens. This means that there is great potential in further reducing latency as packets no longer need to be dropped. With the recent increase in adoption of \gls{ecn}, we believe... (that ecn deserves another chance...?) \todo{state your mission} 
+
+\todo{explain a bit more...}
 
 
-Maecenas pulvinar quis quam eu convallis. Fusce vulputate sodales suscipit. Nullam porttitor hendrerit lacinia. Cras tincidunt ultrices lobortis. Sed ac sem efficitur, faucibus nunc vehicula, elementum arcu. Aenean pellentesque augue ut massa ullamcorper congue. Phasellus varius at erat at lobortis. Ut nunc metus, consequat nec blandit in, laoreet nec ligula. Integer interdum, massa eu accumsan eleifend, nunc nunc ultrices augue, at commodo risus ligula varius ex. Praesent blandit risus sit amet tellus semper, a suscipit libero malesuada. Mauris nec lacus ipsum. Nullam at ipsum rhoncus, mattis nibh vitae, placerat odio. Sed nec leo id dui vulputate accumsan. Pellentesque placerat congue arcu id pharetra. Maecenas imperdiet ex sed vehicula euismod.
+
+
 
 \section{Goals and Research Questions} \label{goals_and_research_questions}
 
-Aliquam quis imperdiet orci, nec vestibulum risus. Curabitur vitae euismod mauris, ut iaculis erat. Ut interdum ex ac elit ultrices, at mattis magna ultricies. Duis ac suscipit nibh. Mauris sagittis consequat elit eget euismod. Mauris tincidunt dui ex, sit amet vulputate sem pretium non. Quisque at nulla lobortis, facilisis ligula eu, efficitur ante. Praesent bibendum dolor purus, non placerat felis pellentesque eu.
+In this section the goal and research questions for the thesis are presented, followed by a brief motivation.
+
+\begin{statement}[Goal statement:]
+    Reduce latency further with a sender-only modification that can be deployed incrementally.
+\end{statement}
+
+The goal of the thesis is to explore the possibility of further reducing the latency experienced in lossy \gls{tcp} flows. In addition, the implementation should be easily deployable, meaning that it should work on most existing hardware equipment. In order to achieve this, the following two research questions defined below will be investigated.
+
+\begin{statement}[Research question 1:]
+    Can the incorporation of \gls{ecn} in existing congestion control mechanisms yield a significant reduction in latency?
+\end{statement}
+
+Most congestion control mechanisms used today are still loss-based. With the recent increased adoption of \gls{ecn}, it makes sense to make use of it in existing mechanisms to reduce the amount of packet drops. The thesis will look at the two most widely used congestion control algorithms, namely NewReno and CUBIC \todo{if time allows it...}, and see how they perform with explicit congestion feedback.
+
+\begin{statement}[Research question 2:]
+    Is the use of \gls{ecn} viable in today's Internet infrastructure? \todo{maybe scrap...}
+\end{statement}
+
+Although \gls{ecn} has gained a big momentum recently, it is still not supported universally.  \todo{provide ecn statistics} In other words, for \gls{ecn} to be globally viable, a fallback to loss-based feedback is still crucial.
+
+
 
 \section{Research Methodology}
 
+To address the research questions outlined above in Section \ref{goals_and_research_questions}, a cluster consisting of eight Raspberry Pi machines has been set up. The cluster serves as a physical testbed for conducting various \gls{tcp} experiments in order to verify the results from our modifications to existing congestion control mechanisms.
+
+\todo{expand?}
+
+
+
+
+
 \section{Contributions}
 
+\todo{}
+
+
+
+
+
 \section{Thesis Structure}
+
+\todo{}
