@@ -49,8 +49,27 @@ Whenever a user sends an email, or any data over the network for that matter, on
 \todo{write a bit more about tcp in general such a connection management and flow control}
 
 % Today, most online web services \todo{citation} are based on transmissions from the \gls{tcp}.
+\subsection{Reliability}
+To ensure reliability, every tcp segment contains a sequence number, and an ACK is send back to the 
+sender for every segment that is recived. This way, data that come out of order can be reordered on the 
+reciving end. This also ensures that lost packets can be retransmitted. If one segment in a datastream is
+lost, the reciver will only ACK the last \textit{in order} packet. Say segment nr 10 is lost. On receiving nr 11, the receiver
+will ACK nr 9 again, this is called duplicate acknowledgment(DupAcks), and on receiving three DupAcks the sender will 
+retransmitt the lost packet. A threshold of three is used in case the segment was just reordered by the network, to
+avoid unnecessary retransmission.
+Loss can also be detected by Retransmission timeout (RTO). For every segment that is sent a timer is started with 
+an estimate of the arrival of the ACK. If the timer expires the segment is retransmitted and a new timer is started
+with double length. This is to backoff retransmission trafic in case of malicious actors such as denial of service
+attacks.
 
-
+\subsection{Flow Controll}
+Tcp stores the data to send in a send buffer before it goes out on the network, and the data it receives in a 
+receive buffer before it is prosessed by an application. It is important to not send more data when the receive 
+buffer is full, otherwise it would lead to packet drop. Tcp ensures this by maintaining a receive window and 
+advertising it in every ACK. The receive window is the space left in the receive buffer, and it dictates how many 
+unacknowledged packets can be in fligh at a time. This means that if the reciver is processing slowly, the receive 
+buffer will start to fill up, causing the recevie window to to decrease, wich tells the sender to slow down
+its sending rate.
 
 % \gls{tcp} is the one of the main protocols for transmitting data on the internet. It is a connection based, reliable protocoll and is used by for instance World Wide Web (WWW), email, File Transfer Protocoll (FTP) and streaming media. \gls{tcp} requires that the sender and reciever establishes a connection through a three-way handshake before transmission starts. All segments sent have a sequence number, and the reciver sends an \gls{ack} for every segment it recieves. This, in addition to retransmission and error-checking ensures reliable transfer, but also lengthens latency.
 
