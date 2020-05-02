@@ -2,7 +2,7 @@
 
 \section{Installing an Operating System} \label{install_os}
 
-To use the Raspberry Pi, an \gls{os} first needs to installed. \href{https://www.raspberrypi.org/downloads/raspbian/}{Raspbian Buster Lite} is the official \gls{os} for Raspberry Pi 3, and is used on the gateway and router. \href{https://www.freebsd.org/}{FreeBSD} is used on the hosts.
+To use the Raspberry Pi, an \gls{os} first needs to be installed. \href{https://www.raspberrypi.org/downloads/raspbian/}{Raspbian Buster Lite} is the official \gls{os} for Raspberry Pi 3, and is used on the gateway and router. \href{https://www.freebsd.org/}{FreeBSD} is used on the hosts.
 
 After downloading the \gls{os}, uncompress the file. The extracted file should be of type \lstinline{.img}, containing a preinstalled \gls{os} that now must be written to the SD card. To write the image file to the SD card, several tools exists that can be used, with some examples following:
 
@@ -102,7 +102,7 @@ Install \lstinline{ntp} with \lstinline{apt install ntp}. Then check if any \gls
 
 \subsubsection{NTP Client on Raspbian Buster}
 
-To automatically query for time from the \gls{ntp} server, the Raspbian Buster \gls{os} already comes with a lightweight daemon called \lstinline{systemd-timesyncd} that allows for synchronizing the system clock across the network. However, TEACUP prefers to use \lstinline{ntp} instead, and so \lstinline{ntp} will be used.
+To automatically query for time from the \gls{ntp} server, the Raspbian Buster \gls{os} already comes with a lightweight daemon called \lstinline{systemd-timesyncd} that allows for synchronizing the system clock across the network. However, \gls{teacup} prefers to use \lstinline{ntp} instead, and so \lstinline{ntp} will be used.
 
 Install \lstinline{ntp} with \lstinline{apt install ntp}. To specify which server to get the time from, prepare to edit the \lstinline{/etc/ntp.conf} file. Comment out the default pools, and add the entry \lstinline{server 10.0.1.254 iburst} which refers to the gateway.
 

@@ -195,7 +195,7 @@ Still, some buffering is clearly needed so that a short burst of packets can be 
     B = RTT_{avg} \times C
 \end{equation}
 
-where $RTT_{avg}$ is the average \gls{rtt} of the flow passing through the link and $C$ is the capacity of the link. A well established rule of thumb is to provide $\SI{250}{\milli\second}$ or more for buffering. \cite{sizing_router_buffers} Say a router has a Gigabit Ethernet interface, then the buffer size should at least be $B = \SI{250}{\milli\second} \times \SI{1}{\giga\bit} = \SI{32}{\mega\byte}$.
+where $RTT_{avg}$ is the average \gls{rtt} of the flow passing through the link and $C$ is the capacity of the link. A well established rule of thumb is to provide $\SI{250}{\milli\second}$ or more \todo{WRONG! rework entire section} for buffering. \cite{sizing_router_buffers} Say a router has a Gigabit Ethernet interface, then the buffer size should at least be $B = \SI{250}{\milli\second} \times \SI{1}{\giga\bit} = \SI{32}{\mega\byte}$.
 
 
 

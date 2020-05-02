@@ -111,9 +111,11 @@
 ]{biblatex}
 \addbibresource{metadata/refs.bib}
 
-% TODO macro
+% TODO and REMARK macro
 \newcommand{\todo}[1]{}
 \renewcommand{\todo}[1]{{\color{red} TODO: {#1}}}
+\newcommand{\remark}[1]{}
+\renewcommand{\remark}[1]{{\color{red} ({#1})}}
 
 % SI units with bytes
 \usepackage[binary-units=true]{siunitx}

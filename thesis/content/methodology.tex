@@ -1,66 +1,95 @@
 \chapter{Methodology}
 
-This chapter describes the architecture and methods that were needed in order to investigate the research questions presented in Section \ref{goals_and_research_questions}. An overview of the physical testbed will first be given, followed by the general setup for each machine and how the \gls{tcp} experimentation have been conducted using \gls{teacup}. \todo{expand}
+This chapter describes the architecture and methods that were needed in order to investigate the research questions presented in Section \ref{goals_and_research_questions}. An overview of the physical testbed will first be given, followed by the general setup for each machine and how the \gls{tcp} experimentation have been conducted using the tool \gls{teacup}. \todo{rework?}
+
+
+
+
+
+
 
 
 
 \section{System Overview}
 
-The objective of the system is to perform automated \gls{tcp} experiments. \todo{more...}
+The objective of the system is to perform automated \gls{tcp} experiments in order to validate the reproducibility and significance of our results. This section aims to give a brief overview of the system as a whole and its individual components.
 
 
 
 
 \subsection{The Raspberry Pi 3 Cluster}
 
-The Raspberry Pi machine is a series of small single-board computers developed in the United Kingdom by the Raspberry Pi Foundation to promote teaching of basic computer science in schools and in developing countries. The Raspberry Pi 3 Model B+ was released in 2018, and is the model used in this cluster.
+The system consists of eight connected Raspberry Pi machines. The Raspberry Pi machine is a series of small single-board computers developed in the UK by the Raspberry Pi Foundation to promote teaching of basic computer science in schools and in developing countries. The Raspberry Pi 3 Model B+ was released in 2018, and is the model used in this cluster.
 
-\begin{table}[H]
-    \centering
-    \begin{tabular}{ |p{4cm}|p{2cm}|p{4cm}|p{2cm}|p{2cm}|  }
+% \begin{table}[H]
+%     \centering
+%     \begin{tabular}{ |p{4cm}|p{2cm}|p{4cm}|p{2cm}|p{2cm}|  }
+%         \hline
+%         \multicolumn{5}{|c|}{\textbf{Raspberry Pi 3 Model B+ Specifications}} \\
+%         \hline
+%         \textbf{CPU} & \textbf{RAM} & \textbf{NICs} & \textbf{Storage} & \textbf{USB}\\
+%         \hline
+%         Broadcom BCM2837B0 \newline Cortex-A53 (ARMv8) 64-bit SoC \newline 1.4GHz, Quad-core &
+%         1GB LPDDR2 SDRAM &
+%         Gigabit Ethernet over USB 2.0 \newline Dual IEEE 802.11ac WiFi, Bluetooth 4.2 &
+%         32GB Micro-SD &
+%         4 USB 2.0 ports\\
+%         \hline
+%     \end{tabular}
+%     \caption{The hardware specifications of Raspberry Pi 3 Model B+.}
+% \end{table}
+
+\begin{wraptable}{r}{5cm}
+    \begin{tabular}{ |p{1cm}|p{3cm}| }
         \hline
-        \multicolumn{5}{|c|}{\textbf{Raspberry Pi 3 Model B+ Specifications}} \\
+        \multicolumn{2}{|c|}{\textbf{Raspberry Pi 3 Model B+}} \\
         \hline
-        \textbf{CPU} & \textbf{RAM} & \textbf{NICs} & \textbf{Storage} & \textbf{USB}\\
+        \textbf{CPU} & Broadcom BCM2837B0 \newline Cortex-A53 (ARMv8) 64-bit SoC 1.4GHz Quad-core \\
         \hline
-        Broadcom BCM2837B0 \newline Cortex-A53 (ARMv8) 64-bit SoC \newline 1.4GHz, Quad-core &
-        1GB LPDDR2 SDRAM &
-        Gigabit Ethernet over USB 2.0 \newline Dual IEEE 802.11ac WiFi, Bluetooth 4.2 &
-        32GB Micro-SD &
-        4 USB 2.0 ports\\
+        \textbf{RAM} & 1GB LPDDR2 SDRAM \\
+        \hline
+        \textbf{NICs} & Gigabit Ethernet over USB 2.0 \newline Dual IEEE 802.11ac WiFi, Bluetooth 4.2 \\
+        \hline
+        \textbf{FS} & 32GB Micro-SD \\
+        \hline
+        \textbf{USB} & 4 USB 2.0 ports \\
         \hline
     \end{tabular}
-    \caption{The hardware specifications of Raspberry Pi 3 Model B+.}
-\end{table}
+    \caption{Raspberry Pi 3 Model B+ hardware specifications.}
+\end{wraptable}
 
-The cluster consists of eight Raspberry Pi 3 Model B+ machines, all hooked up to a Zyxel switch. The switch provides interconnectivity, but also powers the machines through \gls{poe}.
+All the machines are hooked up to a single Zyxel switch. The switch provides interconnectivity, and in addition powers the machines through \gls{poe}. \todo{more?}
 
 \begin{figure}[H]
-    \centering
-    \includegraphics[width=0.6\linewidth]{pi3cluster}
-    \captionsetup{width=0.6\linewidth}
+    \includegraphics[width=0.55\linewidth]{pi3cluster}
+    \captionsetup{width=1.0\linewidth,justification=raggedright,singlelinecheck=false}
     \caption{The Raspberry Pi 3B+ cluster all hooked to a Zyxel switch.}
     \label{fig:pi3cluster}
 \end{figure}
+
+% Fix wraptable bleeding
+\clearpage
 
 
 
 
 \subsection{Network Topology} \label{network_topology}
 
-The testbed consists of two networks; the \textit{controller} network in which all machines are connected directly, and the \textit{experimental} network separated by two subnets with a router in-between.
+The testbed consists of two networks --- the \textit{controller} network in which all machines are connected directly, and the \textit{experimental} network separated by two subnets with a router in-between.
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.8\linewidth]{network_topology}
-    \captionsetup{width=0.8\linewidth}
+    \includegraphics[width=0.6\linewidth]{network_topology}
+    \captionsetup{width=0.6\linewidth}
     \caption{The logical network topology for the Raspberry Pi 3B+ cluster testbed.}
     \label{fig:network_topology}
 \end{figure}
 
-Since the entire testbed is connected to a single switch only, both \gls{vlan} and virtual interfaces have been used to achieve the desired network topology. In addition, one USB-to-ethernet adapter was necessary on the router in order to conduct network experimentation with \gls{teacup}. The \gls{vlan} setup on the switch is explained in section \ref{zyxel} while the general network setup for every machine is explained in the remaining sections.
+Since the entire testbed is connected to a single switch only, and each Raspberry Pi 3B+ machine has only one Ethernet interface, both \gls{vlan} and virtual interfaces have been used to achieve the desired network topology presented above. In addition, one USB-to-Ethernet adapter was necessary on the router in order to conduct network experimentation with \gls{teacup}. The \gls{vlan} setup on the switch is explained in Section \ref{zyxel} while the general network setup for every machine is explained in the remaining sections.
 
 A summary table of the network setup for each machine follows.
+
+\todo{restructure page}
 
 \begin{table}[H]
     \centering
@@ -107,7 +136,7 @@ The Zyxel GS1920-8HP model is a managed switch with 10 available ports for inter
     \label{fig:zyxel}
 \end{figure}
 
-In order to logically separate two subnets on a single switch, as illustrated in \ref{fig:network_topology}, two \gls{vlan}s must be set up. This can easily be done through the switch's graphical user interface that can be accessed in several ways as shown in the official \href{https://www.zyxel.com/support/download_landing/product/gs1920_series_18.shtml?c=gb&l=en&pid=20130521174252&tab=Quick_Start_Guide&pname=GS1920%20Series}{quick start guide.}. In short, connect a computer to the Zyxel switch with an Ethernet cable, set a static IP of 192.168.1.10, and access the graphical user interface in a web browser by visiting the address 192.168.1.1.
+In order to logically separate two subnets on a single switch, as illustrated in \ref{fig:network_topology}, two \gls{vlan}s must be set up. This can easily be done through the switch's graphical user interface that can be accessed in several ways as shown in the official \href{https://www.zyxel.com/support/download_landing/product/gs1920_series_18.shtml?c=gb&l=en&pid=20130521174252&tab=Quick_Start_Guide&pname=GS1920%20Series}{quick start guide.} \todo{footnote}. In short, connect a computer to the Zyxel switch with an Ethernet cable, set a static IP of 192.168.1.10, and access the graphical user interface in a web browser by visiting the address 192.168.1.1.
 
 The default username and password for Zyxel GS1920-8HP is \lstinline{admin} and \lstinline{1234}, respectively. Once logged in, go to \lstinline{Advanced Application -> VLAN -> VLAN Configuration -> Static VLAN Setup}.
 
@@ -134,9 +163,14 @@ Create two \gls{vlan}s as shown above, confirming each creation with the \lstinl
 
 
 
+
+
+
+
+
 \section{General Setup}
 
-This section serves as a guide for reproducing the general setup and configuration for the testbed. In the next sections, the following common tasks are assumed to have already been done on each Raspberry Pi 3B+ machine:
+This section serves as a guide for reproducing the general setup and configuration for the testbed. For the next sections, the following common tasks are assumed to have already been done on each Raspberry Pi 3B+ machine:
 
 \begin{itemize}
     \item Installed an \gls{os} as specified in \ref{install_os}. Raspbian Buster is used on the gateway and router, and FreeBSD on the hosts.
@@ -147,6 +181,9 @@ This section serves as a guide for reproducing the general setup and configurati
 \end{itemize}
 
 In addition, any given command is assumed to be run as \lstinline{root} user.
+
+
+
 
 \subsection{Gateway}
 
@@ -286,6 +323,9 @@ In additon, a few changes to the \lstinline{hostsetup.py} file in \gls{teacup} m
 
 Finally, the tool \lstinline{spp} does not run on the Raspberry Pi 3 or ARM architecture at all, only displaying the helpful message "\lstinline{aborting}" when running it. TEACUP uses this tool to calculate \gls{rtt}, and fortunately is only needed when analyzing the results. In other words, the experiment data can easily be copied over to an x86 machine where \lstinline{spp} works, and then be analyzed from there. That is, follow the install instructions above from \ref{teacup_gateway} again as normal, but on an x86 machine instead.
 
+\todo{custom aqm teacup changes}
+
+
 
 
 
@@ -295,9 +335,10 @@ Finally, the tool \lstinline{spp} does not run on the Raspberry Pi 3 or ARM arch
 
 This section describes how the router has been set up. \todo{maybe expand...}
 
+
 \subsubsection{Network}
 
-The router serves as the intermediate device for the hosts in order to conduct more realistic experiments. The main interface is statically connected to the controller network, with two additional interfaces (one virtual and one USB-to-eth) that function as the default gateway for the two separate subnets that the hosts reside in. To set the router up as such, add the following to the \lstinline{/etc/network/interfaces} file:
+The router serves as the intermediate device for the hosts in order to conduct more realistic experiments. The main interface is statically connected to the controller network, with two additional interfaces (one virtual and one USB-to-Ethernet) that function as the default gateway for the two separate subnets that the hosts reside in. To set the router up as such, add the following to the \lstinline{/etc/network/interfaces} file:
 
 \begin{minted}{bash}
 # Main interface (controller-network)
@@ -345,9 +386,6 @@ The router only needs two tools for \gls{teacup} to work properly when controlle
 # TEACUP tools on router
 apt install -y tcpdump ntp
 \end{minted}
-
-
-
 
 
 
@@ -423,24 +461,20 @@ cp nttcp /bin/
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 \section{TCP Experimentation with TEACUP}
+
+%\glsfirst{teacup}
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -449,4 +483,16 @@ cp nttcp /bin/
 
 
 
+
+
+
+
+
+
+
+
+
+
 \section{Improving ABE}
+
+\todo{rework title... "Making ABE Dynamic"?}
