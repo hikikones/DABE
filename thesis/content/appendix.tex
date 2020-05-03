@@ -200,3 +200,73 @@ To specify which server to get the time from, prepare to edit the \lstinline{/et
 
 
 \section{Configurations} \label{teacup_configs}
+
+
+
+
+
+
+
+
+
+\section{Utility Bash Scripts}
+
+
+\subsubsection{Initiating TEACUP from remote x86 machine}
+
+Since the tool \lstinline{spp} did not work on Raspberry Pi due to the ARM architecture (see \gls{teacup} section in \ref{teacup_gateway}), the experiment data needs to copied over to an x86 machine in order to analyze the results. This process quickly gets tedious when conducting many experiments. The following script automates the process. One only needs to make sure that the experiment folder from which the script is run has the necessary \lstinline{fabfile.py} included, and that the \lstinline{config.py} file reflects the path to where \lstinline{teacup-1.1} is located.
+
+\begin{minted}{bash}
+#!/bin/sh
+
+##############################################################
+## A simple bash script for initiating a TEACUP experiment
+## on a remote x86 machine in the same network.
+## Make sure that fabfile.py is present in both locations.
+## NOTE: Must run inside experiment folder where config.py is
+##############################################################
+
+# Gateway address can be IP address or hostname
+GATEWAY=192.168.10.100
+USER=root
+
+# Target is the location of the TEACUP experiment folder on the gateway
+# Make sure that this location is reflected in config.py
+TARGET=/home/danny/teacup/experiment
+OUTPUT=result
+
+############################################
+## Start TEACUP experiment
+############################################
+
+# Delete old results
+ssh $USER@$GATEWAY rm $TARGET/experiments_started.txt
+ssh $USER@$GATEWAY rm $TARGET/experiments_completed.txt
+ssh $USER@$GATEWAY rm -rf $TARGET/$OUTPUT
+
+# Copy config.py to gateway
+scp config.py $USER@$GATEWAY:$TARGET
+
+# Start TEACUP experiment
+ssh $USER@$GATEWAY fab -f $TARGET/fabfile.py run_experiment_single:test_id=$OUTPUT
+
+# Move new results to experiment folder
+ssh $USER@$GATEWAY mv ./experiments_started.txt $TARGET
+ssh $USER@$GATEWAY mv ./experiments_completed.txt $TARGET
+ssh $USER@$GATEWAY mv ./$OUTPUT $TARGET
+
+############################################
+## Analyze TEACUP results
+############################################
+
+# Cleanup local
+rm experiments_completed.txt experiments_started.txt teacup_dir_cache.txt teacup_flow_cache.txt
+rm -rf $OUTPUT
+
+# Get new TEACUP results
+scp -r $USER@$GATEWAY:$TARGET/* ./
+
+# Analyze results
+fab analyse_all:test_id=$OUTPUT
+#fab analyse_all:test_id=result,lnames='Receiver;Sender',plot_params="TC_TITLE\='Plot Title'"
+\end{minted}
