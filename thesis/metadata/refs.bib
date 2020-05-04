@@ -7,6 +7,36 @@
   doi = {10.23919/IFIPNetworking.2017.8264863}
 }
 
+@misc{rfc8311,
+	series =	{Request for Comments},
+	number =	8311,
+	howpublished =	{RFC 8311},
+	publisher =	{RFC Editor},
+	doi =		{10.17487/RFC8311},
+	url =		{https://rfc-editor.org/rfc/rfc8311.txt},
+        author =	{David L. Black},
+	title =		{{Relaxing Restrictions on Explicit Congestion Notification (ECN) Experimentation}},
+	pagetotal =	20,
+	year =		2018,
+	month =		jan,
+	abstract =	{This memo updates RFC 3168, which specifies Explicit Congestion Notification (ECN) as an alternative to packet drops for indicating network congestion to endpoints. It relaxes restrictions in RFC 3168 that hinder experimentation towards benefits beyond just removal of loss. This memo summarizes the anticipated areas of experimentation and updates RFC 3168 to enable experimentation in these areas. An Experimental RFC in the IETF document stream is required to take advantage of any of these enabling updates. In addition, this memo makes related updates to the ECN specifications for RTP in RFC 6679 and for the Datagram Congestion Control Protocol (DCCP) in RFCs 4341, 4342, and 5622. This memo also records the conclusion of the ECN nonce experiment in RFC 3540 and provides the rationale for reclassification of RFC 3540 from Experimental to Historic; this reclassification enables new experimental use of the ECT(1) codepoint.},
+}
+
+@misc{rfc8511,
+	series =	{Request for Comments},
+	number =	8511,
+	howpublished =	{RFC 8511},
+	publisher =	{RFC Editor},
+	doi =		{10.17487/RFC8511},
+	url =		{https://rfc-editor.org/rfc/rfc8511.txt},
+        author =	{Naeem Khademi and Michael Welzl and Dr. Grenville Armitage and Gorry Fairhurst},
+	title =		{{TCP Alternative Backoff with ECN (ABE)}},
+	pagetotal =	12,
+	year =		2018,
+	month =		dec,
+	abstract =	{Active Queue Management (AQM) mechanisms allow for burst tolerance while enforcing short queues to minimise the time that packets spend enqueued at a bottleneck. This can cause noticeable performance degradation for TCP connections traversing such a bottleneck, especially if there are only a few flows or their bandwidth-delay product (BDP) is large. The reception of a Congestion Experienced (CE) Explicit Congestion Notification (ECN) mark indicates that an AQM mechanism is used at the bottleneck, and the bottleneck network queue is therefore likely to be short. Feedback of this signal allows the TCP sender-side ECN reaction in congestion avoidance to reduce the Congestion Window (cwnd) by a smaller amount than the congestion control algorithm's reaction to inferred packet loss. Therefore, this specification defines an experimental change to the TCP reaction specified in RFC 3168, as permitted by RFC 8311.},
+}
+
 @ARTICLE{bufferbloat,
   author={J. {Gettys}},
   journal={IEEE Internet Computing},
@@ -58,6 +88,21 @@
   doi={10.1109/90.251892},
   ISSN={1558-2566},
   month={Aug}
+}
+
+@misc{rfc2884,
+	series =	{Request for Comments},
+	number =	2884,
+	howpublished =	{RFC 2884},
+	publisher =	{RFC Editor},
+	doi =		{10.17487/RFC2884},
+	url =		{https://rfc-editor.org/rfc/rfc2884.txt},
+        author =	{Jamal Hadi Salim and Uvaiz Ahmed},
+	title =		{{Performance Evaluation of Explicit Congestion Notification (ECN) in IP Networks}},
+	pagetotal =	18,
+	year =		2000,
+	month =		jul,
+	abstract =	{This memo presents a performance study of the Explicit Congestion Notification (ECN) mechanism in the TCP/IP protocol using our implementation on the Linux Operating System. This memo provides information for the Internet community.},
 }
 
 @inproceedings{sizing_router_buffers,
@@ -220,4 +265,15 @@
 	year =		2017,
 	month =		mar,
 	abstract =	{The goal of this document is to describe the potential benefits of applications using a transport that enables Explicit Congestion Notification (ECN). The document outlines the principal gains in terms of increased throughput, reduced delay, and other benefits when ECN is used over a network path that includes equipment that supports Congestion Experienced (CE) marking. It also discusses challenges for successful deployment of ECN. It does not propose new algorithms to use ECN nor does it describe the details of implementation of ECN in endpoint devices (Internet hosts), routers, or other network devices.},
+}
+
+@article{pre-congestion_notification,
+  author = {Menth, Michael and Briscoe, Bob and Tsou, Tina},
+  year = {2012},
+  month = {03},
+  pages = {94-103},
+  title = {Pre-Congestion Notification – New QoS Support for Differentiated Services IP Networks},
+  volume = {50},
+  journal = {IEEE Communications Magazine - IEEE Commun. Mag.},
+  doi = {10.1109/MCOM.2012.6163587}
 }

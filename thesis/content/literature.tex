@@ -319,19 +319,13 @@ Conventially, the means of detecting network congestion has been by packet loss 
 
 An \gls{ecn}-capable network works as follows. A sender will transmit \gls{ip} packets with either the \gls{ect}(0) or \gls{ect}(1) bit set. Then, when there is congestion, a router (in conjuction with \gls{aqm}) will start marking the packets by setting the \gls{ce} bit. The receiver will then see this, and echo back the congestion indication to the sender with an \gls{ece} packet. The sender will then reduce its \gls{cwnd} value and respond with an \gls{cwr} packet.
 
-\todo{go on...}
+\todo{mention some ECN benefits from RFC8087 here?}
 
+\gls{ecn} was standardized in 2001 as a direct replacement for the use of packet loss as congestion signaling. \cite{rfc3168} Despite its positive early impact \cite{rfc2884}, it never saw widespread usage. \cite{enabling_internet-wide_ecn} A series of unfortunate incidents managed to cripple its early deployment --- rather than responding properly or ignoring the \gls{ecn} bits, some firewalls on faulty network equipment would instead block or mangle packets with \gls{ecn} bits set. This incorrect behaviour led to failure rate of 8\% in \gls{ecn}-enabled \gls{tcp} connections for web servers tested in 2004. \cite{pre-congestion_notification}
 
+Due to the unfortunate early struggles of \gls{ecn} deployment, the \gls{ietf} required that the response to an \gls{ecn} signal should be the same as the reaction to a loss. \cite{rfc3168} However, this requirement has recently been relaxed, \cite{rfc8311} sparking \remark{spurring? incentivising? motivating?} a regained interest in the field and giving rise to new experimental \gls{ecn} proposals. \todo{finish off with some promising stats}
 
-
-% \subsection{Legacy ECN}
-
-% In legacy ECN, the router notifies end hosts of congestion by setting a Congestion Encountered (CE) flag in the \gls{ip} header on ECN enabled packets when experiencing congestion. The receiver of the packet then reflects this back to the sender by setting an ECN-Echo (ECE) in the TCP header. It keeps doing this until the sender responds back with a segment with Congestion Window Reduced (CWR) set, indicating that the sender has backed off.
-
-
-
-
-% \subsection{Accuracy ECN}
+% As of 2015, measurements show that the failure of \gls{ecn}-enabled \gls{tcp} connections has reduced to less than 1\%, \cite{enabling_internet-wide_ecn} and as of May 2017, 
 
 
 
@@ -339,4 +333,15 @@ An \gls{ecn}-capable network works as follows. A sender will transmit \gls{ip} p
 
 \section{Alternative Backoff with ECN}
 
-The standard response to a packet loss in a \gls{tcp} connection is to reduce the \gls{cwnd} value by half, as with NewReno. \todo{go on...}
+\glsfirst{abe} \cite{abe} is a recent proposal utilizing \gls{ecn} in congestion control. It is a simple sender-side only modification that can be summarized as follows:
+
+\begin{itemize}
+    \item Upon a packet loss, a \gls{tcp} sender should reduce its \gls{cwnd} as usual (e.g. 50\% with NewReno or 30\% with CUBIC).
+    \item Upon the receipt of an \gls{ecn} mark, a \gls{tcp} sender should reduce \textit{less} than the usual response for loss.
+\end{itemize}
+
+The less aggresive multiplicative decrease factor yielded  significant performance gains in lightly-multiplexed scenarios. Specifically, a 20\% reduction factor was found to give a good latency-vs-utilization trade-off.
+
+As of 2018, \gls{abe} has been formalized by the \gls{ietf} as an experimental \gls{rfc} \cite{rfc8511} and been implemented in mainline FreeBSD \gls{os} kernel.
+
+\todo{more?}
