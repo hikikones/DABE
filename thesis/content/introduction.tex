@@ -46,13 +46,13 @@ The goal of the thesis is to explore the use of \gls{ecn} in \gls{tcp} congestio
     Does the incorporation of \gls{ecn} in existing congestion control mechanisms yield a significant reduction in latency?
 \end{statement}
 
-Because of the recent surge in \gls{ecn} adoption, the thesis will look into the two most widely used \gls{cc} mechanisms, namely NewReno and CUBIC, and see how they compare with and without the use of \gls{ecn}. The fundamental logic of the algorithms should not be altered, only complemented with explicit congestion feedback. Since the work of \gls{abe} has already done this, it will be used as a base.
+Because of the recent surge in \gls{ecn} adoption, the thesis will look into the two most widely used \gls{cc} mechanisms, namely NewReno and CUBIC, and see how they compare with and without the use of \gls{ecn}. \todo{maybe look into more?}
 
 \begin{statement}[Research question 2:]
-    Can the use of \gls{ecn} in existing congestion control mechanisms be further improved?
+    Can the static reduction factor in \gls{abe} be made more responsive?
 \end{statement}
 
-A common behaviour of NewReno and CUBIC is that they reduce the sender's transmission rate by a constant factor in the event of packet loss. This behaviour is mirrored in \gls{abe}, but the factor is less and happens in the event of a packet with an \gls{ecn} mark. The thesis will also look at how NewReno and CUBIC  with \gls{ecn} can be improved by making the reduction factor more responsive.
+A common behaviour of NewReno and CUBIC is that they reduce the sender's transmission rate by a constant factor in the event of packet loss. The \gls{ecn} implementation in NewReno on FreeBSD is called \gls{abe}, mirroring this static behaviour but with a less \remark{lesser?} reduction factor. CUBIC's \gls{ecn} implementation, however, does not mirror this static behavior, but rather maintains a maximum \gls{cwnd}. The thesis will also look at how \gls{abe} can be improved by making it more responsive to \gls{ecn} events.
 
 
 

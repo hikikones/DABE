@@ -1,5 +1,7 @@
 \chapter{Literature Review}
 
+\todo{change title to "Background". Add literature review section at end if time allows it...}
+
 This chapter presents the background theory for which this thesis is based upon.
 
 \todo{improve introduction to chapter...}
@@ -149,6 +151,13 @@ The goal of congestion avoidance is also simple --- avoid congestion, as the nam
 
 \todo{maybe write more about AIMD with some math}
 
+\begin{equation} \label{eq:aimd}
+    w(t + 1) = \begin{cases}
+        w(t) + a, & \text{if congestion is not detected},\\
+        w(t) \times a, & \text{if congestion is detected}.
+    \end{cases}
+\end{equation}
+
 \todo{add conclusion to this section}
 
 
@@ -241,7 +250,7 @@ where $RTT_{avg}$ is the average \gls{rtt} of the flow passing through the link 
 
 When a packet arrives at the incoming port of a router, it is often the case that there is not enough memory to buffer it, and so an important decision must be made --- should the newly arrived packet simply be dropped, or should one of the already-queued packets be dropped to make room for the new one? In the early days of networking, the queue management algorithm called \textit{tail drop} was used, simply dropping newly arrived packets when the queue was filled. However, this approach is considered unfair among traffic flow due to its \textit{first come, first serve} basis, leaving little room for new participants since a single connection could monopolize the queue space. \cite{on_traffic_phase_effects_in_packet_switched_gateways} Tail drop also lead to what is known as \textit{\gls{tcp} global synchronization}, where all connections would both simultaneously "hold back" and then step forward, causing networks to become underutilized and flooded in alternate waves.
 
-Over the years, many new suggestions and algorithms were made. They collectively became known as \gls{aqm} algorithms --- the policy of how to queue new incoming packets \textit{before} a buffer becomes full. One of the first and most widely implemented algorithm to surface was \gls{red}, addressing the issues of tail drop. By preemptively dropping packets \textit{probabilistically} before the buffer became full, \gls{red} would avoid both global synchronization and the problem of new bursty connections being penalized. \cite{ieee251892}
+Over the years, many new suggestions and algorithms were made. They collectively became known as \glsfirst{aqm} algorithms --- the policy of dropping packets \textit{before} a buffer becomes full. One of the first and most widely implemented algorithm to surface was \gls{red}, addressing the issues of tail drop. By preemptively dropping packets \textit{probabilistically} before the buffer became full, \gls{red} would avoid both global synchronization and the problem of new bursty connections being penalized. \cite{ieee251892}
 
 Widespread usage of \gls{red} also revealed a core problem --- it was difficult to configure, requiring complex fine-tuning in order to achieve significant performance gains. Variants of \gls{red} were developed to accommodate for this, such as BLUE, and later many new \gls{aqm} schemes. A few selected will be discussed briefly in the next sections.
 

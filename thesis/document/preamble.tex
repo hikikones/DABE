@@ -91,6 +91,8 @@
 % Syntax highlighting with minted
 \usepackage[newfloat]{minted}
 \captionsetup[listing]{position=top}
+\newenvironment{code}{\captionsetup{type=listing}}{}
+\SetupFloatingEnvironment{listing}{name=Listing}
 %\usemintedstyle{monokai}
 %\definecolor{bg}{HTML}{282828} % from https://github.com/kevinsawicki/monokai
 \definecolor{CodeBG}{gray}{0.95}
@@ -118,11 +120,30 @@
 \newcommand{\remark}[1]{}
 \renewcommand{\remark}[1]{{\color{red} ({#1})}}
 
+% Title for minted code blocks
+\makeatletter
+\newcommand\file{\@startsection{subsubsection}% name
+		{6}% level
+		{0pt}% indent
+		{-\baselineskip}% beforeskip
+		{0.1\baselineskip}% afterskip
+		{\centering\textsc}% style
+}
+\makeatother
+
+% \makeatletter
+% \newcommand\centeredsection{\@startsection {section}{1}{\z@}%
+%                                    {-3.5ex \@plus -1ex \@minus -.2ex}%
+%                                    {2.3ex \@plus.2ex}%
+%                                    {\centering\normalfont\Large\bfseries}}
+% \makeatother
+
 % SI units with bytes
 \usepackage[binary-units=true]{siunitx}
 
 % Theorems, definitions etc
 \usepackage{amsthm}
+\usepackage{amsmath}
 \makeatletter
 \newtheoremstyle{statement}
     {3pt}            % Space above, empty = `usual value'
