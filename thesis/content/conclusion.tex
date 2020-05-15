@@ -1,6 +1,6 @@
 \chapter{Conclusion} \label{ch:conclusion}
 
-This chapter concludes our thesis on improving \gls{abe}. We wrap up with a short conclusion and follow up with a reflection of further improvements. Finally, we end the thesis with a brief comment on the frustrations that were experienced in this project.
+This chapter concludes our thesis on improving \gls{abe}. We wrap up with a short conclusion and follow up with a reflection of further improvements. Finally, we end the thesis with a brief note on the setbacks that were experienced in this project.
 
 
 The goal of the thesis was to improve \gls{abe} by making it more responsive to various network conditions. This was achieved by making the \gls{ecn} congestion response depend on \gls{rtt} measurements, where the ratio between the minimum and most recent \gls{rtt} was used as the multiplicative decrease factor. From our limited set of experiments, this yielded a consistently higher throughput without any significant increase in latency when compared with \gls{abe} and CUBIC.
@@ -19,7 +19,7 @@ There are many improvements that we would have liked to add to \gls{dabe}. In ad
 
 A major concern when depending on \gls{rtt} measurements is that they are inherently noisy. Delayed \gls{ack}s and path changes in the routing of intricate networks can lead to highly inaccurate \gls{rtt} estimates. In our implementation, we use the minimum \gls{rtt} measured from the \lstinline{h_ertt} module, but this value could be inaccurate. For example, if a path change in the routing occurs such that the latency increases significantly, the resulting backoff might be too much. And if the route change stays, then \gls{dabe} will perform poorly for the rest of the connection. Another scenario might be if a \gls{dabe} flow joins an already congested network, causing an overestimated minimum \gls{rtt} that eventually reduces due to packet loss. We would have liked to investigate this further.
 
-\todo{more}
+Another concern is the lack of experimental scenarios that have been conducted. We would have liked to run much more experiments in order to produce more statistical data. As it currently stands, there are simply too little data to make more concrete conclusions.
 
 
 
@@ -29,7 +29,7 @@ A major concern when depending on \gls{rtt} measurements is that they are inhere
 
 
 
-\section{Frustrations}
+\section{Setbacks}
 
 Initially, we received a cluster of Raspberry Pi 4 Model B machines, which is currently the newest model. We were tasked with dual booting the machines with FreeBSD and a Linux-based \gls{os}. After much frustration, we found out that FreeBSD does not support the newest Raspberry Pi 4\footnote{\url{https://wiki.freebsd.org/action/show/arm/Raspberry\%20Pi?action=show\&redirect=FreeBSD\%2Farm\%2FRaspberry+Pi}}, and so we ended up installing only Linux, namely Raspbian Buster as the \gls{os}.
 
@@ -41,6 +41,6 @@ Thankfully, our supervisor had requested a new cluster of Raspberry Pi 3 models 
 
 By the time everything was "working", we had used up over half of our project timeline, with two months remaining for the deadline. We could now finally start working on our actual bachelor project, which is to improve \gls{abe}. And this is where we hit another struggle. We have no experience with socket programming in C, nor any programming in C/C++ for that matter. Additionally, we have no experience with the networking stack of either the Linux of FreeBSD kernel. We quickly found that you do not simply jump into kernel development, but nonetheless, we forced the issue as time was running out.
 
-And finally, to add some salt to our wounds after spending so much time on setting up \gls{teacup}, many completed experiments ended up producing incomplete data, even though no errors were reported. This became increasingly frustrating when strapped for time, and especially when the experiments took several hours to run, only to find that the results could not be analysed due to "incomplete" log files.
+And finally, to add some salt to our wounds after spending so much time on setting up \gls{teacup}, most completed experiments ended up producing incomplete data, even though no errors were reported. This became increasingly frustrating when strapped for time, and especially when the experiments took several hours to run, only to find that the results could not be analysed due to "incomplete" log files. Unfortunately, this led to severe lack of experiments in the final result.
 
 However, in the end, we managed to come up with a simple solution that we are actually proud of to have achieved.

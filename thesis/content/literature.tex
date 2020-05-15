@@ -1,6 +1,4 @@
-\chapter{Literature Review} \label{ch:background}
-
-\todo{change title to "Background". Add literature review section at end if time allows it...}
+\chapter{Background} \label{ch:background}
 
 This chapter presents the background knowledge that the thesis builds upon. We start by introducing the various components of network delay, and follow up by presenting the main protocol used today for transmitting data on the Internet. The later sections goes into both somewhat old and more recent technologies that has emerged in order to improve the performance of Internet.
 
@@ -160,15 +158,21 @@ The two first \gls{tcp} \gls{cc} algorithms that became widely used was called T
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.75\textwidth]{TCP_CC_NewReno}
-    \captionsetup{width=0.75\linewidth}
-    \caption{The classic \textit{sawtooth} pattern of \gls{cwnd} over time using the \gls{tcp} congestion control algorithm NewReno. \todo{update image}}
+    \includegraphics[width=0.5\textwidth]{TCP_CC_NewReno}
+    \captionsetup{width=0.5\linewidth}
+    \caption{The classic \textit{sawtooth} pattern of \gls{cwnd} over time using the \gls{tcp} congestion control algorithm NewReno.}
     \label{fig:newreno}
 \end{figure}
 
-Another \gls{cc} algorithm that became popular was CUBIC, aiming to optimize the congestion control in high bandwidth networks with high latency. CUBIC was implemented and used by default in Linux kernel versions 2.6.19 and above, which persists to this day. As its name implies, CUBIC does not use a linear function to adjust its \gls{cwnd}, but rather a cubic function as shown in the following Figure \todo{ref...}.
+Another \gls{cc} algorithm that became popular was CUBIC, aiming to optimize the congestion control in high bandwidth networks with high latency. CUBIC was implemented and used by default in Linux kernel versions 2.6.19 and above, which persists to this day. As its name implies, CUBIC does not use a linear function to adjust its \gls{cwnd}, but rather a cubic function as shown in the following Figure \ref{fig:cubic}.
 
-\todo{image}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.4\textwidth]{cubic}
+    \captionsetup{width=0.4\linewidth}
+    \caption{The behavior of the CUBIC congestion control algorithm.}
+    \label{fig:cubic}
+\end{figure}
 
 
 
@@ -257,9 +261,7 @@ An \gls{ecn}-capable network works as follows. A sender will transmit \gls{ip} p
 
 \gls{ecn} was standardized in 2001 as a direct replacement for the use of packet loss as congestion signaling. \cite{rfc3168} Despite its positive early impact \cite{rfc2884}, it never saw widespread usage. \cite{enabling_internet-wide_ecn} A series of unfortunate incidents managed to cripple its early deployment --- rather than responding properly or ignoring the \gls{ecn} bits, some firewalls on faulty network equipment would instead block or mangle packets with \gls{ecn} bits set. This incorrect behaviour led to failure rate of 8\% in \gls{ecn}-enabled \gls{tcp} connections for web servers tested in 2004. \cite{pre-congestion_notification}
 
-Due to the unfortunate early struggles of \gls{ecn} deployment, the \gls{ietf} required that the response to an \gls{ecn} signal should be the same as the reaction to a loss. \cite{rfc3168} However, this requirement has recently been relaxed, \cite{rfc8311} sparking \remark{spurring? incentivising? motivating?} a regained interest in the field and giving rise to new experimental \gls{ecn} proposals. \todo{finish off with some promising stats?}
-
-% As of 2015, measurements show that the failure of \gls{ecn}-enabled \gls{tcp} connections has reduced to less than 1\%, \cite{enabling_internet-wide_ecn} and as of May 2017, 
+Due to the unfortunate early struggles of \gls{ecn} deployment, the \gls{ietf} required that the response to an \gls{ecn} signal should be the same as the reaction to a loss. \cite{rfc3168} However, this requirement has recently been relaxed, \cite{rfc8311} sparking a regained interest in the field and giving rise to new experimental \gls{ecn} proposals. As of 2015, measurements show that the failure of \gls{ecn}-enabled \gls{tcp} connections has reduced to less than 1\%. \cite{enabling_internet-wide_ecn}
 
 
 
@@ -277,5 +279,3 @@ Due to the unfortunate early struggles of \gls{ecn} deployment, the \gls{ietf} r
 The less aggressive multiplicative decrease factor yielded significant performance gains in lightly-multiplexed scenarios. Specifically, a 20\% reduction factor was found to give a good latency-vs-utilization trade-off.
 
 As of 2018, \gls{abe} has been formalized by the \gls{ietf} as an experimental \gls{rfc} \cite{rfc8511} and been implemented in mainline FreeBSD \gls{os} kernel.
-
-\todo{more? image?}

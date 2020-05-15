@@ -1,6 +1,6 @@
 \chapter{Experimental Evaluation} \label{ch:experimental_evaluation}
 
-In the following sections, all experiments conducted in order to resolve the research questions in Section \ref{goals_and_research_questions} will be presented, and later used as a basis for discussion in Chapter \ref{discussion}. \todo{more? rework?}
+In the following sections, all experiments conducted in order to resolve the research question in Section \ref{goals_and_research_questions} will be presented, and later used as a basis for discussion in the final section.
 
 
 
@@ -13,14 +13,6 @@ In the following sections, all experiments conducted in order to resolve the res
 \section{Experimental Design}
 
 From our testbed, we will be using \lstinline{pi3host2}, \lstinline{pi3host3} and \lstinline{pi3host4} as clients, with \lstinline{pi3host7} acting as a server. The clients will be sending bulk \gls{tcp} data over the bottleneck router \lstinline{pi3router} with a maximum bandwidth of \SI{10}{mbit} and a buffer size of 64 packets. To provide a fair share of the bandwidth for all flows during experiments, we will use the Fair Queuing version of \gls{codel} as the \gls{aqm} on the bottleneck router.
-
-\todo{show image of setup}
-
-For each experiment, a set of graphs will be produced from the generated output of \gls{teacup}. The graphs will represent \todo{....}
-
-
-
-This section will focus solely on \gls{dabe}. We start with a single flow to show its behavior, and then follow up with multiple flows to see how it compares against itself.
 
 
 
@@ -195,46 +187,57 @@ Figure \ref{fig:dabe_vs_abe_throughput} shows the throughput in four different d
 
 
 
-% \section{Two Flows}
+\section{Intra-Fairness} \label{sec:intra-fair}
 
-% \todo{}
+In this section we will look at intra-fairness of \gls{dabe} by running experiments where it competes against itself.
 
-% \begin{figure}[H]
-%     \centering
-%     \includegraphics[width=1.0\linewidth]{performance/two_flows/cwnd}
-%     \captionsetup{width=1.0\linewidth}
-%     \caption{\todo{}}
-%     %\label{fig:rtt_queue}
-% \end{figure}
+\subsection{Two Flows}
 
-% \begin{figure}[H]
-%     \centering
-%     \includegraphics[width=1.0\linewidth]{performance/two_flows/rtt}
-%     \captionsetup{width=1.0\linewidth}
-%     \caption{\todo{}}
-%     %\label{fig:rtt_queue}
-% \end{figure}
+In this section we have two flows of \gls{dabe} sharing the same link in order to see how they coexist with each other. The following Figure \ref{fig:dabe_vs_dabe_cwnd} shows the resulting \gls{cwnd} value over time when it competes against another \gls{dabe} flow.
 
-% \begin{figure}[H]
-%     \centering
-%     \begin{subfigure}{0.5\linewidth}
-%         \centering
-%         \includegraphics[width=1.0\linewidth]{performance/two_flows/cwnd_avg}
-%     \end{subfigure}%
-%     \begin{subfigure}{0.5\linewidth}
-%         \centering
-%         \includegraphics[width=1.0\linewidth]{performance/two_flows/rtt_avg}
-%     \end{subfigure}
-%     \caption{\todo{update figure}}
-% \end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1.0\linewidth]{performance/two_flows/cwnd}
+    \captionsetup{width=1.0\linewidth}
+    \caption{The \gls{cwnd} of \gls{dabe} when competing against another \gls{dabe} flow.}
+    \label{fig:dabe_vs_dabe_cwnd}
+\end{figure}
 
-% \begin{figure}[H]
-%     \centering
-%     \includegraphics[width=1.0\linewidth]{performance/two_flows/throughput}
-%     \captionsetup{width=1.0\linewidth}
-%     \caption{\todo{}}
-%     %\label{fig:rtt_queue}
-% \end{figure}
+Figure \ref{fig:dabe_vs_dabe_rtt} shows the \gls{rtt} value over time when competing against another \gls{dabe} flow.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1.0\linewidth]{performance/two_flows/rtt}
+    \captionsetup{width=1.0\linewidth}
+    \caption{The \gls{rtt} of \gls{dabe} when competing against another \gls{dabe} flow.}
+    \label{fig:dabe_vs_dabe_rtt}
+\end{figure}
+
+In order to assess the overall behavior when \gls{dabe} competes against another \gls{dabe} flow, the following Figure \ref{fig:dabe_vs_dabe_avg} presents the average \gls{cwnd} and \gls{rtt} values from ten experiments that has been conducted.
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}{0.5\linewidth}
+        \centering
+        \includegraphics[width=1.0\linewidth]{performance/two_flows/cwnd_avg}
+    \end{subfigure}%
+    \begin{subfigure}{0.5\linewidth}
+        \centering
+        \includegraphics[width=1.0\linewidth]{performance/two_flows/rtt_avg}
+    \end{subfigure}
+    \caption{The average \gls{cwnd} and \gls{rtt} when two flows of \gls{dabe} compete against each others. The average is taken from ten experiments.}
+    \label{fig:dabe_vs_dabe_avg}
+\end{figure}
+
+Figure \ref{fig:dabe_vs_dabe_throughput} shows the throughput in four different delays when \gls{dabe} and \gls{abe} coexists.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1.0\linewidth]{performance/two_flows/throughput}
+    \captionsetup{width=1.0\linewidth}
+    \caption{The throughput of \gls{dabe} competing with another \gls{dabe} flow under four different delays.}
+    \label{fig:dabe_vs_dabe_throughput}
+\end{figure}
 
 
 
@@ -244,46 +247,53 @@ Figure \ref{fig:dabe_vs_abe_throughput} shows the throughput in four different d
 
 
 
-% \section{Four Flows}
+\subsection{Four Flows}
 
-% \todo{}
+In this section we have four flows of \gls{dabe} sharing the same link in order to see how they coexist with each other. The following Figure \ref{fig:dabe_vs_dabe4_cwnd} shows the resulting \gls{cwnd} value over time when it competes against three other \gls{dabe} flows.
 
-% \begin{figure}[H]
-%     \centering
-%     \includegraphics[width=1.0\linewidth]{performance/four_flows/cwnd}
-%     \captionsetup{width=1.0\linewidth}
-%     \caption{\todo{}}
-%     %\label{fig:rtt_queue}
-% \end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1.0\linewidth]{performance/four_flows/cwnd}
+    \captionsetup{width=1.0\linewidth}
+    \caption{The \gls{cwnd} of \gls{dabe} when competing against three other \gls{dabe} flows.}
+    \label{fig:dabe_vs_dabe4_cwnd}
+\end{figure}
 
-% \begin{figure}[H]
-%     \centering
-%     \includegraphics[width=1.0\linewidth]{performance/four_flows/rtt}
-%     \captionsetup{width=1.0\linewidth}
-%     \caption{\todo{}}
-%     %\label{fig:rtt_queue}
-% \end{figure}
+Figure \ref{fig:dabe_vs_dabe4_rtt} shows the \gls{rtt} value over time when competing against three other \gls{dabe} flows.
 
-% \begin{figure}[H]
-%     \centering
-%     \begin{subfigure}{0.5\linewidth}
-%         \centering
-%         \includegraphics[width=1.0\linewidth]{performance/four_flows/cwnd_avg}
-%     \end{subfigure}%
-%     \begin{subfigure}{0.5\linewidth}
-%         \centering
-%         \includegraphics[width=1.0\linewidth]{performance/four_flows/rtt_avg}
-%     \end{subfigure}
-%     \caption{\todo{update figure}}
-% \end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1.0\linewidth]{performance/four_flows/rtt}
+    \captionsetup{width=1.0\linewidth}
+    \caption{The \gls{rtt} of \gls{dabe} when competing against three other \gls{dabe} flows.}
+    \label{fig:dabe_vs_dabe4_rtt}
+\end{figure}
 
-% \begin{figure}[H]
-%     \centering
-%     \includegraphics[width=1.0\linewidth]{performance/four_flows/throughput}
-%     \captionsetup{width=1.0\linewidth}
-%     \caption{\todo{}}
-%     %\label{fig:rtt_queue}
-% \end{figure}
+In order to assess the overall behavior when \gls{dabe} competes against three other \gls{dabe} flows, the following Figure \ref{fig:dabe_vs_dabe4_avg} presents the average \gls{cwnd} and \gls{rtt} values from ten experiments that has been conducted.
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}{0.5\linewidth}
+        \centering
+        \includegraphics[width=1.0\linewidth]{performance/four_flows/cwnd_avg}
+    \end{subfigure}%
+    \begin{subfigure}{0.5\linewidth}
+        \centering
+        \includegraphics[width=1.0\linewidth]{performance/four_flows/rtt_avg}
+    \end{subfigure}
+    \caption{The average \gls{cwnd} and \gls{rtt} when four flows of \gls{dabe} compete against each others. The average is taken from ten experiments.}
+    \label{fig:dabe_vs_dabe4_avg}
+\end{figure}
+
+Figure \ref{fig:dabe_vs_dabe4_throughput} shows the throughput in four different delays when four \gls{dabe} flows comepete against each other.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1.0\linewidth]{performance/four_flows/throughput}
+    \captionsetup{width=1.0\linewidth}
+    \caption{The throughput of four competing \gls{dabe} flows under four different delays.}
+    \label{fig:dabe_vs_dabe4_throughput}
+\end{figure}
 
 
 
@@ -386,7 +396,7 @@ In order to assess the overall behavior when \gls{dabe} and CUBIC coexists, the 
     \label{fig:dabe_and_cubic_avg}
 \end{figure}
 
-Figure \ref{fig:dabe_and_cubic_throughput} shows the throughput in four different delays when \gls{dabe} and \gls{abe} coexists.
+Figure \ref{fig:dabe_and_cubic_throughput} shows the throughput in four different delays when \gls{dabe} and CUBIC coexists.
 
 \begin{figure}[H]
     \centering
@@ -506,6 +516,12 @@ Figure \ref{fig:dabe_abe_cubic_throughput} shows the throughput in four differen
 
 \section{Evaluation}
 
-Overall, we can see that \gls{dabe} manages to consistently yield a higher throughput without a significant increase in latency. Being more aggressive usually means more latency, but to our surprise this was not the case for most experiments when looking at the average \gls{rtt}. When comparing directly with \gls{abe} from Figure \ref{fig:dabe_vs_abe_avg}, the \gls{cwnd} is consistently higher over time for \gls{dabe}, but the latency effectively statys the same as \gls{abe}.
+Our main goal was to improve \gls{abe}. From Figure \ref{fig:dabe_vs_abe_throughput}, we can see that \gls{dabe} successfully reduces its \gls{cwnd} by less than \gls{abe}. In addition, the sustained throughput remains consistently high and stable compared to \gls{abe}, especially when the latency increases. The exception occurs when \gls{rtt} reaches \SI{200}{ms}, in which it looks like \gls{dabe} and \gls{abe} starts to merge in behavior.
 
-\todo{more...}
+We see this same behavior from Figure \ref{fig:dabe_vs_abe_cwnd}, where the \gls{cwnd} of \gls{dabe} consistently stays above \gls{abe}, until latency reaches \SI{200}{ms}. The behavior if confirmed by looking at the average of \gls{cwnd} and \gls{rtt} from Figure \ref{fig:dabe_vs_abe_avg}, where \gls{dabe} shows a slightly higher \gls{cwnd} value during all the various latencies while the average \gls{rtt} remains roughly the same.
+
+We argue that the reason for this is simply because \gls{dabe} reduces much more frequently with a significantly lower reduction factor compared to \gls{abe} which always reduces by 20\%. This effect is especially apparent when the \gls{rtt} stays stable.
+
+
+In terms of fairness, we can we can see from Section \ref{sec:intra-fair} the that when \gls{dabe} flows compete against each other, they eventually converge in throughput. In other words, \gls{dabe} achieves intra-fairness. However, when looking at fairness in mixed flows from Section \ref{sec:mixed-flows}, we can see that the flows does both diverge and converge in alternate waves when it comes to throughput. We also see that \gls{dabe} always yields the higher throughput, but this is because \gls{dabe} reduces less which results in a higher throughput.
+

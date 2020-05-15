@@ -20,7 +20,7 @@ To combat bufferbloat, the proposal of \gls{aqm} on intermediary devices was int
 
 The benefits of \gls{ecn} are evident. Instead of reacting to network congestion after the fact (i.e. after packet loss), one can take protective \remark{?} measures before it happens. When reliable delivery is necessary, packet loss is directly responsible for reducing throughput and consequently rising the latency due to the additional time needed for retransmission. While the reason for a packet loss can be of multiple sources besides a full buffer, explicit feedback using \gls{ecn} serves as a clear signal for the inevitable impending of network congestion.
 
-\gls{abe} \cite{abe} is a recent proposal \remark{technical paper?} that clearly shows the potential \remark{practical?} benefits of using explicit congestion feedback --- by reducing the sender's transmission rate upon the receipt of an \gls{ecn} mark, a packet loss can be avoided. In addition, the earlier congestion feedback allows for a less aggressive reduction factor, yielding a higher sustained throughput and lower latency while also maintaining the benefit of avoiding packet loss.
+\gls{abe} \cite{abe} is a recent proposal \remark{technical paper?} that clearly shows the benefits of using explicit congestion feedback --- by reducing the sender's transmission rate upon the receipt of an \gls{ecn} mark, a packet loss can be avoided. In addition, the earlier congestion feedback allows for a less aggressive reduction factor, yielding a higher sustained throughput and lower latency while also maintaining the benefit of avoiding packet loss.
 
 
 
@@ -38,13 +38,13 @@ In this section, the goal and research question for the thesis is presented alon
     Designing and implementing an improved version of \gls{abe} on FreeBSD.
 \end{statement}
 
-The goal of the thesis is to improve \gls{abe} by making it more responsive to different network conditions. Currently, \gls{abe} shares the same behaviour as NewReno when responding to a congestion signal, which is to reduce a sender's transmission rate by a constant factor. The only difference is that \gls{abe} reduces by less. \todo{rework?} Hence, the following research question defined below will be investigated.
+The goal of the thesis is to improve \gls{abe} by making it more responsive to different network conditions. Currently, \gls{abe} shares the same behaviour as NewReno when responding to a congestion signal, which is to reduce a sender's transmission rate by a constant factor. The only difference is that \gls{abe} reduces by less. Hence, the following research question defined below will be investigated.
 
 \begin{statement}[Research question:]
     \gls{abe} reduces a sender's transmission rate by a constant factor in the event of an \gls{ecn} congestion signal. Can this factor be made more dynamic such that it reduces less when there is moderate congestion, and more when there is heavy congestion?
 \end{statement}
 
-Since \gls{abe} backs off by a constant factor, the thesis will look into techniques to make this reduction factor more dynamic. The \gls{ecn} congestion response should back off less when there is moderate congestion, and back off more when there is heavy congestion. \todo{more?}
+Since \gls{abe} backs off by a constant factor, the thesis will look into techniques to make this reduction factor more dynamic. The \gls{ecn} congestion response should back off less when there is moderate congestion, and back off more when there is heavy congestion.
 
 
 
@@ -56,7 +56,7 @@ Since \gls{abe} backs off by a constant factor, the thesis will look into techni
 
 \section{Research Methodology}
 
-To address the research question outlined above, a cluster consisting of eight Raspberry Pi machines has been set up. The cluster serves as a physical testbed for conducting various \gls{tcp} experiments in order to validate the results from our modifications to \gls{abe}. \todo{more....}
+To address the research question outlined above, a cluster consisting of eight Raspberry Pi machines has been set up. The cluster serves as a physical testbed for conducting various \gls{tcp} experiments in order to validate the results from our modifications to \gls{abe}.
 
 
 
@@ -68,7 +68,8 @@ To address the research question outlined above, a cluster consisting of eight R
 
 \section{Contributions}
 
-\todo{write when finished}
+The thesis' main contribution is improving \gls{abe} by making it more responsive to various network conditions through the use of a more dynamic reduction factor in the event of an \gls{ecn} congestion signal. We have also set up a physical testbed using a cluster of Raspberry Pi machines in order to test the validity of our improvements to \gls{abe}. In addition, we have documented the set up for others who are interested in making the \gls{teacup} work on an ARM architecture.
+
 
 
 

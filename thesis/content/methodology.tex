@@ -1,6 +1,6 @@
 \chapter{Methodology} \label{ch:methodology}
 
-This chapter describes the architecture and methods that were needed in order to investigate the research questions presented in Section \ref{goals_and_research_questions}. An overview of the physical testbed will first be given, followed by the general setup for each machine and how the \gls{tcp} experimentation have been conducted using the tool \gls{teacup}. \todo{rework?}
+This chapter describes the architecture and methods that were needed in order to investigate the research question presented in Section \ref{goals_and_research_questions}. An overview of the physical testbed will given, followed by the general setup for each machine and how the \gls{tcp} experimentation have been conducted using the tool \gls{teacup}. The later sections briefly explain the internals of congestion control development on FreeBSD, how to use \gls{abe} and the implementation details for our work upon improving \gls{abe}.
 
 
 
@@ -58,10 +58,10 @@ The system consists of eight connected Raspberry Pi machines. The Raspberry Pi m
     \caption{Raspberry Pi 3 Model B+ hardware specifications.}
 \end{wraptable}
 
-All the machines are hooked up to a single Zyxel switch. The switch provides interconnectivity, and in addition powers the machines through \gls{poe}. \todo{more?}
+All the machines are hooked up to a single Zyxel switch. The switch provides interconnectivity, and in addition powers the machines through \gls{poe}.
 
 \begin{figure}[H]
-    \includegraphics[width=0.55\linewidth]{pi3cluster}
+    \includegraphics[width=0.5\linewidth]{pi3cluster}
     \captionsetup{width=1.0\linewidth,justification=raggedright,singlelinecheck=false}
     \caption{The Raspberry Pi 3B+ cluster all hooked to a Zyxel switch.}
     \label{fig:pi3cluster}
@@ -88,8 +88,6 @@ The testbed consists of two networks --- the \textit{controller} network in whic
 Since the entire testbed is connected to a single switch only, and each Raspberry Pi 3B+ machine has only one Ethernet interface, both \gls{vlan} and virtual interfaces have been used to achieve the desired network topology presented above. In addition, one USB-to-Ethernet adapter was necessary on the router in order to conduct network experimentation with \gls{teacup}. The \gls{vlan} setup on the switch is explained in Section \ref{zyxel} while the general network setup for every machine is explained in the remaining sections.
 
 A summary table of the network setup for each machine follows.
-
-\todo{restructure page}
 
 \begin{table}[H]
     \centering
@@ -126,7 +124,7 @@ The table above lists the configured Raspberry Pi 3B+ machines in left to right 
 
 \subsection{Zyxel GS1920-8HP} \label{zyxel}
 
-The Zyxel GS1920-8HP model is a managed switch with 10 available ports for interconnectivity. The Zyxel switch is what powers every Raspberry Pi 3B+ machine using \gls{poe}, with port 9 providing Internet access.
+The Zyxel GS1920-8HP model is a managed switch with 10 available ports for interconnectivity. The Zyxel switch is what powers every Raspberry Pi 3B+ machine using \gls{poe}.
 
 \begin{figure}[H]
     \centering
@@ -230,8 +228,6 @@ The hostname has also been changed to \lstinline{pi3gate} as specified in \ref{c
 
 Every network experiment orchestrated by \gls{teacup} is initiated from the gateway, and so the majority of the tools for \gls{teacup} to work are installed on this machine. As described from the official \href{http://caia.swin.edu.au/tools/teacup/TEACUP-0.9_INSTALL.txt}{install} guide \footnote{\url{http://caia.swin.edu.au/tools/teacup/TEACUP-0.9_INSTALL.txt}}, with some slight adjustments, the following commands will install \gls{teacup} properly:
 
-\todo{mention that TEACUP is 5 years old, and this is why the install steps had been slightly modified as Fabric has moved to Python 3}
-
 \begin{minted}{bash}
 # R
 apt install -y r-base
@@ -325,7 +321,6 @@ In additon, a few changes to the \lstinline{hostsetup.py} file in \gls{teacup} m
 
 Finally, the tool \lstinline{spp} does not run on the Raspberry Pi 3 or ARM architecture at all, only displaying the helpful message "\lstinline{aborting}" when running it. TEACUP uses this tool to calculate \gls{rtt}, and fortunately is only needed when analyzing the results. In other words, the experiment data can easily be copied over to an x86 machine where \lstinline{spp} works, and then be analyzed from there. That is, follow the install instructions above from \ref{teacup_gateway} again as normal, but on an x86 machine instead.
 
-\todo{custom aqm teacup changes}
 
 
 
@@ -335,7 +330,7 @@ Finally, the tool \lstinline{spp} does not run on the Raspberry Pi 3 or ARM arch
 
 \subsection{Router}
 
-This section describes how the router has been set up. \todo{maybe expand...}
+This section describes how the router has been set up.
 
 
 \subsubsection{Network}
@@ -393,7 +388,7 @@ apt install -y tcpdump ntp
 
 \subsection{Hosts}
 
-This section describes how each host has been set up. \todo{maybe expand...}
+This section describes how each host has been set up.
 
 
 \subsubsection{Network}
@@ -434,15 +429,17 @@ To synchronize time for each host against the gateway, set up each host as an \g
 \begin{minted}{bash}
 # Installing modified iperf on FreeBSD
 wget https://sourceforge.net/projects/iperf2/files/iperf-2.0.9.tar.gz --no-check-certificate
+wget http://caia.swin.edu.au/tools/teacup/downloads/iperf-2.0.5-mod.tar.gz
 tar -xf iperf-2.0.9.tar.gz
+tar -xf iperf-2.0.5-mod.tar.gz
 cd iperf-2.0.9
-patch -p1 < iperf-2.0.9.patch
+patch -p1 < ../iperf-2.0.5-mod/iperf-2.0.5.patch
 ./configure
 make
 make install
 \end{minted}
 
-\todo{iperf-2.0.9.patch needs more explaining}
+The patching process will produce a tiny conflict. This issue is easily resolved by manually applying the changes.
 
 A modified version of \lstinline{httperf} is also used, but installing from source has proven unsuccessful. Thus, an unmodified version is therefore installed with \lstinline{pkg install httperf}. The last tool to install, \lstinline{nttcp}, is also modified, and so must be installed from source as follows:
 
@@ -467,11 +464,10 @@ cp nttcp /bin/
 
 \glsfirst{teacup} \footnote{\url{http://caia.swin.edu.au/tools/teacup}} is a software tool for running automated \gls{tcp} experiments in a controlled physical tested. It was made as a research project by \gls{caia} in 2005 to gain a better understanding of the impact of different \gls{cc} algorithms on \gls{tcp}-based streaming flows. \cite{teacup} The typical use-case involves a classical dumbbell topology where multiple hosts are connected on opposite sides of a bottleneck router. An essential part of the tool is the \textit{control host} or \textit{gateway} as we refer to it, which is where \gls{teacup} itself runs and orchestrates the configuration of the end hosts and bottleneck router before a particular experiment is conducted.
 
-The process of installing and setting up \gls{teacup} is quite extensive. We experienced a lot of trouble \remark{problems?} due to the ARM architecture on Raspberry Pi as discussed in Section \todo{reference}. However, the effort was well worth it. We ended up with a single \gls{os} on each machine, where the hosts are running FreeBSD and the router and gateway are running Raspbian Buster (Linux). With a single configuration file (see Appendix \ref{teacup_gateway}), \gls{teacup} is able to perform experiments with multiple permuations --- traffic generation (such as \gls{tcp} bulk transfer), traffic shaping (such as bandwidth, delay and loss), traffic control (scheduling of packets with \gls{aqm}) and executing custom host commands such as enabling \gls{ecn}.
+The process of installing and setting up \gls{teacup} is quite extensive. We experienced a lot of problems due to the ARM architecture on Raspberry Pi. However, the effort was well worth it. We ended up with a single \gls{os} on each machine, where the hosts are running FreeBSD and the router and gateway are running Raspbian Buster (Linux). With a single configuration file (see Appendix \ref{teacup_gateway}), \gls{teacup} is able to perform experiments with multiple permuations --- traffic generation (such as \gls{tcp} bulk transfer), traffic shaping (such as bandwidth, delay and loss), traffic control (scheduling of packets with \gls{aqm}) and executing custom host commands such as enabling \gls{ecn}.
 
-For each experiment, \gls{teacup} will collect a variety of metadata from the end hosts and bottleneck router. The resulting experiment data is then analyzed in order to generate graphical plots that can show either the throughput, \gls{rtt} (including smoothed) or \gls{cwnd} over time. The use of \gls{teacup} in our thesis serves to validate the results from our work, as every plot illustrated in Chapter \ref{evaluation} has been generated by it.
+For each experiment, \gls{teacup} will collect a variety of metadata from the end hosts and bottleneck router. The resulting experiment data is then analyzed in order to generate graphical plots that can show either the throughput, \gls{rtt} (including smoothed) or \gls{cwnd} over time. The use of \gls{teacup} in our thesis serves to validate the results from our work, as every plot illustrated in Chapter \ref{ch:experimental_evaluation} has been generated by it.
 
-\todo{more?}
 
 
 
@@ -704,13 +700,13 @@ The complete implementation details for NewReno can be found in Appendix \ref{cc
 
 \glsfirst{dabe} represents our work that builds upon \gls{abe}. Instead of reducing the \gls{cwnd} by a constant factor in the event of an \gls{ecn} congestion signal, we reduce by the ratio of the shortest \gls{rtt} measured and the most recent one. Hence, if the \gls{rtt} rises, the resulting backoff is also greater, but if the \gls{rtt} remains stable, the backoff is less. The shortest, or \textit{minimum}, \gls{rtt} serves as the optimal point in which the network experiences no congestion.
 
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.6\linewidth]{rtt_queue}
-    \captionsetup{width=0.6\linewidth}
-    \caption{The effect on the \gls{rtt} when buffers start to fill and queues are formed. \todo{update image}}
-    \label{fig:rtt_queue}
-\end{figure}
+% \begin{figure}[H]
+%     \centering
+%     \includegraphics[width=0.6\linewidth]{rtt_queue}
+%     \captionsetup{width=0.6\linewidth}
+%     \caption{The effect on the \gls{rtt} when buffers start to fill and queues are formed. \todo{update image}}
+%     \label{fig:rtt_queue}
+% \end{figure}
 
 % \begin{wrapfigure}{r}{0.5\textwidth}
 %     \centering

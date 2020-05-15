@@ -99,8 +99,6 @@ pkg upgrade
 
 \section{Enable SSH} \label{enable_ssh}
 
-\todo{add SSH term and maybe passwordless access}
-
 \subsubsection{Raspbian Buster}
 
 To enable SSH access, simply run \lstinline{systemctl enable ssh}. To allow SSH root login, the line \lstinline{PermitRootLogin yes} must be added to the file \lstinline{/etc/ssh/sshd_config}, which can conveniently be done with \lstinline{echo 'PermitRootLogin yes' >> /etc/ssh/sshd_config}. Then start SSH service with \lstinline{systemctl start ssh} or just reboot.
@@ -154,8 +152,6 @@ First, set up a common timezone on all machines. On Raspbian Buster, run \lstinl
 \subsubsection{NTP Server on Raspbian Buster}
 
 Install \lstinline{ntp} with \lstinline{apt install ntp}. Then check if any \gls{ntp} peers are connected with \lstinline{ntpq -p}. If not, consider replacing the default pools or servers in \lstinline{/etc/ntp.conf} with another, such as \lstinline{server ntp.uio.no} followed up by \lstinline{systemctl restart ntp}.
-
-\todo{find out why ntp server needs to be restarted on gateway upon boot}
 
 
 \subsubsection{NTP Client on Raspbian Buster}

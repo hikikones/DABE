@@ -1,4 +1,6 @@
 \chapter*{Abstract}
 \addcontentsline{toc}{chapter}{Abstract}
 
-\todo{...}
+The Internet has evolved beyond its original purpose to send mail or use the \gls{www}. Recent years have seen a rapid increase in the use of latency sensitive applications such as online gaming, video streaming and highly time-sensitive financial transactions. Despite this, the Internet today still rely on lost packets as feedback for moderating the transmission rate of a host. When reliable delivery is necessary, which is still the case today with the bulk traffic using \gls{tcp}, packet loss is directly responsible for reducing throughput and consequently rising the latency due to the additional time needed for retransmission.
+
+\gls{ecn} is a solution to combat this and has existed for two generations, but only recently gained a swift and wide adoption. \gls{abe} is a recent proposal that increases performance by utilizing \gls{ecn}. We propose \gls{dabe} that improves \gls{abe} by using a dynamic reduction factor.
