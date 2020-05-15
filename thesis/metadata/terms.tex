@@ -6,6 +6,14 @@
     description={A simple sender-side only modification that, upon a receipt of en ECN mark, reduces the CWND by less than the usual response for loss.}
 }
 
+\newglossaryentry{dabe}
+{
+    name={Dynamic Alternative Backoff with ECN (DABE)},
+    first={Dynamic Alternative Backoff with ECN (DABE)},
+    text={DABE},
+    description={Our work building upon ABE. Instead of reducing the CWND by a constant factor in the event of a ECN congestion signal, the reduction is now based on the shortest RTT measured divided by the most recent RTT.}
+}
+
 \newglossaryentry{tcp}
 {
     name={Transmission Control Protocol (TCP)},
@@ -76,6 +84,14 @@
     first={acknowledgement (ACK)},
     text={ACK},
     description={A signal that is passed between communicating processes, computers, or devices to signify acknowledgement, or receipt of message, as part of a communications protocol.}
+}
+
+\newglossaryentry{rto}
+{
+    name={Retransmission Timeout (RTO)},
+    first={Retransmission Timeout (RTO)},
+    text={RTO},
+    description={A timeout that occurs when a sender misses too many ACKs and therefore decides to stop sending for a bit, and then cautiously resume again.}
 }
 
 \newglossaryentry{cc}

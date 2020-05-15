@@ -1,10 +1,11 @@
-\chapter{Literature Review}
+\chapter{Literature Review} \label{ch:background}
 
 \todo{change title to "Background". Add literature review section at end if time allows it...}
 
-This chapter presents the background theory for which this thesis is based upon.
+This chapter presents the background knowledge that the thesis builds upon. We start by introducing the various components of network delay, and follow up by presenting the main protocol used today for transmitting data on the Internet. The later sections goes into both somewhat old and more recent technologies that has emerged in order to improve the performance of Internet.
 
-\todo{improve introduction to chapter...}
+
+
 
 
 
@@ -14,8 +15,6 @@ This chapter presents the background theory for which this thesis is based upon.
 \section{Network Delay and Latency}
 
 The time it takes for a bit of data to travel across the network from one communication endpoint to another is known as \textit{delay}. The process for such a transmission involves many components. A typical example where the data traverses an intermediate device before reaching destination follows. First, the data to be sent is usually created by an application. The data will then be handed over to the \gls{os} which passes it further down to the network interface card. From there, the data will be encoded and transmitted over a physical medium and eventually received by an intermediate device, such as a router. The router will then analyze the data and retransmit it over another medium that points to the destination. Finally, the data reaches the receiver. The whole process can happen in either multiples or fractions of seconds.
-
-\todo{maybe show a picture of the typical example}
 
 Network delay is therefore divided into the following four parts:
 
@@ -30,11 +29,6 @@ It is common to notify the sender that the receiver actually got the data. This 
 
 In this thesis, we are mainly concerned with the \textit{queuing} delay part.
 
-% \section{Bufferbloat}
-
-% A common cause of latency in packet switched networks is bufferbloat. It occurs when a router, with a large buffer gets congested. the tcp \gls{cc} will fill up the entire buffer, before it starts backing off. Packets become queued for a long period of time, untill the buffer is drained, \gls{cc} resets and TCP connection ramps back up to speed to fill the buffer again.
-
-% This causes high and variable latency, in addition to "blocking" the bottleneck for other flows when the buffer is full and packets are droped. Several technical solutions exists, that try to solve the problem of bufferbloat and we will outline some of them  in this section.
 
 
 
@@ -43,61 +37,35 @@ In this thesis, we are mainly concerned with the \textit{queuing} delay part.
 
 
 
-
-\section{Transmission Control Protocol}
+\section{Transmission Control Protocol} \label{sec:tcp}
 
 Whenever a user sends an email, or any data over the network for that matter, one should expect some kind of assurance that the delivery of the data was successful. This notion is known as \textit{reliability}, and is one of the key components of the \gls{tcp} and why it is one of the main protocols for transmitting data on the Internet. In essence, \gls{tcp} is a communication protocol that provides reliable, ordered, and error-checked delivery of data between applications such as \gls{www}, email and file transfer.
 
-\todo{write a bit more about tcp in general such a connection management and flow control}
+The main job of the \gls{tcp} is to package data into \textit{segments} or \textit{packets}, send them and then reassemble them on the receiving side. To ensure the reliability of these segments, a \textit{sequence number} is contained in each of them so that the receiver side can reassemble them in correct order. The sequence numbers also act as a safeguard when some packet has been lost, as the receiver will know what is missing. If the sender has not received an \gls{ack} within what is known as a \textit{timeout} interval, the missing data will be retransmitted.
 
-% Today, most online web services \todo{citation} are based on transmissions from the \gls{tcp}.
-\subsection{Reliability}
-To ensure reliability, every tcp segment contains a sequence number, and an ACK is send back to the 
-sender for every segment that is recived. This way, data that come out of order can be reordered on the 
-reciving end. This also ensures that lost packets can be retransmitted. If one segment in a datastream is
-lost, the reciver will only ACK the last \textit{in order} packet. Say segment nr 10 is lost. On receiving nr 11, the receiver
-will ACK nr 9 again, this is called duplicate acknowledgment(DupAcks), and on receiving three DupAcks the sender will 
-retransmitt the lost packet. A threshold of three is used in case the segment was just reordered by the network, to
-avoid unnecessary retransmission.
-Loss can also be detected by Retransmission timeout (RTO). For every segment that is sent a timer is started with 
-an estimate of the arrival of the ACK. If the timer expires the segment is retransmitted and a new timer is started
-with double length. This is to backoff retransmission trafic in case of malicious actors such as denial of service
-attacks.
+Another distinguishing feature of \gls{tcp} is the notion of \textit{flow control}. Network devices have finite resources, and so some will be much faster than others. One device may be sending data at a much faster rate than the receiver can handle. \gls{tcp} solves this by using a \textit{sliding windows} mechanism which the sole purpose of controlling the flow of data between two devices such that one is not overwhelmed.
 
-\subsection{Flow Controll}
-Tcp stores the data to send in a send buffer before it goes out on the network, and the data it receives in a 
-receive buffer before it is prosessed by an application. It is important to not send more data when the receive 
-buffer is full, otherwise it would lead to packet drop. Tcp ensures this by maintaining a receive window and 
-advertising it in every ACK. The receive window is the space left in the receive buffer, and it dictates how many 
-unacknowledged packets can be in fligh at a time. This means that if the reciver is processing slowly, the receive 
-buffer will start to fill up, causing the recevie window to to decrease, wich tells the sender to slow down
-its sending rate.
 
-% \gls{tcp} is the one of the main protocols for transmitting data on the internet. It is a connection based, reliable protocoll and is used by for instance World Wide Web (WWW), email, File Transfer Protocoll (FTP) and streaming media. \gls{tcp} requires that the sender and reciever establishes a connection through a three-way handshake before transmission starts. All segments sent have a sequence number, and the reciver sends an \gls{ack} for every segment it recieves. This, in addition to retransmission and error-checking ensures reliable transfer, but also lengthens latency.
 
-\subsection{Network Congestion}
+
+
+
+
+
+
+\subsection{Congestion Control} \label{sec:cc}
 
 In the same sense that traffic on the road can come to a halt, the same is true for traffic on a network. This is known as \textit{congestion}, and is usually caused by overutilization. That is, network devices such as a router have finite resources, and thus too much traffic will cause the device to carry more data than it can handle which leads to congestion on the network. Typical effects include queueing delay, packet loss or the blocking of new connections.
 
-\todo{show image illustrating congestion}
-
-\todo{write more about general network congestion...}
-
-
-
-
-
-\subsection{Congestion Control}
-
-Another key compononent of \gls{tcp} is the ability to either prevent congestion or mitigate it after it occurs, known simply as \gls{cc}. The means of applying \gls{cc} is simple --- ensure that the sender does not overflow the network. In other words, the sender's rate needs to be adjusted based on the condition of the network. Now to the hard part --- how to adjust it?
+The notion of congestion led to another key compononent of \gls{tcp}, which is the ability to either prevent congestion or mitigate it after it occurs. The means of applying \glsfirst{cc} is simple --- ensure that the sender does not overflow the network. In other words, the sender's rate needs to be adjusted based on the condition of the network. Now to the hard part --- how to adjust it?
 
 To shed some light on this, \gls{tcp} includes a state variable called \gls{cwnd} which limits the amount of data that a sender can send before receiving an \gls{ack} back. This variable is known only to the sender, and serves as the key role for attaining \gls{cc}. The means of adjusting \gls{cwnd} is referred to as an \textit{congestion-control algorithm}, and consists of four intertwined parts:
 
 \begin{itemize}
-    \item Slow start ---
-    \item Congestion avoidance ---
-    \item Fast retransmit ---
-    \item Fast recovery ---
+    \item Slow start --- gradually increase the amount of data transmitted until the capacity of the network has been reached.
+    \item Congestion avoidance --- slowly probe for available bandwidth.
+    \item Fast retransmit --- perform retransmission isntead of waiting for a timeout.
+    \item Fast recovery --- enter congestion avoidance phase instead of slow start after a fast retransmit.
 \end{itemize}
 
 The following sections will describe each part in more detail.
@@ -107,40 +75,26 @@ The following sections will describe each part in more detail.
 
 \subsubsection{Slow Start and Congestion Avoidance}
 
-% Upon a \gls{tcp} connection, the value of \gls{cwnd} is typically set to a small multiple of the \gls{mss} allowed \cite{rfc6691}. The sending rate can then be calculated as follows:
-
-% \begin{equation}
-%     RATE = \frac{CWND}{RTT}.    \label{eq:rate}
-% \end{equation}
-
-% \begin{wrapfigure}{r}{0.35\textwidth}
-%     \centering
-%     \includegraphics[width=0.35\textwidth]{TCP_Slow_Start}
-%     \captionsetup{width=0.35\textwidth}
-%     \caption{\gls{tcp} slow start.}
-% \end{wrapfigure}
-
-% With the initial \gls{cwnd} size set, say $1$ \gls{mss} for simplicity sake, the goal of the slow start phase is simple; find the amount of available bandwidth, \textit{quickly}.
-
-% To do this, \gls{tcp} will first send one segment of size $1$ \gls{mss} into the network, and for every \gls{ack}, increase 
-
-Slow start and congestion avoidance are two independent algorithms with
-different objectives, but in practice are implemented together and so will be discussed together.
+Slow start and congestion avoidance are two independent algorithms with different objectives, but in practice are implemented together and so will be discussed together.
 
 Upon a \gls{tcp} connection, the \gls{cwnd} value is initialized to a single \textit{segment} with a specified size. This size is either  announced by the the other end, known as the \gls{rwnd}, or set to a typical default \cite{rfc5681}. In the same sense that \gls{cwnd} is a sender-side limit, \gls{rwnd} is a receiver-side limit. Together, the minimum of \gls{cwnd} and \gls{rwnd} governs the data transmission in slow start. However, at the beginning of a transmission, the network conditions are unknown, so the goal of the slow start phase is simple --- slowly probe the network to determine the available capacity.
 
 To find the capacity, slow start works as follows --- the sender starts by transmitting one segment. For every received \gls{ack}, increment the \gls{cwnd} by another segment, effectively doubling it every \gls{rtt}. Repeat this process until a timeout occurs. That is, until the capacity has been reached that is signaled by a router starting to drop packets, which tells the sender that its \gls{cwnd} has grown too large.
 
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.4\textwidth]{TCP_Slow_Start}
-    \captionsetup{width=0.4\textwidth}
-    \caption{\gls{tcp} slow start. Despite the name, the sending rate experiences exponential growth. \todo{update image}}
-\end{figure}
-
 As a response to hitting the threshold, \gls{tcp} will now halve the \gls{cwnd} since that is the last known value to not induce a timeout. This new value is known as the \gls{ssthresh}, and is another \gls{tcp} state variable used to determine whether the slow start or congestion avoidance algorithm is used to control the data transmission. In other words, the slow start phase ends when \gls{cwnd} reaches or exceeds \gls{ssthresh}.
 
-The goal of congestion avoidance is also simple --- avoid congestion, as the name implies. But the challenge here is to maintain a transmission rate that it not too low, otherwise the link becomes underutilized, and at the same time probe for available bandwidth without overflowing the network too quickly. To do so, a feedback control algorithm known as \gls{aimd} is used. \gls{aimd} provides linear growth of the \gls{cwnd} when probing for available bandwidth, and a multiplicative reduction when congestion is detected.
+The goal of congestion avoidance is also simple --- avoid congestion, as the name implies. But the challenge here is to maintain a transmission rate that it not too low, otherwise the link becomes underutilized, and at the same time probe for available bandwidth without overflowing the network too quickly. To do so, a feedback control algorithm known as \gls{aimd} is used.
+
+Let $w(t)$ be the sending rate during time slot $t$, let $a$ be a positive number and $b$ a number between $0$ and $1$. The sending rate can then be modeled as \gls{aimd} by
+
+\begin{equation} \label{eq:aimd}
+    w(t + 1) = \begin{cases}
+        w(t) + a, & \text{if congestion is not detected},\\
+        w(t) \times b, & \text{if congestion is detected}.
+    \end{cases}
+\end{equation}
+
+where $a$ is the additive increase factor, and $b$ is the multiplicative decrease factor.
 
 \begin{figure}[H]
     \centering
@@ -149,16 +103,12 @@ The goal of congestion avoidance is also simple --- avoid congestion, as the nam
     \caption{The two main parts of \gls{cc} --- the slow start phase where \gls{cwnd} grows exponentially, and the congestion avoidance phase where the transmission rate is increased more conservatively. (\href{https://hpbn.co/building-blocks-of-tcp/}{\textit{source}})}
 \end{figure}
 
-\todo{maybe write more about AIMD with some math}
+\gls{aimd} provides linear growth of the \gls{cwnd} when probing for available bandwidth, and a multiplicative reduction when congestion is detected.
 
-\begin{equation} \label{eq:aimd}
-    w(t + 1) = \begin{cases}
-        w(t) + a, & \text{if congestion is not detected},\\
-        w(t) \times a, & \text{if congestion is detected}.
-    \end{cases}
-\end{equation}
 
-\todo{add conclusion to this section}
+
+
+
 
 
 
@@ -175,40 +125,10 @@ When a fast retransmit has occured, the sender will transmit what appears to be 
     \centering
     \includegraphics[width=0.6\textwidth]{TCP_Congestion_Control_Complete}
     \captionsetup{width=0.6\textwidth}
-    \caption{A more complete illustration of a congestion-control algorithm including all four parts --- slow start, congestion avoidance, fast retransmit and fast recovery. \todo{update image}}
+    \caption{A more complete illustration of a congestion-control algorithm including all four parts --- slow start, congestion avoidance, fast retransmit and fast recovery. (\href{https://sites.google.com/site/projectcodebank/computer-engineering-notes/tcp-congestion-control-algorithm}{\textit{source}})}
 \end{figure}
 
 
-
-
-
-% \subsubsection{Congestion Avoidance}
-% \subsubsection{Fast Retransmit}
-% \subsubsection{Fast Recovery}
-
-
-
-
-% The answer is simple; \textit{start slow}. First, set the \gls{cwnd} to a small multiple of the \gls{mss} allowed on the \gls{tcp} connection. Then, start probing for available bandwidth. For every received \gls{ack}, double the \gls{cwnd} until a timeout occurs. This phase is known as the \textit{slow start}, which lasts until \gls{cwnd} reaches the threshold value, known as the \gls{ssthresh}, and is signaled by a timeout.
-
-% With the threshold hit, \gls{tcp} now has an idea of the maximum amount of data it can transmit, and therefore sets the \gls{cwnd} value to half of the \gls{ssthresh} value since that is the last known value to not induce a timeout. From this point, the \textit{congestion avoidance} phase starts. Here, the \gls{cwnd} value is additively increased by one \gls{mss} every \gls{rtt}.
-
-
-
-
-
-% \begin{figure}[H]
-%     \centering
-%     \includegraphics[width=1.0\textwidth]{TCP_Slow-Start_and_Congestion_Avoidance}
-%     \captionsetup{width=0.95\textwidth}
-%     \caption{Example of ioj oij io iojio joiojioj iojio joi jio joi jioj ioj io jio jioj ioj io jio ijojiojoijoij a parametric plot ($\sin (x), \cos(x), x$)}
-% \end{figure}
-
-
-
-% To help reduce congestion on the links \gls{tcp} maintains a \gls{cwnd}, which limits the total number of unacknowledged packets that it can send at a time. This is done in multiple fases.
-
-% In the slow start fase,  right after a connection is established. the congestion window starts as a small multiple of \gls{mss} and is effectively doubled for every \gls{rtt}. When it reaches the slow-start threshold(ssthresh), \gls{cwnd} is reduced by half and a new fase starts, congestion avoidance. In this fase \gls{cwnd} is increased linearly by one \gls{mss} every \gls{rtt}. If loss occurs, it could mean there is congestion, and steps will be taken to reduce load on the network. The steps depend on what exact congestion avoidance algorithm is used.
 
 
 
@@ -217,31 +137,38 @@ When a fast retransmit has occured, the sender will transmit what appears to be 
 
 It is easy to fall into the trap of believing that bigger buffers would increase network performance. After all, why drop a packet when you can avoid it by a buffer that never gets full in the first place. Likewise, it is easy to see why a big buffer is bad --- it takes time to drain the queue. If more packets come in than can be transmitted, the longer the queue gets. As a result, the latency spikes. Excess buffering of packets is referred to as \textit{bufferbloat}, causing high latency and reducing the overall network throughput.
 
-Still, some buffering is clearly needed so that a short burst of packets can be absorbed without significant loss. But how much? Ideally, for a particular network, we would want to keep the bottleneck link as busy as possible. A widely used formula in determining the buffer size $B$ is the \gls{bdp}:
+Still, some buffering is clearly needed so that a short burst of packets can be absorbed without significant loss. But how much? Ideally, for a particular network, we would want to keep the bottleneck link as busy as possible. A widely used formula in determining the buffer size $B$ is the \gls{bdp} \cite{sizing_router_buffers}:
 
 \begin{equation}
     B = RTT_{avg} \times C
 \end{equation}
 
-where $RTT_{avg}$ is the average \gls{rtt} of the flow passing through the link and $C$ is the capacity of the link. A well established rule of thumb is to provide $\SI{250}{\milli\second}$ or more \todo{WRONG! rework entire section} for buffering. \cite{sizing_router_buffers} Say a router has a Gigabit Ethernet interface, then the buffer size should at least be $B = \SI{250}{\milli\second} \times \SI{1}{\giga\bit} = \SI{32}{\mega\byte}$.
+where $RTT_{avg}$ is the average \gls{rtt} of the flow passing through the link and $C$ is the capacity of the link. However, if the average \gls{rtt} is relatively high such as \SI{250}{ms} and a router has a Gigabit Ethernet interface, then the buffer size would at least be $B = \SI{250}{\milli\second} \times \SI{1}{\giga\bit} = \SI{32}{\mega\byte}$. Such large buffers have been shown to greatly contribute to the bufferbloat problem, especially on backbone routers that uses slow, off-chip DRAMs. Nick McKeown et. al. from \cite{sizing_router_buffers} showed that dividing the \gls{bdp} by the square root of number of flows yielded a radical better estimate for buffer sizing, so far as a 99\% reduction in buffer size with negligible difference in throughput. In other words, the better formula for estimating the buffer size is then
+
+\begin{equation}
+    B = \frac{RTT_{avg} \times C}{\sqrt{n}}
+\end{equation}
+
+where $n$ is the amount of flows on a given link.
 
 
 
 
 \subsection{TCP Variants}
 
-\todo{reno and tahoe, newreno, cubic, vegas, westwood, bbr etc.. A collection of brief explanations.}
+The two first \gls{tcp} \gls{cc} algorithms that became widely used was called Tahoe and Reno. Both uses packet loss as a congestion signal, and both react by halving their \gls{cwnd}. With the increase in network speeds, other loss-based algorithms were proposed. One of these were called NewReno, which improved the retransmission during the fast recovery phase of Reno. NewReno became widely popular, and is currently the default \gls{cc} algorithm used on FreeBSD today. NewReno follows the behavior described in Section \ref{sec:cc} and produces the classical \textit{sawtooth} pattern shown in the following Figure \ref{fig:newreno}.
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.6\textwidth]{TCP_CC_NewReno}
-    \captionsetup{width=0.6\textwidth}
-    \caption{The classic \textit{sawtooth} pattern of \gls{cwnd} using the \gls{tcp} congestion-algorithm known as \textit{NewReno}. \todo{update image}}
+    \includegraphics[width=0.75\textwidth]{TCP_CC_NewReno}
+    \captionsetup{width=0.75\linewidth}
+    \caption{The classic \textit{sawtooth} pattern of \gls{cwnd} over time using the \gls{tcp} congestion control algorithm NewReno. \todo{update image}}
+    \label{fig:newreno}
 \end{figure}
 
+Another \gls{cc} algorithm that became popular was CUBIC, aiming to optimize the congestion control in high bandwidth networks with high latency. CUBIC was implemented and used by default in Linux kernel versions 2.6.19 and above, which persists to this day. As its name implies, CUBIC does not use a linear function to adjust its \gls{cwnd}, but rather a cubic function as shown in the following Figure \todo{ref...}.
 
-
-
+\todo{image}
 
 
 
@@ -272,7 +199,7 @@ Jacobsen would therefore properly combat bufferfloat in \gls{codel} by distingui
     \item Allow simple and efficient implementation.
 \end{itemize}
 
-\todo{more details?}
+
 
 
 
@@ -328,11 +255,9 @@ Conventially, the means of detecting network congestion has been by packet loss 
 
 An \gls{ecn}-capable network works as follows. A sender will transmit \gls{ip} packets with either the \gls{ect}(0) or \gls{ect}(1) bit set. Then, when there is congestion, a router (in conjuction with \gls{aqm}) will start marking the packets by setting the \gls{ce} bit. The receiver will then see this, and echo back the congestion indication to the sender with an \gls{ece} packet. The sender will then reduce its \gls{cwnd} value and respond with an \gls{cwr} packet.
 
-\todo{mention some ECN benefits from RFC8087 here?}
-
 \gls{ecn} was standardized in 2001 as a direct replacement for the use of packet loss as congestion signaling. \cite{rfc3168} Despite its positive early impact \cite{rfc2884}, it never saw widespread usage. \cite{enabling_internet-wide_ecn} A series of unfortunate incidents managed to cripple its early deployment --- rather than responding properly or ignoring the \gls{ecn} bits, some firewalls on faulty network equipment would instead block or mangle packets with \gls{ecn} bits set. This incorrect behaviour led to failure rate of 8\% in \gls{ecn}-enabled \gls{tcp} connections for web servers tested in 2004. \cite{pre-congestion_notification}
 
-Due to the unfortunate early struggles of \gls{ecn} deployment, the \gls{ietf} required that the response to an \gls{ecn} signal should be the same as the reaction to a loss. \cite{rfc3168} However, this requirement has recently been relaxed, \cite{rfc8311} sparking \remark{spurring? incentivising? motivating?} a regained interest in the field and giving rise to new experimental \gls{ecn} proposals. \todo{finish off with some promising stats}
+Due to the unfortunate early struggles of \gls{ecn} deployment, the \gls{ietf} required that the response to an \gls{ecn} signal should be the same as the reaction to a loss. \cite{rfc3168} However, this requirement has recently been relaxed, \cite{rfc8311} sparking \remark{spurring? incentivising? motivating?} a regained interest in the field and giving rise to new experimental \gls{ecn} proposals. \todo{finish off with some promising stats?}
 
 % As of 2015, measurements show that the failure of \gls{ecn}-enabled \gls{tcp} connections has reduced to less than 1\%, \cite{enabling_internet-wide_ecn} and as of May 2017, 
 
@@ -349,8 +274,8 @@ Due to the unfortunate early struggles of \gls{ecn} deployment, the \gls{ietf} r
     \item Upon the receipt of an \gls{ecn} mark, a \gls{tcp} sender should reduce \textit{less} than the usual response for loss.
 \end{itemize}
 
-The less aggresive multiplicative decrease factor yielded  significant performance gains in lightly-multiplexed scenarios. Specifically, a 20\% reduction factor was found to give a good latency-vs-utilization trade-off.
+The less aggressive multiplicative decrease factor yielded significant performance gains in lightly-multiplexed scenarios. Specifically, a 20\% reduction factor was found to give a good latency-vs-utilization trade-off.
 
 As of 2018, \gls{abe} has been formalized by the \gls{ietf} as an experimental \gls{rfc} \cite{rfc8511} and been implemented in mainline FreeBSD \gls{os} kernel.
 
-\todo{more?}
+\todo{more? image?}

@@ -1,20 +1,9 @@
-\chapter{Conclusion} \label{conclusion}
+\chapter{Conclusion} \label{ch:conclusion}
 
-This chapter concludes our thesis on incorporating \gls{ecn} in existing \gls{cc} algorithms such as NewReno and CUBIC. We wrap up with a final evaluation targeting the goal of the thesis, followed up by a future work section reflecting further improvements.
-
-\todo{small rework}
+This chapter concludes our thesis on improving \gls{abe}. We wrap up with a short conclusion and follow up with a reflection of further improvements. Finally, we end the thesis with a brief comment on the frustrations that were experienced in this project.
 
 
-
-
-
-
-
-
-
-\section{Evaluation}
-
-\todo{the goal of this thesis....}
+The goal of the thesis was to improve \gls{abe} by making it more responsive to various network conditions. This was achieved by making the \gls{ecn} congestion response depend on \gls{rtt} measurements, where the ratio between the minimum and most recent \gls{rtt} was used as the multiplicative decrease factor. From our limited set of experiments, this yielded a consistently higher throughput without any significant increase in latency when compared with \gls{abe} and CUBIC.
 
 
 
@@ -26,4 +15,32 @@ This chapter concludes our thesis on incorporating \gls{ecn} in existing \gls{cc
 
 \section{Future Work}
 
-\todo{what could have been improved...}
+There are many improvements that we would have liked to add to \gls{dabe}. In addition, more experiments and statistical analysis would have aided in determining the usability of \gls{dabe}. We will briefly discuss them here.
+
+A major concern when depending on \gls{rtt} measurements is that they are inherently noisy. Delayed \gls{ack}s and path changes in the routing of intricate networks can lead to highly inaccurate \gls{rtt} estimates. In our implementation, we use the minimum \gls{rtt} measured from the \lstinline{h_ertt} module, but this value could be inaccurate. For example, if a path change in the routing occurs such that the latency increases significantly, the resulting backoff might be too much. And if the route change stays, then \gls{dabe} will perform poorly for the rest of the connection. Another scenario might be if a \gls{dabe} flow joins an already congested network, causing an overestimated minimum \gls{rtt} that eventually reduces due to packet loss. We would have liked to investigate this further.
+
+\todo{more}
+
+
+
+
+
+
+
+
+
+\section{Frustrations}
+
+Initially, we received a cluster of Raspberry Pi 4 Model B machines, which is currently the newest model. We were tasked with dual booting the machines with FreeBSD and a Linux-based \gls{os}. After much frustration, we found out that FreeBSD does not support the newest Raspberry Pi 4\footnote{\url{https://wiki.freebsd.org/action/show/arm/Raspberry\%20Pi?action=show\&redirect=FreeBSD\%2Farm\%2FRaspberry+Pi}}, and so we ended up installing only Linux, namely Raspbian Buster as the \gls{os}.
+
+This led to the biggest hurdle in our project. In order for \gls{teacup} to work with Linux hosts, the Web10G kernel was required. Web10G is a set of \gls{tcp} stack kernel instruments that enables fine grained measurements of the internal actions of the \gls{tcp} stack. To install it, the existing Linux kernel installed on Raspbian Buster needed to be patched with the Web10G changes and then compiled, along with installing a kernel module afterwards and some userland tools. We have never used Linux before, so this was quite the undertaking for us.
+
+Installing Web10G was met with heavy resistance. We fought countless compile errors, modified the Linux kernel code in the hopes of fixing it, and applied many suggestions we found on the Internet. Eventually, we managed to successfully compile Web10G and boot up with the custom kernel. Unfortunately, when testing to see if Web10G was working, we got a kernel panic. We found that the issue only occured on the Raspberry Pi, as Web10G was working fine on our laptops. In other words, it was due to the ARM architecture. We tried to fix\footnote{\url{https://github.com/rapier1/web10g/issues/11}} the kernel panic on Raspberry Pi 4, but never managed to do so.
+
+Thankfully, our supervisor had requested a new cluster of Raspberry Pi 3 models which we eventually received. Although Web10G also experienced kernel panics here, FreeBSD was now working and so we ditched Linux entirely on the hosts and went with only FreeBSD instead. However, new problems kept adding up due to the ARM architecture. For instance, the \lstinline{spp} tool \gls{teacup} uses refused to start, but we managed to get everything to sort of work after a while.
+
+By the time everything was "working", we had used up over half of our project timeline, with two months remaining for the deadline. We could now finally start working on our actual bachelor project, which is to improve \gls{abe}. And this is where we hit another struggle. We have no experience with socket programming in C, nor any programming in C/C++ for that matter. Additionally, we have no experience with the networking stack of either the Linux of FreeBSD kernel. We quickly found that you do not simply jump into kernel development, but nonetheless, we forced the issue as time was running out.
+
+And finally, to add some salt to our wounds after spending so much time on setting up \gls{teacup}, many completed experiments ended up producing incomplete data, even though no errors were reported. This became increasingly frustrating when strapped for time, and especially when the experiments took several hours to run, only to find that the results could not be analysed due to "incomplete" log files.
+
+However, in the end, we managed to come up with a simple solution that we are actually proud of to have achieved.

@@ -16,13 +16,11 @@ The Internet has evolved beyond its original purpose to send mail or use the \gl
 
 A key factor for the frequently full buffers is the dominant use of the \gls{tcp} as the main communication protocol for the Internet. Although \gls{tcp} itself is not the problem, a part of it became a major contributor. One of the main reasons for \gls{tcp} dominance is \gls{cc} --- a fundamental set of mechanisms for maintaining the stability and efficiency of the Internet. \cite{rfc6077} However, most mechanisms in use today still rely on lost packets as feedback for moderating the transmission rate of a host. This has served to add fuel to the bufferbloat problem, as standard \gls{cc} will fill up any buffer in the network until a packet loss is inferred. Constantly pushing excessively large buffers to its limits causes packets to become queued for long periods of time, resulting in high latencies.
 
-To combat bufferbloat, the proposal of \gls{aqm} on intermediary devices was introduced in order to minimize the time packets spend enqueued at a bottleneck. By dropping a packet inside a buffer before it became full, the \gls{cc} would trigger a rate reduction before pushing the limits. Building upon \gls{aqm} came the ability to explicitly signal congestion in the network, called \gls{ecn}. Although \gls{ecn} was standardized two decades ago, it has not seen much support due to compatibility issues with existing network equipment. However, recent years have shown a rapid change on this matter as the adoption of \gls{ecn} on end-systems has accelerated and is now supported on the majority of servers. \cite{enabling_internet-wide_ecn}
+To combat bufferbloat, the proposal of \gls{aqm} on intermediary devices was introduced in order to minimize the time packets spend enqueued at a bottleneck. By dropping a packet inside a buffer before it becomes full, the \gls{cc} would trigger a rate reduction before pushing the buffer to its limits. Building upon \gls{aqm} came the ability to explicitly signal congestion in the network, called \gls{ecn}. Although \gls{ecn} was standardized two decades ago, it has not seen much support due to compatibility issues with existing network equipment. However, recent years have shown a rapid change on this matter as the adoption of \gls{ecn} on end-systems has accelerated and is now supported on the majority of servers. \cite{enabling_internet-wide_ecn}
 
 The benefits of \gls{ecn} are evident. Instead of reacting to network congestion after the fact (i.e. after packet loss), one can take protective \remark{?} measures before it happens. When reliable delivery is necessary, packet loss is directly responsible for reducing throughput and consequently rising the latency due to the additional time needed for retransmission. While the reason for a packet loss can be of multiple sources besides a full buffer, explicit feedback using \gls{ecn} serves as a clear signal for the inevitable impending of network congestion.
 
 \gls{abe} \cite{abe} is a recent proposal \remark{technical paper?} that clearly shows the potential \remark{practical?} benefits of using explicit congestion feedback --- by reducing the sender's transmission rate upon the receipt of an \gls{ecn} mark, a packet loss can be avoided. In addition, the earlier congestion feedback allows for a less aggressive reduction factor, yielding a higher sustained throughput and lower latency while also maintaining the benefit of avoiding packet loss.
-
-With the recent increase in adoption of \gls{ecn}, we believe... \todo{state your mission, dynamic ABE here?}
 
 
 
@@ -34,25 +32,19 @@ With the recent increase in adoption of \gls{ecn}, we believe... \todo{state you
 
 \section{Goals and Research Questions} \label{goals_and_research_questions}
 
-In this section the goal and research questions for the thesis are presented along with a brief motivation.
+In this section, the goal and research question for the thesis is presented along with a brief motivation.
 
 \begin{statement}[Goal statement:]
-    Achieving low latency using \gls{ecn} with a sender-only modification that can be deployed incrementally.
+    Designing and implementing an improved version of \gls{abe} on FreeBSD.
 \end{statement}
 
-The goal of the thesis is to explore the use of \gls{ecn} in \gls{tcp} congestion control in order to achieve low latency in a consistent manner. In addition, the implementation should be easily deployable, meaning that it should work on most existing hardware equipment. In order to attain this, the following two research questions defined below will be investigated.
+The goal of the thesis is to improve \gls{abe} by making it more responsive to different network conditions. Currently, \gls{abe} shares the same behaviour as NewReno when responding to a congestion signal, which is to reduce a sender's transmission rate by a constant factor. The only difference is that \gls{abe} reduces by less. \todo{rework?} Hence, the following research question defined below will be investigated.
 
-\begin{statement}[Research question 1:]
-    Does the incorporation of \gls{ecn} in existing congestion control mechanisms yield a significant reduction in latency?
+\begin{statement}[Research question:]
+    \gls{abe} reduces a sender's transmission rate by a constant factor in the event of an \gls{ecn} congestion signal. Can this factor be made more dynamic such that it reduces less when there is moderate congestion, and more when there is heavy congestion?
 \end{statement}
 
-Because of the recent surge in \gls{ecn} adoption, the thesis will look into the two most widely used \gls{cc} mechanisms, namely NewReno and CUBIC, and see how they compare with and without the use of \gls{ecn}. \todo{maybe look into more?}
-
-\begin{statement}[Research question 2:]
-    Can the static reduction factor in \gls{abe} be made more responsive?
-\end{statement}
-
-A common behaviour of NewReno and CUBIC is that they reduce the sender's transmission rate by a constant factor in the event of packet loss. The \gls{ecn} implementation in NewReno on FreeBSD is called \gls{abe}, mirroring this static behaviour but with a less \remark{lesser?} reduction factor. CUBIC's \gls{ecn} implementation, however, does not mirror this static behavior, but rather maintains a maximum \gls{cwnd}. The thesis will also look at how \gls{abe} can be improved by making it more responsive to \gls{ecn} events.
+Since \gls{abe} backs off by a constant factor, the thesis will look into techniques to make this reduction factor more dynamic. The \gls{ecn} congestion response should back off less when there is moderate congestion, and back off more when there is heavy congestion. \todo{more?}
 
 
 
@@ -64,9 +56,7 @@ A common behaviour of NewReno and CUBIC is that they reduce the sender's transmi
 
 \section{Research Methodology}
 
-To address the research questions outlined above in Section \ref{goals_and_research_questions}, a cluster consisting of eight Raspberry Pi machines has been set up. The cluster serves as a physical testbed for conducting various \gls{tcp} experiments in order to verify the results from our modifications to existing congestion control mechanisms.
-
-\todo{expand? mininet? discuss both research questions separately?}
+To address the research question outlined above, a cluster consisting of eight Raspberry Pi machines has been set up. The cluster serves as a physical testbed for conducting various \gls{tcp} experiments in order to validate the results from our modifications to \gls{abe}. \todo{more....}
 
 
 
@@ -88,4 +78,4 @@ To address the research questions outlined above in Section \ref{goals_and_resea
 
 \section{Thesis Structure}
 
-\todo{write when thesis is done}
+The thesis consists of five chapters. This chapter presents the introduction and motivation for the research question. Chapter \ref{ch:background} gives an insight into the background knowledge that the thesis builds upon, and serves as an aid for those unfamiliar with the topic. Chapter \ref{ch:methodology} describes how the physical testbed has been set up, how our work has been done and the implementation details of it. Chapter \ref{ch:experimental_evaluation} presents the results from our work along with an evaluation of the findings. Chapter \ref{ch:conclusion} concludes the thesis with an outline of future considerations and a final section discussing the struggles we encountered during the project.
