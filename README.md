@@ -1,2 +1,3 @@
-# ABE
-Git repo for alternative backoff with ECN (ABE) development work on Linux and FreeBSD. 
+# DABE
+
+[Dynamic Alternative Backoff with ECN (DABE)](./thesis/Dynamic%20Alternative%20Backoff%20with%20ECN.pdf) is a simple modification to NewReno's ECN congestion response on FreeBSD. Instead of reducing a sender's congestion window by a static multiplicative factor in the event of an ECN signal, the reduction is now determined by the ratio of the shortest RTT measured and the most recent one. Hence, a sender's transmission rate backs off more when RTT rises, and less when RTT remains stable. The goal of the bachelor project was to improve [ABE](http://heim.ifi.uio.no/~naeemk/index.php?option=com_content&view=article&id=61) by making it more responsive to different network conditions.
